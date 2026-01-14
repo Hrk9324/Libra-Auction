@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-tien-coc
+      author: tuan
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: tien_coc
+
+      changes:
+        - createTable:
+            tableName: tien_coc
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nguoi_coc_id
+                  type: varchar(50)
+              - column:
+                  name: phien_dau_gia_id
+                  type: varchar(50)
+              - column:
+                  name: so_tien
+                  type: bigint
+              - column:
+                  name: thoi_gian_coc
+                  type: timestamp
+              - column:
+                  name: trang_thai
+                  type: varchar(50)
+
+        - addForeignKeyConstraint:
+            baseTableName: tien_coc
+            baseColumnNames: nguoi_coc_id
+            referencedTableName: nguoi_dung
+            referencedColumnNames: id
+            constraintName: fk_tc_nguoi
+
+        - addForeignKeyConstraint:
+            baseTableName: tien_coc
+            baseColumnNames: phien_dau_gia_id
+            referencedTableName: phien_dau_gia
+            referencedColumnNames: id
+            constraintName: fk_tc_phien

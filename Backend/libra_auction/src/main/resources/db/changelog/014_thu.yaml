@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-thu
+      author: tuan
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: thu
+      changes:
+        - createTable:
+            tableName: thu
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nguoi_nop_id
+                  type: varchar(50)
+              - column:
+                  name: so_tien
+                  type: bigint
+              - column:
+                  name: loai_thu
+                  type: varchar(50)
+              - column:
+                  name: thoi_gian_thu
+                  type: timestamp
+              - column:
+                  name: ghi_chu
+                  type: text
+
+        - addForeignKeyConstraint:
+            baseTableName: thu
+            baseColumnNames: nguoi_nop_id
+            referencedTableName: nguoi_dung
+            referencedColumnNames: id
+            constraintName: fk_thu_nguoi

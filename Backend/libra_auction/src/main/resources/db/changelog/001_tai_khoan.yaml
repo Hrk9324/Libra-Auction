@@ -1,0 +1,35 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-tai-khoan
+      author: tuan
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: tai_khoan
+      changes:
+        - createTable:
+            tableName: tai_khoan
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: hashed_password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: salt
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+  

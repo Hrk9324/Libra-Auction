@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-danh-muc
+      author: tuan
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: danh_muc
+      changes:
+        - createTable:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: ten_danh_muc
+                  type: varchar(255)
+                  constraints:
+                    nullable: false

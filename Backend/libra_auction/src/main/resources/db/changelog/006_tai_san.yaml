@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-tai-san
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: tai_san
+
+      changes:
+        - createTable:
+            tableName: tai_san
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: phien_dau_gia_id
+                  type: varchar(50)
+              - column:
+                  name: ten_tai_san
+                  type: varchar(255)
+              - column:
+                  name: so_luong
+                  type: int
+              - column:
+                  name: mo_ta
+                  type: text
+              - column:
+                  name: da_ban
+                  type: boolean
+              - column:
+                  name: danh_muc_id
+                  type: varchar(50)
+
+        - addForeignKeyConstraint:
+            baseTableName: tai_san
+            baseColumnNames: phien_dau_gia_id
+            referencedTableName: phien_dau_gia
+            referencedColumnNames: id
+            constraintName: fk_tai_san_phien
+
+        - addForeignKeyConstraint:
+            baseTableName: tai_san
+            baseColumnNames: danh_muc_id
+            referencedTableName: danh_muc
+            referencedColumnNames: id
+            constraintName: fk_tai_san_danh_muc

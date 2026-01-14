@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-qna
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: qna
+
+      changes:
+        - createTable:
+            tableName: qna
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nguoi_hoi_id
+                  type: varchar(50)
+              - column:
+                  name: tai_san_id
+                  type: varchar(50)
+              - column:
+                  name: cau_hoi
+                  type: text
+              - column:
+                  name: cau_tra_loi
+                  type: text
+              - column:
+                  name: thoi_gian_hoi
+                  type: timestamp
+              - column:
+                  name: thoi_gian_tra_loi
+                  type: timestamp
+
+        - addForeignKeyConstraint:
+            baseTableName: qna
+            baseColumnNames: nguoi_hoi_id
+            referencedTableName: nguoi_dung
+            referencedColumnNames: id
+            constraintName: fk_qna_nguoi
+
+        - addForeignKeyConstraint:
+            baseTableName: qna
+            baseColumnNames: tai_san_id
+            referencedTableName: tai_san
+            referencedColumnNames: id
+            constraintName: fk_qna_tai_san

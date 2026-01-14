@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-nguoi-dung
+      author: tuan
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: nguoi_dung
+      changes:
+        - createTable:
+            tableName: nguoi_dung
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: tai_khoan_id
+                  type: varchar(50)
+                  constraints:
+                    unique: true
+              - column:
+                  name: ho_va_ten
+                  type: varchar(100)
+              - column:
+                  name: sdt
+                  type: varchar(20)
+              - column:
+                  name: cccd
+                  type: varchar(20)
+
+        - addForeignKeyConstraint:
+            baseTableName: nguoi_dung
+            baseColumnNames: tai_khoan_id
+            referencedTableName: tai_khoan
+            referencedColumnNames: id
+            constraintName: fk_nguoi_dung_tai_khoan

@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-phien-dau-gia
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: phien_dau_gia
+
+      changes:
+        - createTable:
+            tableName: phien_dau_gia
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: thoi_gian_bat_dau
+                  type: timestamp
+              - column:
+                  name: thoi_gian_ket_thuc
+                  type: timestamp
+              - column:
+                  name: trang_thai_phien
+                  type: varchar(50)

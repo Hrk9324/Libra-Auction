@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-thanh-toan
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: thanh_toan
+
+      changes:
+        - createTable:
+            tableName: thanh_toan
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nguoi_thanh_toan_id
+                  type: varchar(50)
+              - column:
+                  name: phien_dau_gia_id
+                  type: varchar(50)
+              - column:
+                  name: so_tien
+                  type: bigint
+              - column:
+                  name: thoi_gian_thanh_toan
+                  type: timestamp
+              - column:
+                  name: trang_thai
+                  type: varchar(50)
+              - column:
+                  name: loai_thanh_toan
+                  type: varchar(50)
+
+        - addForeignKeyConstraint:
+            baseTableName: thanh_toan
+            baseColumnNames: nguoi_thanh_toan_id
+            referencedTableName: nguoi_dung
+            referencedColumnNames: id
+            constraintName: fk_tt_nguoi
+
+        - addForeignKeyConstraint:
+            baseTableName: thanh_toan
+            baseColumnNames: phien_dau_gia_id
+            referencedTableName: phien_dau_gia
+            referencedColumnNames: id
+            constraintName: fk_tt_phien

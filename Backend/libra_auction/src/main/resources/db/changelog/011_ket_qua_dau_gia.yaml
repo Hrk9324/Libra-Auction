@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-ket-qua-dau-gia
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: ket_qua_dau_gia
+
+      changes:
+        - createTable:
+            tableName: ket_qua_dau_gia
+            columns:
+              - column:
+                  name: phien_dau_gia_id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nguoi_thang_id
+                  type: varchar(50)
+              - column:
+                  name: gia_trung
+                  type: bigint
+              - column:
+                  name: thoi_gian_ket_thuc
+                  type: timestamp
+
+        - addForeignKeyConstraint:
+            baseTableName: ket_qua_dau_gia
+            baseColumnNames: phien_dau_gia_id
+            referencedTableName: phien_dau_gia
+            referencedColumnNames: id
+            constraintName: fk_kq_phien
+
+        - addForeignKeyConstraint:
+            baseTableName: ket_qua_dau_gia
+            baseColumnNames: nguoi_thang_id
+            referencedTableName: nguoi_dung
+            referencedColumnNames: id
+            constraintName: fk_kq_nguoi

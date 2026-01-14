@@ -1,3 +1,17 @@
 databaseChangeLog:
-  - include:
-      file: db/changelog/001-initialize.yaml
+  - include: { file: db/changelog/001_tai_khoan.yaml }
+  - include: { file: db/changelog/002_nguoi_dung.yaml }
+  - include: { file: db/changelog/003_danh_muc.yaml }
+  - include: { file: db/changelog/004_phien_dau_gia.yaml }
+  - include: { file: db/changelog/005_thong_tin_phien_dau_gia.yaml }
+  - include: { file: db/changelog/006_tai_san.yaml }
+  - include: { file: db/changelog/007_thuoc_tinh_tai_san.yaml }
+  - include: { file: db/changelog/008_thuoc_tinh_tim_kiem.yaml }
+  - include: { file: db/changelog/009_tham_gia_dau_gia.yaml }
+  - include: { file: db/changelog/010_ban_ghi_phien_dau_gia.yaml }
+  - include: { file: db/changelog/011_ket_qua_dau_gia.yaml }
+  - include: { file: db/changelog/012_thanh_toan.yaml }
+  - include: { file: db/changelog/013_tien_coc.yaml }
+  - include: { file: db/changelog/014_thu.yaml }
+  - include: { file: db/changelog/015_thu_bao_mat.yaml }
+  - include: { file: db/changelog/016_qna.yaml }

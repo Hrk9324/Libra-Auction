@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-tham-gia
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: tham_gia_dau_gia
+
+      changes:
+        - createTable:
+            tableName: tham_gia_dau_gia
+            columns:
+              - column:
+                  name: phien_dau_gia_id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nguoi_tham_gia_id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: thoi_gian_dang_ky
+                  type: timestamp
+
+        - addForeignKeyConstraint:
+            baseTableName: tham_gia_dau_gia
+            baseColumnNames: phien_dau_gia_id
+            referencedTableName: phien_dau_gia
+            referencedColumnNames: id
+            constraintName: fk_tg_phien
+
+        - addForeignKeyConstraint:
+            baseTableName: tham_gia_dau_gia
+            baseColumnNames: nguoi_tham_gia_id
+            referencedTableName: nguoi_dung
+            referencedColumnNames: id
+            constraintName: fk_tg_nguoi

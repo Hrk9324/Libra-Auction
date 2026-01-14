@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-tttk
+      author: tuan
+
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            tableExists:
+              tableName: thuoc_tinh_tim_kiem
+              
+      changes:
+        - createTable:
+            tableName: thuoc_tinh_tim_kiem
+            columns:
+              - column:
+                  name: id
+                  type: varchar(50)
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: thuoc_tinh
+                  type: varchar(100)
+              - column:
+                  name: gia_tri
+                  type: varchar(255)
+              - column:
+                  name: tai_san_id
+                  type: varchar(50)
+
+        - addForeignKeyConstraint:
+            baseTableName: thuoc_tinh_tim_kiem
+            baseColumnNames: tai_san_id
+            referencedTableName: tai_san
+            referencedColumnNames: id
+            constraintName: fk_tttk_tai_san
