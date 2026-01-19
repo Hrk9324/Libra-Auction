@@ -7,7 +7,7 @@ import { UserActionType } from "@/types/user_action_type";
 export default function Header() {
   const navItems: NavType[] = [
     { value: "Home", href: "/" },
-    { value: "Auction", href: "/auction" },
+    { value: "Auctions", href: "/auctions" },
     { value: "Support", href: "/support" },
     { value: "Contact", href: "/contact" }
   ];
