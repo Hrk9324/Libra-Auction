@@ -13,10 +13,10 @@
   --header-z-index: 2;
 
   --home-banner-title-font-size: 3.4vw;
-  --home-banner-subtitle-font-size: 1.25rem;
+  --home-banner-subtitle-font-size: 1.5vw;
 
-  --home-categories-section-image-height: 22rem;
-  --home-live-auction-section-image-height: 30rem;
+  --home-categories-section-image-height: 50vh;
+  --home-live-auction-section-image-height: 60vh;
 }
 
 @theme inline {
