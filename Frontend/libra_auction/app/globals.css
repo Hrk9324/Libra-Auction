@@ -3,6 +3,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  --primary-color: #19A7CE;
+  --secondary-color: #146C94;
+  --accent-color: #AFD3E2;
+  --background-color: #F6F1F1;
+
+  --header-height: 64px;
+  --header-z-index: 2;
+
+  --home-banner-title-font-size: 3.4vw;
+  --home-banner-subtitle-font-size: 1.25rem;
+
+  --home-categories_section_image_height: 22rem;
 }
 
 @theme inline {
