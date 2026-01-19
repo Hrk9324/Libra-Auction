@@ -6,7 +6,7 @@ export default function CategoryCard({ card }: { card: CategoryCardType }) {
     <div className="w-full">
       <a href={card.href}>
         <div className="flex flex-col items-center gap-4">
-          <div className="relative h-(--home-categories_section_image_height) w-full rounded-2xl overflow-hidden">
+          <div className="relative h-(--home-categories-section-image-height) w-full rounded-2xl overflow-hidden">
             <Image src={card.image_src} alt="" layout="fill" className="h-full object-cover"/>
           </div>
           <p className="capitalize font-semibold">{card.title}</p>
