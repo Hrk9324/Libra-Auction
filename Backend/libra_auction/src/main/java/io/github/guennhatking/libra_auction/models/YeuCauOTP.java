@@ -5,7 +5,6 @@ import io.github.guennhatking.libra_auction.enums.Enums;
 public class YeuCauOTP extends YeuCau {
     private String maOTPDaTao;
     private String maOTPNguoiDungNhap;
-    private YeuCau yeuCau;
 
     public YeuCauOTP(NguoiDung nguoiYeuCau) {
         super(nguoiYeuCau, Enums.LoaiYeuCau.OTP);
