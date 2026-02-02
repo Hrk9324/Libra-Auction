@@ -46,6 +46,7 @@ public class NguoiDung {
         this.trangThaiTaiKhoan = trangThaiTaiKhoan;
     }
 
+    // cập nhật mật khẩu mới cho người dùng
     public void capNhatMatKhau(String matKhauMoiHash, byte[] salt) {
         for (TaiKhoan taiKhoan : danhSachPhuongThucDangNhap) {
             if (taiKhoan instanceof TaiKhoanPassword) {

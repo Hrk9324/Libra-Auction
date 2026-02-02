@@ -37,6 +37,13 @@ public class TaiKhoanPassword extends TaiKhoan {
         this.salt = newSalt;
     }
 
+    // kiểm tra mật khẩu khi đăng nhập
+    public void kiemTraMatKhau(String passwordHashToCheck) {
+        if (!this.passwordHash.equals(passwordHashToCheck)) {
+            throw new IllegalArgumentException("Mật khẩu không đúng.");
+        }
+    }
+
     public String getPasswordHash() {
         return passwordHash;
     }

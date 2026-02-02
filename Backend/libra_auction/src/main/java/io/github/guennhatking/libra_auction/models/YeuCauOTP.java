@@ -17,7 +17,7 @@ public class YeuCauOTP extends YeuCau {
     @Override
     public void kichHoat() {
         if (maOTPDaTao != null && maOTPDaTao.equals(maOTPNguoiDungNhap)) {
-            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.HOAN_THANH;
+            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.DANG_SU_DUNG;
             System.out.println("Yêu cầu OTP đã được kích hoạt thành công.");
         } else {
             System.out.println("Mã OTP không hợp lệ. Kích hoạt thất bại.");
@@ -26,8 +26,8 @@ public class YeuCauOTP extends YeuCau {
 
     @Override
     public void suDung() {
-        if (this.trangThaiYeuCau == Enums.TrangThaiYeuCau.HOAN_THANH) {
-            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.DANG_SU_DUNG;
+        if (this.trangThaiYeuCau == Enums.TrangThaiYeuCau.DANG_SU_DUNG) {
+            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.HOAN_THANH;
             System.out.println("Yêu cầu OTP đã được sử dụng.");
         } else {
             System.out.println("Yêu cầu OTP chưa được kích hoạt hoặc đã sử dụng.");
