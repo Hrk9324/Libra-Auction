@@ -14,7 +14,7 @@ public class GiaoDichThanhToan extends GiaoDich {
     //chức năng thanh toán sau khi đấu giá thành công
     public void taoGiaoDichThanhToan(String id, long soTien, NguoiDung nguoiGui, NguoiDung nguoiNhan) {
         this.setId(id);
-        this.setLoaiGiaoDich("thanh toán");
+        this.setLoaiGiaoDich(io.github.guennhatking.libra_auction.enums.Enums.LoaiGiaoDich.THANH_TOAN);
         this.setSoTien(soTien);
         this.setNgayTao(java.time.LocalDateTime.now());
         this.nguoiGui = nguoiGui;

@@ -16,7 +16,6 @@ public class GiaoDichDatCoc extends GiaoDich {
     //tạo chức năng đặt cọc ở đây
     public void taoGiaoDichDatCoc(String id, long soTien, NguoiDung nguoiDatCoc, ThongTinThamGiaDauGia thongTinThamGia) {
         this.setId(id);
-        this.setLoaiGiaoDich("đặt cọc");
         this.setSoTien(soTien);
         this.setNgayTao(java.time.LocalDateTime.now());
         this.nguoiDatCoc = nguoiDatCoc;

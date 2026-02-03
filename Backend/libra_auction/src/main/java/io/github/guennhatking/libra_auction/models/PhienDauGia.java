@@ -1,7 +1,7 @@
 package io.github.guennhatking.libra_auction.models;
 import java.time.LocalDateTime;
-import java.util.List; 
-
+import java.util.List;
+import io.github.guennhatking.libra_auction.enums.Enums;
 
 public class PhienDauGia {
     private String id; // string(10)
@@ -11,7 +11,7 @@ public class PhienDauGia {
     private long thoiLuong;
     private KetQuaDauGia ketQuaDauGia;
     private ChienLuocDatGia chienLuocDatGia;
-    private String trangThaiKiemDuyet; // "chưa được duyệt" | "đã duyệt"
+    private Enums.TrangThaiKiemDuyet trangThaiKiemDuyet; // "chưa được duyệt" | "đã duyệt"
     private List<CauHoi> danhSachCauHoi;
     private List<BanGhiPhienDauGia> lichSuDatGia;
     private List<ThongTinThamGiaDauGia> danhSachThamGia;
@@ -31,7 +31,7 @@ public class PhienDauGia {
     public long getThoiLuong() { return thoiLuong; }    
     public KetQuaDauGia getKetQuaDauGia() { return ketQuaDauGia; }
     public ChienLuocDatGia getChienLuocDatGia() { return chienLuocDatGia; }
-    public String getTrangThaiKiemDuyet() { return trangThaiKiemDuyet; }
+    public Enums.TrangThaiKiemDuyet getTrangThaiKiemDuyet() { return trangThaiKiemDuyet; }
     public List<CauHoi> getDanhSachCauHoi() { return danhSachCauHoi; }
     public List<BanGhiPhienDauGia> getLichSuDatGia() { return lichSuDatGia; }
     public List<ThongTinThamGiaDauGia> getDanhSachThamGia() { return danhSachThamGia; }

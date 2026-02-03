@@ -1,6 +1,8 @@
 package io.github.guennhatking.libra_auction.models;
 import java.time.LocalDateTime;
 
+import io.github.guennhatking.libra_auction.enums.Enums;
+
 public class CauHoi {
     private String id; // string(10)
     private PhienDauGia phienDauGia;
@@ -10,7 +12,7 @@ public class CauHoi {
     private String noiDungTraLoi;
     private LocalDateTime thoiGianHoi;
     private LocalDateTime thoiGianTraLoi;
-    private String tinhTrang; // "chưa trả lời" | "đã trả lời" | "đã từ chối trả lời"
+    private Enums.TinhTrangCauHoi tinhTrangCauHoi; // "chưa trả lời" | "đã trả lời" | "đã từ chối trả lời"
 
     public void traLoi(NguoiDung nguoiTraLoi, String noiDungTraLoi) {}
     public void tuChoiTraLoi() {}
@@ -23,7 +25,7 @@ public class CauHoi {
     public String getNoiDungTraLoi() { return noiDungTraLoi; }
     public LocalDateTime getThoiGianHoi() { return thoiGianHoi; }
     public LocalDateTime getThoiGianTraLoi() { return thoiGianTraLoi; }
-    public String getTinhTrang() { return tinhTrang; }
+    public Enums.TinhTrangCauHoi getTinhTrangCauHoi() { return tinhTrangCauHoi; }
 
     //id
     public void setId(String id) { this.id = id; }
@@ -40,5 +42,5 @@ public class CauHoi {
     //thoiGianTraLoi
     public void setThoiGianTraLoi(LocalDateTime thoiGianTraLoi) { this.thoiGianTraLoi = thoiGianTraLoi; }
     //tinhTrang
-    public void setTinhTrang(String tinhTrang) { this.tinhTrang = tinhTrang; }
+    public void setTinhTrangCauHoi(Enums.TinhTrangCauHoi tinhTrangCauHoi) { this.tinhTrangCauHoi = tinhTrangCauHoi; }
 }
