@@ -1,5 +1,8 @@
 package io.github.guennhatking.libra_auction.models;
 
+import jakarta.persistence.Entity;
+
+@Entity
 public class ThongBaoEmail extends ThongBao {
     public ThongBaoEmail(NguoiDung nguoiNhan, String noiDung) {
         super(nguoiNhan, noiDung);

@@ -1,7 +1,9 @@
 package io.github.guennhatking.libra_auction.models;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
+import jakarta.persistence.Entity;
 
+@Entity
 public class YeuCauDatLaiMatKhau extends YeuCau {
     private YeuCauOTP yeuCauOTP;
     private String matKhauMoi;

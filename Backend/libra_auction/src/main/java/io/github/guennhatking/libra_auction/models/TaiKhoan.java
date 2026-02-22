@@ -1,7 +1,10 @@
 package io.github.guennhatking.libra_auction.models;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
+import jakarta.persistence.Entity;
 
+
+@Entity
 // abstract class
 public abstract class TaiKhoan {
     protected String id;
@@ -31,5 +34,13 @@ public abstract class TaiKhoan {
 
     public String getUsername() {
         return username;
+    }
+
+    public Enums.TrangThaiTaiKhoan getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Enums.TrangThaiTaiKhoan trangThai) {
+        this.trangThai = trangThai;
     }
 }
