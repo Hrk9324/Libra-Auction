@@ -1,9 +1,16 @@
 package io.github.guennhatking.libra_auction.models;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 
 // abstract class
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class TaiKhoan {
+    @Id
     protected String id;
     protected String username;
     protected Enums.TrangThaiTaiKhoan trangThai;

@@ -3,7 +3,9 @@ package io.github.guennhatking.libra_auction.models;
 import java.util.regex.Pattern;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
+import jakarta.persistence.Entity;
 
+@Entity
 public class TaiKhoanPassword extends TaiKhoan {
     private String passwordHash;
     private byte[] salt;

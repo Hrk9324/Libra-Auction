@@ -4,8 +4,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
+@Entity
 public class NguoiDung {
+    @Id
+    protected String Id;
+    @OneToMany(cascade = CascadeType.ALL)
     protected List<TaiKhoan> danhSachPhuongThucDangNhap;
     protected String hoVaTen;
     protected String soDienThoai;
