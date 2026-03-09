@@ -1,7 +1,7 @@
 
 package io.github.guennhatking.libra_auction.models;
 
-public class DauGiaNguoc implements ChienLuocDatGia {
+public class DauGiaNguoc{
     public boolean kiemTraHopLe(long giaHienTai, long giaMoi) { 
         return giaMoi < giaHienTai; 
     }

@@ -4,7 +4,7 @@ package io.github.guennhatking.libra_auction.models;
  * Chiến lược đấu giá ngược (Reverse Auction)
  * Giá càng thấp càng tốt, người thắng là người đưa ra giá thấp nhất
  */
-public class DauGiaXuong implements ChienLuocDatGia {
+public class DauGiaXuong{
     /**
      * Kiểm tra giá mới có hợp lệ không
      * Giá mới phải thấp hơn giá hiện tại

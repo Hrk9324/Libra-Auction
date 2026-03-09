@@ -1,6 +1,6 @@
 package io.github.guennhatking.libra_auction.models;
 
-public class DauGiaKin implements ChienLuocDatGia {
+public class DauGiaKin{
     
     /**
      * Kiểm tra tính hợp lệ của giá mới trong đấu giá kín

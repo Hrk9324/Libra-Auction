@@ -29,7 +29,6 @@ public class PhienDauGia {
     public LocalDateTime getThoiGianBatDau() { return thoiGianBatDau; }
     public long getThoiLuong() { return thoiLuong; }    
     public KetQuaDauGia getKetQuaDauGia() { return ketQuaDauGia; }
-    public ChienLuocDatGia getChienLuocDatGia() { return chienLuocDatGia; }
     public Enums.TrangThaiKiemDuyet getTrangThaiKiemDuyet() { return trangThaiKiemDuyet; }
     public List<CauHoi> getDanhSachCauHoi() { return danhSachCauHoi; }
     public List<BanGhiPhienDauGia> getLichSuDatGia() { return lichSuDatGia; }
