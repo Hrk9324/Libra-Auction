@@ -27,9 +27,6 @@ public class NguoiDung {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "nguoiDung")
     protected List<TaiKhoan> taiKhoanLienKet;
 
-    @Transient
-    protected TaiKhoan taiKhoanHienTai;
-
     protected String hoVaTen;
     protected String soDienThoai;
     protected String CCCD;
@@ -128,14 +125,6 @@ public class NguoiDung {
 
     public void datTrangThaiTaiKhoan(Enums.TrangThaiTaiKhoan trangThaiTaiKhoan) {
         this.trangThaiTaiKhoan = trangThaiTaiKhoan;
-    }
-
-    public TaiKhoan getTaiKhoanHienTai() {
-        return taiKhoanHienTai;
-    }
-
-    public void setTaiKhoanHienTai(TaiKhoan taiKhoanHienTai) {
-        this.taiKhoanHienTai = taiKhoanHienTai;
     }
 
     // cập nhật mật khẩu mới cho người dùng
