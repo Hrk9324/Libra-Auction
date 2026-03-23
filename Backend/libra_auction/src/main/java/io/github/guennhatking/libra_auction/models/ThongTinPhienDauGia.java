@@ -1,7 +1,5 @@
 package io.github.guennhatking.libra_auction.models;
 
-import org.hibernate.annotations.ManyToAny;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
