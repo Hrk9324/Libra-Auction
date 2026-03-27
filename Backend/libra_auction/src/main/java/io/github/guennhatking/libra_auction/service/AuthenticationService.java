@@ -1,0 +1,278 @@
+package io.github.guennhatking.libra_auction.service;
+
+import io.github.guennhatking.libra_auction.dto.request.IntrospectRequest;
+import io.github.guennhatking.libra_auction.dto.request.RefreshRequest;
+import io.github.guennhatking.libra_auction.dto.request.SignupRequest;
+import io.github.guennhatking.libra_auction.dto.response.AuthenticationResponse;
+import io.github.guennhatking.libra_auction.dto.response.IntrospectResponse;
+import io.github.guennhatking.libra_auction.dto.response.UserResponse;
+import io.github.guennhatking.libra_auction.exception.AppException;
+import io.github.guennhatking.libra_auction.exception.ErrorCode;
+import io.github.guennhatking.libra_auction.models.NguoiDung;
+import io.github.guennhatking.libra_auction.models.TaiKhoanPassword;
+import io.github.guennhatking.libra_auction.repos.InvalidatedTokenRepository;
+import io.github.guennhatking.libra_auction.repos.NguoiDungRepository;
+import io.github.guennhatking.libra_auction.repos.TaiKhoanRepository;
+import io.github.guennhatking.libra_auction.repos.TaiKhoanPasswordRepository;
+import io.github.guennhatking.libra_auction.dto.request.AuthenticationRequest;
+
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.util.CollectionUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Slf4j
+@Service
+public class AuthenticationService {
+    @Autowired
+    private NguoiDungRepository nguoiDungRepository;
+    
+    @Autowired
+    private TaiKhoanRepository taiKhoanRepository;
+    
+    @Autowired
+    private TaiKhoanPasswordRepository taiKhoanPasswordRepository;
+    
+    @Autowired
+    private InvalidatedTokenRepository invalidatedTokenRepository;
+
+    @Value("${jwt.signerKey}")
+    private String SIGNER_KEY;
+
+    @Value("${jwt.valid-duration}")
+    private long VALID_DURATION;
+
+    @Value("${jwt.refreshable-duration}")
+    private long REFRESHABLE_DURATION;
+
+    
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException, java.text.ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = (isRefresh)
+                ? new Date(signedJWT
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
+    }
+
+
+    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException, java.text.ParseException {
+        var token = request.getToken();
+        boolean isValid = true;
+
+        try {
+            verifyToken(token, false);
+        } catch (AppException e) {
+            isValid = false;
+        }
+
+        return IntrospectResponse.builder().valid(isValid).build();
+    }
+
+    private String buildScope(NguoiDung user) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+
+        try {
+            if (user != null && user.getRoles() != null && !user.getRoles().isEmpty()) {
+                user.getRoles().forEach(role -> {
+                    stringJoiner.add("ROLE_" + role);
+                });
+            }
+        } catch (Exception e) {
+            log.warn("Failed to build scope for user", e);
+        }
+
+        return stringJoiner.toString();
+    }
+
+    private String generateToken(NguoiDung user) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getId())
+                .issuer("io.github.guennhatking")
+                .issueTime(new Date())
+                .expirationTime(new Date(
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScope(user))
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Cannot create token", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String generateRefreshToken(NguoiDung user) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getId())
+                .issuer("io.github.guennhatking")
+                .issueTime(new Date())
+                .expirationTime(new Date(
+                        Instant.now().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScope(user))
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Cannot create refresh token", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        
+        if (request.getUsername() == null || request.getPassword() == null)
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        var taiKhoanPassword = taiKhoanPasswordRepository
+                .findByUsername(request.getUsername());
+
+        if (taiKhoanPassword == null)
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        String passwordHash = taiKhoanPassword.getPasswordHash();
+
+        if (passwordHash == null)
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        boolean authenticated =
+                passwordEncoder.matches(request.getPassword(), passwordHash);
+
+        if (!authenticated)
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        
+        var authUser = taiKhoanPassword.getNguoiDung();
+
+        var token = generateToken(authUser);
+        var refreshToken = generateRefreshToken(authUser);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public AuthenticationResponse refreshToken(RefreshRequest request) 
+            throws JOSEException, ParseException, java.text.ParseException {
+        var signedJWT = verifyToken(request.getRefresh_token(), true);
+        String userId = signedJWT.getJWTClaimsSet().getSubject();
+        
+        var user = nguoiDungRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+        
+        var token = generateToken(user);
+        
+        return AuthenticationResponse.builder()
+                .token(token)
+                .build();
+    }
+
+    public UserResponse signup(SignupRequest request) {
+        // Check if username already exists
+        var existingTaiKhoan = taiKhoanRepository.findByUsername(request.getUsername());
+        if (existingTaiKhoan != null) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+
+        // Validate inputs
+        if (request.getUsername().length() < 3) {
+            throw new AppException(ErrorCode.USERNAME_INVALID);
+        }
+        if (request.getUsername().contains(" ")) {
+            throw new AppException(ErrorCode.USERNAME_INVALID);
+        }
+        if (request.getPassword().length() < 6) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // Create user with password hash
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        String passwordHash = passwordEncoder.encode(request.getPassword());
+
+        // Create NguoiDung using builder
+        NguoiDung user = NguoiDung.builder()
+                .hoVaTen(request.getFullName())
+                .email(request.getEmail())
+                .trangThaiEmail(io.github.guennhatking.libra_auction.enums.Enums.TrangThaiEmail.CHO_XAC_THUC)
+                .trangThaiTaiKhoan(io.github.guennhatking.libra_auction.enums.Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN)
+                .thoiGianTao(java.time.LocalDateTime.now())
+                .build();
+        
+        user = nguoiDungRepository.save(user);
+
+        // Create TaiKhoanPassword using constructor
+        TaiKhoanPassword taiKhoan = new TaiKhoanPassword(
+                UUID.randomUUID().toString(),
+                request.getUsername(),
+                passwordHash,
+                null   // salt
+        );
+        taiKhoan.setNguoiDung(user);
+        
+        taiKhoanPasswordRepository.save(taiKhoan);
+
+        // Return user response
+        return UserResponse.builder()
+                .id(user.getId())
+                .hoVaTen(user.getHoVaTen())
+                .email(user.getEmail())
+                .build();
+    }
+}

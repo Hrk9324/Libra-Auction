@@ -2,6 +2,10 @@ package io.github.guennhatking.libra_auction.models;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import io.github.guennhatking.libra_auction.models.Role;
+
+import org.jspecify.annotations.Nullable;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
 import jakarta.persistence.CascadeType;
@@ -13,12 +17,20 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.Transient;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NguoiDung {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -31,7 +43,11 @@ public class NguoiDung {
     protected String soDienThoai;
     protected String CCCD;
     protected String anhDaiDien;
-
+    protected String email;
+    
+    @ManyToMany
+    private List<Role> roles;
+    
     @Enumerated(EnumType.STRING)
     protected Enums.TrangThaiEmail trangThaiEmail;
 
@@ -39,29 +55,6 @@ public class NguoiDung {
     protected Enums.TrangThaiTaiKhoan trangThaiTaiKhoan;
 
     protected LocalDateTime thoiGianTao;
-
-    protected NguoiDung() {
-        // Constructor mặc định cho JPA
-    }
-
-    public NguoiDung(String hoVaTen, String soDienThoai, String CCCD) {
-        if (hoVaTen == null || hoVaTen.isBlank()) {
-            throw new IllegalArgumentException("Họ và tên không được để trống.");
-        }
-        if (soDienThoai == null || soDienThoai.isBlank()) {
-            throw new IllegalArgumentException("Số điện thoại không được để trống.");
-        }
-        if (CCCD == null || CCCD.isBlank()) {
-            throw new IllegalArgumentException("CCCD không được để trống.");
-        }
-
-        this.hoVaTen = hoVaTen;
-        this.soDienThoai = soDienThoai;
-        this.CCCD = CCCD;
-        this.trangThaiEmail = Enums.TrangThaiEmail.CHO_XAC_THUC;
-        this.trangThaiTaiKhoan = Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN;
-        this.thoiGianTao = LocalDateTime.now();
-    }
 
     public String getId() {
         return Id;
@@ -111,6 +104,10 @@ public class NguoiDung {
         this.trangThaiTaiKhoan = trangThaiTaiKhoan;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public Enums.TrangThaiEmail getTrangThaiEmail() {
         return trangThaiEmail;
     }
@@ -127,6 +124,26 @@ public class NguoiDung {
         this.trangThaiTaiKhoan = trangThaiTaiKhoan;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<TaiKhoan> getTaiKhoanLienKet() {
+        return taiKhoanLienKet;
+    }
+
+    public void setTaiKhoanLienKet(List<TaiKhoan> taiKhoanLienKet) {
+        this.taiKhoanLienKet = taiKhoanLienKet;
+    }
+
+    public List<Role> getRoles() {
+    return roles;
+}
+
+    public void setRoles(List<Role> roles) {
+    this.roles = roles;
+    }
+
     // cập nhật mật khẩu mới cho người dùng
     public void capNhatMatKhau(String matKhauMoiHash, byte[] salt) {
         for (TaiKhoan taiKhoan : taiKhoanLienKet) {
@@ -137,4 +154,5 @@ public class NguoiDung {
         }
         throw new IllegalStateException("Người dùng không có phương thức đăng nhập bằng mật khẩu.");
     }
+
 }

@@ -1,19 +1,29 @@
-# TODO: Hoàn thành database ở đây
+# Insert test data
 databaseChangeLog:
   - changeSet:
-      id: 001
+      id: 001-insert-test-user
       author: guennhatking
-      labels: example-label
-      context: example-context
-      comment: example-comment
       changes:
-        - createTable:
-            tableName: testTable
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
+        - sql:
+            sql: |
+              INSERT INTO nguoi_dung (id, ho_va_ten, so_dien_thoai, cccd, email, trang_thai_email, trang_thai_tai_khoan, tho_i_gian_tao)
+              VALUES (
+                  'user-1',
+                  'Tuan Test',
+                  '0987654321',
+                  '123456789000',
+                  'tuan@example.com',
+                  'DA_XAC_THUC',
+                  'DA_XAC_NHAN',
+                  NOW()
+              );
+              
+              INSERT INTO tai_khoan_password (id, username, password_hash, salt, trang_thai, nguoi_dung_id)
+              VALUES (
+                  'account-1',
+                  'tuan',
+                  '$2a$10$Yp6LkMHEH/sEqOD2Ss.wuOc7.JPT6B6KJlmGqQjEYmHC5o.47PQe2',
+                  'salt-value',
+                  'DA_XAC_NHAN',
+                  'user-1'
+              );

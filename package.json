@@ -1,0 +1,23 @@
+{
+  "name": "libra-auction",
+  "version": "1.0.0",
+  "description": "- Spring Boot\r ## Frontend:\r - Nextjs\r ## Database:\r - Postgresql",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TuanNguyenDUT/Libra-Auction.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TuanNguyenDUT/Libra-Auction/issues"
+  },
+  "homepage": "https://github.com/TuanNguyenDUT/Libra-Auction#readme",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  }
+}
