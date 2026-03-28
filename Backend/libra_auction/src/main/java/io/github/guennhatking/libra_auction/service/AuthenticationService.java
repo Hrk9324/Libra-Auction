@@ -244,6 +244,13 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
 
+        // Validate password format (must contain uppercase, lowercase, digit, special char)
+        try {
+            TaiKhoanPassword.validatePasswordFormat(request.getPassword());
+        } catch (IllegalArgumentException e) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD_FORMAT);
+        }
+
         // Create user with password hash
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         String passwordHash = passwordEncoder.encode(request.getPassword());

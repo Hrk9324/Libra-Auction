@@ -12,12 +12,12 @@ import io.github.guennhatking.libra_auction.models.Role;
 
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public abstract class UserMapper {
+public interface UserMapper {
 
-    public abstract UserResponse toUserResponse(NguoiDung user);
+    UserResponse toUserResponse(NguoiDung user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "hoVaTen", source = "fullName")
-    public abstract void updateUser(@MappingTarget NguoiDung user, UserUpdateRequest request);
+    void updateUser(@MappingTarget NguoiDung user, UserUpdateRequest request);
 
 }
