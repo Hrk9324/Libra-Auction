@@ -18,6 +18,15 @@ public class TaiKhoanPassword extends TaiKhoan {
         "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{6,}$"
     );
 
+    public static void validatePasswordFormat(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("Mật khẩu không được để trống.");
+        }
+        if (!PASSWORD_PATTERN.matcher(password).matches()) {
+            throw new IllegalArgumentException("Mật khẩu không hợp lệ. Mật khẩu phải chứa ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
+        }
+    }
+
     public TaiKhoanPassword(String id, String username, String passwordHash, byte[] salt) {
         super(id, Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN, username);
         this.passwordHash = passwordHash;
