@@ -1,0 +1,23 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build files
+build/
+.gradle/
+*.class
+*.jar
+target/
+
+# Node/npm (for Frontend)
+node_modules/
+dist/
+.next/

@@ -1,27 +1,23 @@
 {
-  "name": "libra_auction",
-  "version": "0.1.0",
-  "private": true,
+  "name": "libra-auction",
+  "version": "1.0.0",
+  "description": "- Spring Boot\r ## Frontend:\r - Nextjs\r ## Database:\r - Postgresql",
+  "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TuanNguyenDUT/Libra-Auction.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TuanNguyenDUT/Libra-Auction/issues"
+  },
+  "homepage": "https://github.com/TuanNguyenDUT/Libra-Auction#readme",
   "dependencies": {
-    "better-auth": "^1.5.6",
-    "next": "16.1.1",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.1",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "jsonwebtoken": "^9.0.3"
   }
 }

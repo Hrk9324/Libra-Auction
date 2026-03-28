@@ -1,19 +1,11 @@
-# TODO: Hoàn thành database ở đây
+# Liquibase changelog placeholder
+# Add your database migrations here
 databaseChangeLog:
-  - changeSet:
-      id: 001
-      author: guennhatking
-      labels: example-label
-      context: example-context
-      comment: example-comment
-      changes:
-        - createTable:
-            tableName: testTable
-            columns:
-              - column:
-                  name: id
-                  type: int
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    nullable: false
+  # Example changeSet structure (uncomment and modify as needed):
+  # - changeSet:
+  #     id: 001-example
+  #     author: your-name
+  #     changes:
+  #       - sql:
+  #           sql: |
+  #             -- Your SQL statements here
