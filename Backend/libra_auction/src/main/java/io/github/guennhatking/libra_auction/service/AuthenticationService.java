@@ -248,7 +248,7 @@ public class AuthenticationService {
         try {
             TaiKhoanPassword.validatePasswordFormat(request.getPassword());
         } catch (IllegalArgumentException e) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD_FORMAT);
         }
 
         // Create user with password hash
