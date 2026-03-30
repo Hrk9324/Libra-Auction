@@ -15,6 +15,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/identity/signup", "/identity/signin/**", "/identity/refresh", "/identity/introspect")
                     .permitAll()
                 .anyRequest().authenticated()

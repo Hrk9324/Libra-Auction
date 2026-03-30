@@ -21,11 +21,12 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
+import io.github.guennhatking.libra_auction.util.RSAKeyProvider;
 
 import java.util.UUID;
 import java.util.Collections;
@@ -64,9 +65,8 @@ public class AuthenticationService {
     @Autowired
     private RoleRepository roleRepository;
     
-
-    @Value("${jwt.signerKey}")
-    private String SIGNER_KEY;
+    @Autowired
+    private RSAKeyProvider rsaKeyProvider;
 
     @Value("${jwt.valid-duration}")
     private long VALID_DURATION;
@@ -76,7 +76,7 @@ public class AuthenticationService {
 
     
     private SignedJWT verifyAccessToken(String token) throws JOSEException, ParseException, java.text.ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        JWSVerifier verifier = new RSASSAVerifier(rsaKeyProvider.getPublicKey());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
@@ -94,7 +94,7 @@ public class AuthenticationService {
     }
 
     private SignedJWT verifyRefreshToken(String token) throws JOSEException, ParseException, java.text.ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        JWSVerifier verifier = new RSASSAVerifier(rsaKeyProvider.getPublicKey());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
@@ -135,7 +135,7 @@ public class AuthenticationService {
     }
 
     private String generateToken(NguoiDung user) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId())
@@ -153,7 +153,7 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new RSASSASigner(rsaKeyProvider.getPrivateKey()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Cannot create token", e);
@@ -162,7 +162,7 @@ public class AuthenticationService {
     }
 
     private String generateRefreshToken(NguoiDung user) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId())
@@ -180,7 +180,7 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            jwsObject.sign(new RSASSASigner(rsaKeyProvider.getPrivateKey()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Cannot create refresh token", e);
