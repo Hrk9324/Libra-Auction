@@ -141,7 +141,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signin/password")
-    AuthenticationResponse authenticate(@RequestBody AuthenticationRequest request) {
+    AuthenticationResponse authenticate(@Valid @RequestBody AuthenticationRequest request) {
+        log.info("=== Sign-In Request ===");
+        log.info("Username: {}", request.getUsername());
         return authenticationService.authenticate(request);
     }
 

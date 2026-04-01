@@ -11,3 +11,25 @@ databaseChangeLog:
               INSERT INTO role (name, description) VALUES ('SELLER', 'Seller - can create and manage auctions');
               INSERT INTO role (name, description) VALUES ('ADMIN', 'Administrator - full access to system');
             splitStatements: false
+  - changeSet:
+      id: 003-insert-default-categories
+      author: system
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO danh_muc (id, ten_danh_muc, hinh_anh) VALUES ('cat-001', 'Electronics', 'https://example.com/electronics.jpg') ON CONFLICT (id) DO NOTHING;
+              INSERT INTO danh_muc (id, ten_danh_muc, hinh_anh) VALUES ('cat-002', 'Jewelry', 'https://example.com/jewelry.jpg') ON CONFLICT (id) DO NOTHING;
+              INSERT INTO danh_muc (id, ten_danh_muc, hinh_anh) VALUES ('cat-003', 'Art', 'https://example.com/art.jpg') ON CONFLICT (id) DO NOTHING;
+              INSERT INTO danh_muc (id, ten_danh_muc, hinh_anh) VALUES ('cat-004', 'Collectibles', 'https://example.com/collectibles.jpg') ON CONFLICT (id) DO NOTHING;
+              INSERT INTO danh_muc (id, ten_danh_muc, hinh_anh) VALUES ('cat-005', 'Fashion', 'https://example.com/fashion.jpg') ON CONFLICT (id) DO NOTHING;
+            splitStatements: false
+  - changeSet:
+      id: 004-insert-sample-products
+      author: system
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO tai_san (id, ten_tai_san, so_luong, mo_ta, danh_muc_id) VALUES ('3d705a3d-82ff-4bcf-9518-3c0d2aa3ab27', 'iPhone 15 Pro MAX', 10, 'Điện thoại cực đẹp', 'cat-001') ON CONFLICT (id) DO NOTHING;
+              INSERT INTO tai_san (id, ten_tai_san, so_luong, mo_ta, danh_muc_id) VALUES ('a1234567-89ab-cdef-0123-456789abcdef', 'Vintage Gold Watch', 2, 'Beautiful vintage watch with leather band', 'cat-002');
+              INSERT INTO tai_san (id, ten_tai_san, so_luong, mo_ta, danh_muc_id) VALUES ('b2234567-89ab-cdef-0123-456789abcdef', 'Modern Art Painting', 1, 'Contemporary abstract art piece', 'cat-003');
+            splitStatements: false

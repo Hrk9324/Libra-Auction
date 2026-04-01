@@ -19,14 +19,15 @@ public class TaiSan {
     @OneToOne(mappedBy = "taiSan", cascade = CascadeType.ALL)
     private ThongTinPhienDauGia thongTinPhienDauGia;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "danh_muc_id")
     private DanhMuc danhMuc;
 
     private String tenTaiSan;
-    private int soLuong;
+    private Integer soLuong;
     private String moTa;
 
+    public String getId() { return id; }
     public ThongTinPhienDauGia getThongTinPhienDauGia() { return thongTinPhienDauGia; }
     public DanhMuc getDanhMuc() { return danhMuc; }
     public String getTenTaiSan() { return tenTaiSan; }
@@ -38,7 +39,7 @@ public class TaiSan {
     public void setThongTinPhienDauGia(ThongTinPhienDauGia thongTinPhienDauGia) { this.thongTinPhienDauGia = thongTinPhienDauGia; }
     public void setDanhMuc(DanhMuc danhMuc) { this.danhMuc = danhMuc; }
     public void setTenTaiSan(String tenTaiSan) { this.tenTaiSan = tenTaiSan; }
-    public void setSoLuong(int soLuong) { this.soLuong = soLuong; } 
+    public void setSoLuong(Integer soLuong) { this.soLuong = soLuong; } 
     public void setMoTa(String moTa) { this.moTa = moTa; }
 
 

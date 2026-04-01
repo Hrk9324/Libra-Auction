@@ -66,7 +66,7 @@ public class PhienDauGia {
     private long giaKhoiDiem;
     private long buocGiaNhoNhat;
 
-    protected PhienDauGia() {}
+    public PhienDauGia() {}
 
     //getter
     public String getId() { return id; }
@@ -83,6 +83,9 @@ public class PhienDauGia {
     public Enums.LoaiDauGia getLoaiDauGia() { return loaiDauGia; }
     public Enums.TrangThaiPhien getTrangThaiPhien() { return trangThaiPhien; }
     public LocalDateTime getThoiGianTao() { return thoiGianTao; }
+    public TaiSan getTaiSan() { return taiSan; }
+    public long getGiaKhoiDiem() { return giaKhoiDiem; }
+    public long getBuocGiaNhoNhat() { return buocGiaNhoNhat; }
     //setter
     public void setId(String id) {
         this.id = id;
@@ -101,6 +104,27 @@ public class PhienDauGia {
     }
     public void setBuocGiaNhoNhat(long buocGiaNhoNhat) {
        this.buocGiaNhoNhat = buocGiaNhoNhat;
+    }
+    public void setNguoiTao(NguoiDung nguoiTao) {
+        this.nguoiTao = nguoiTao;
+    }
+    public void setThongTinPhienDauGia(ThongTinPhienDauGia thongTinPhienDauGia) {
+        this.thongTinPhienDauGia = thongTinPhienDauGia;
+    }
+    public void setThoiLuong(long thoiLuong) {
+        this.thoiLuong = thoiLuong;
+    }
+    public void setLoaiDauGia(Enums.LoaiDauGia loaiDauGia) {
+        this.loaiDauGia = loaiDauGia;
+    }
+    public void setTrangThaiPhien(Enums.TrangThaiPhien trangThaiPhien) {
+        this.trangThaiPhien = trangThaiPhien;
+    }
+    public void setTrangThaiKiemDuyet(Enums.TrangThaiKiemDuyet trangThaiKiemDuyet) {
+        this.trangThaiKiemDuyet = trangThaiKiemDuyet;
+    }
+    public void setThoiGianTao(LocalDateTime thoiGianTao) {
+        this.thoiGianTao = thoiGianTao;
     }
 }
    
