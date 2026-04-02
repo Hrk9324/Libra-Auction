@@ -16,7 +16,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 
-import io.github.guennhatking.libra_auction.dto.JwtResponse;
+import io.github.guennhatking.libra_auction.dto.response.JwtResponse;
 import io.github.guennhatking.libra_auction.enums.Enums;
 import io.github.guennhatking.libra_auction.models.NguoiDung;
 import io.github.guennhatking.libra_auction.models.TaiKhoanOAuth;

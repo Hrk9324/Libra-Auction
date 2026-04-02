@@ -1,4 +1,4 @@
-package io.github.guennhatking.libra_auction.dto;
+package io.github.guennhatking.libra_auction.dto.request;
 
 public class GoogleLoginRequest {
     private String idToken;

@@ -1,6 +1,5 @@
 package io.github.guennhatking.libra_auction.service;
 
-
 import io.github.guennhatking.libra_auction.dto.request.RefreshRequest;
 import io.github.guennhatking.libra_auction.dto.request.SignupRequest;
 import io.github.guennhatking.libra_auction.dto.response.AuthenticationResponse;
@@ -14,34 +13,27 @@ import io.github.guennhatking.libra_auction.repos.TaiKhoanRepository;
 import io.github.guennhatking.libra_auction.repos.TaiKhoanPasswordRepository;
 import io.github.guennhatking.libra_auction.repos.RoleRepository;
 import io.github.guennhatking.libra_auction.dto.request.AuthenticationRequest;
+import io.github.guennhatking.libra_auction.security.JwtUtils;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.ParseException;
 
-import java.util.UUID;
-import java.util.Collections;
-
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -52,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @Service
 public class AuthenticationService {
+
     @Autowired
     private NguoiDungRepository nguoiDungRepository;
     
@@ -63,211 +56,132 @@ public class AuthenticationService {
     
     @Autowired
     private RoleRepository roleRepository;
-    
 
-    @Value("${jwt.signerKey}")
-    private String SIGNER_KEY;
+    @Autowired
+    private JwtUtils jwtUtils;
 
-    @Value("${jwt.valid-duration}")
+    @Value("${app.jwt.expiration}")
     private long VALID_DURATION;
 
-    @Value("${jwt.refreshable-duration}")
+    @Value("${jwt.refreshable-duration:2592000}")
     private long REFRESHABLE_DURATION;
 
-    
-    private SignedJWT verifyAccessToken(String token) throws JOSEException, ParseException, java.text.ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-
-        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        String tokenType = (String) signedJWT.getJWTClaimsSet().getClaim("type");
-        if (tokenType == null || !tokenType.equals("ACCESS")) 
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        return signedJWT;
-    }
-
-    private SignedJWT verifyRefreshToken(String token) throws JOSEException, ParseException, java.text.ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = new Date(signedJWT
-                .getJWTClaimsSet()
-                .getIssueTime()
-                .toInstant()
-                .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
-                .toEpochMilli());
-
-        var verified = signedJWT.verify(verifier);
-
-        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        String tokenType = (String) signedJWT.getJWTClaimsSet().getClaim("type");
-        if (tokenType == null || !tokenType.equals("REFRESH")) 
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        return signedJWT;
-    }
-
-
-
-    private String buildScope(NguoiDung user) {
-        StringJoiner stringJoiner = new StringJoiner(" ");
-
+    /**
+     * Xác thực Token sử dụng Public Key RSA
+     */
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         try {
-            if (user != null && user.getRoles() != null && !user.getRoles().isEmpty()) {
-                user.getRoles().forEach(role -> {
-                    stringJoiner.add("ROLE_" + role);
-                });
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            
+            // Ép kiểu về RSAPublicKey để Nimbus chấp nhận
+            RSAPublicKey publicKey = (RSAPublicKey) jwtUtils.getPublicKey();
+            JWSVerifier verifier = new RSASSAVerifier(publicKey);
+
+            Date expiryTime = isRefresh 
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
+                    .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
+            var verified = signedJWT.verify(verifier);
+
+            if (!(verified && expiryTime.after(new Date()))) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
+
+            String expectedType = isRefresh ? "REFRESH" : "ACCESS";
+            String tokenType = (String) signedJWT.getJWTClaimsSet().getClaim("type");
+            
+            if (tokenType == null || !tokenType.equals(expectedType)) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            return signedJWT;
         } catch (Exception e) {
-            log.warn("Failed to build scope for user", e);
+            log.error("Token verification failed: {}", e.getMessage());
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-
-        return stringJoiner.toString();
     }
 
-    private String generateToken(NguoiDung user) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+    /**
+     * Tạo Token sử dụng Private Key RSA (RS512)
+     */
+    private String generateToken(NguoiDung user, boolean isRefresh) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.RS512);
+
+        long duration = isRefresh ? REFRESHABLE_DURATION : VALID_DURATION;
+        String type = isRefresh ? "REFRESH" : "ACCESS";
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId())
                 .issuer("io.github.guennhatking")
                 .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(duration, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("type", "ACCESS")
+                .claim("type", type)
                 .claim("scope", buildScope(user))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            // Ép kiểu về RSAPrivateKey để Nimbus ký
+            RSAPrivateKey privateKey = (RSAPrivateKey) jwtUtils.getPrivateKey();
+            jwsObject.sign(new RSASSASigner(privateKey));
             return jwsObject.serialize();
-        } catch (JOSEException e) {
-            log.error("Cannot create token", e);
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("RSA Signing failed", e);
+            throw new RuntimeException("Token generation error", e);
         }
     }
-
-    private String generateRefreshToken(NguoiDung user) {
-        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
-
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getId())
-                .issuer("io.github.guennhatking")
-                .issueTime(new Date())
-                .expirationTime(new Date(
-                        Instant.now().plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
-                .jwtID(UUID.randomUUID().toString())
-                .claim("type", "REFRESH")
-                .claim("scope", buildScope(user))
-                .build();
-
-        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
-
-        JWSObject jwsObject = new JWSObject(header, payload);
-
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            log.error("Cannot create refresh token", e);
-            throw new RuntimeException(e);
-        }
-    }
-
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        
-        if (request.getUsername() == null || request.getPassword() == null)
+        var taiKhoanPassword = taiKhoanPasswordRepository.findByUsername(request.getUsername());
+
+        if (taiKhoanPassword == null || 
+            !passwordEncoder.matches(request.getPassword(), taiKhoanPassword.getPasswordHash())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        var taiKhoanPassword = taiKhoanPasswordRepository
-                .findByUsername(request.getUsername());
-
-        if (taiKhoanPassword == null)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        String passwordHash = taiKhoanPassword.getPasswordHash();
-
-        if (passwordHash == null)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        boolean authenticated =
-                passwordEncoder.matches(request.getPassword(), passwordHash);
-
-        if (!authenticated)
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
         
         var authUser = taiKhoanPassword.getNguoiDung();
 
-        var token = generateToken(authUser);
-        var refreshToken = generateRefreshToken(authUser);
-
         return AuthenticationResponse.builder()
-                .token(token)
-                .refreshToken(refreshToken)
+                .token(generateToken(authUser, false))
+                .refreshToken(generateToken(authUser, true))
                 .build();
     }
 
-    public AuthenticationResponse refreshToken(RefreshRequest request) 
-            throws JOSEException, ParseException, java.text.ParseException {
-        var signedJWT = verifyRefreshToken(request.getRefresh_token());
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws JOSEException, ParseException {
+        var signedJWT = verifyToken(request.getRefresh_token(), true);
         String userId = signedJWT.getJWTClaimsSet().getSubject();
         
         var user = nguoiDungRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
         
-        var token = generateToken(user);
-        
         return AuthenticationResponse.builder()
-                .token(token)
+                .token(generateToken(user, false))
                 .build();
     }
 
+    private String buildScope(NguoiDung user) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+        if (user != null && user.getRoles() != null) {
+            user.getRoles().forEach(role -> stringJoiner.add("ROLE_" + role.getName()));
+        }
+        return stringJoiner.toString();
+    }
+
     public UserResponse signup(SignupRequest request) {
-        // Check if username already exists
-        var existingTaiKhoan = taiKhoanRepository.findByUsername(request.getUsername());
-        if (existingTaiKhoan != null) {
+        System.out.println("=== [SERVICE] Bắt đầu Signup: " + request.getUsername());
+
+        if (taiKhoanRepository.findByUsername(request.getUsername()) != null) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        // Validate inputs
-        if (request.getUsername().length() < 3) {
-            throw new AppException(ErrorCode.USERNAME_INVALID);
-        }
-        if (request.getUsername().contains(" ")) {
-            throw new AppException(ErrorCode.USERNAME_INVALID);
-        }
-        if (request.getPassword().length() < 6) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
-        }
-
-        // Validate password format (must contain uppercase, lowercase, digit, special char)
-        try {
-            TaiKhoanPassword.validatePasswordFormat(request.getPassword());
-        } catch (IllegalArgumentException e) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD_FORMAT);
-        }
-
-        // Create user with password hash
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         String passwordHash = passwordEncoder.encode(request.getPassword());
 
-        // Create NguoiDung using builder
         NguoiDung user = NguoiDung.builder()
                 .hoVaTen(request.getFullName())
                 .email(request.getEmail())
@@ -278,75 +192,45 @@ public class AuthenticationService {
                 .thoiGianTao(java.time.LocalDateTime.now())
                 .build();
         
-        user = nguoiDungRepository.save(user);
+        // Lưu để có ID, gán vào biến final để dùng trong Lambda
+        final NguoiDung finalUser = nguoiDungRepository.save(user);
 
-        // Assign default USER role
-        var userRole = roleRepository.findById("USER");
-        if (userRole.isPresent()) {
-            java.util.List<io.github.guennhatking.libra_auction.models.Role> roles = new java.util.ArrayList<>();
-            roles.add(userRole.get());
-            user.setRoles(roles);
-            user = nguoiDungRepository.save(user);
-            log.info("Assigned USER role to user: {}", user.getId());
-        } else {
-            log.warn("USER role not found in database. Skipping role assignment.");
-        }
+        // Gán Role USER (Fix lỗi UnsupportedOperationException bằng ArrayList)
+        roleRepository.findById("USER").ifPresentOrElse(role -> {
+            List<io.github.guennhatking.libra_auction.models.Role> mutableRoles = new ArrayList<>();
+            mutableRoles.add(role);
+            finalUser.setRoles(mutableRoles);
+            nguoiDungRepository.save(finalUser);
+            System.out.println(">>> Đã gán Role USER thành công.");
+        }, () -> System.out.println("!!! CẢNH BÁO: Role USER chưa có trong DB."));
 
-        // Handle profile image upload
-        if (request.getAnhDaiDien() != null && !request.getAnhDaiDien().isEmpty()) {
-            try {
-                String imagePath = uploadProfileImage(user.getId(), request.getAnhDaiDien());
-                user.setAnhDaiDien(imagePath);
-                user = nguoiDungRepository.save(user);
-                log.info("Uploaded profile image for user: {}", user.getId());
-            } catch (IOException e) {
-                log.warn("Failed to upload profile image for user: {}", user.getId(), e);
-                // Continue without image, don't fail the signup
-            }
-        }
-
-        // Create TaiKhoanPassword using constructor
+        // Tạo tài khoản mật khẩu
         TaiKhoanPassword taiKhoan = new TaiKhoanPassword(
-                UUID.randomUUID().toString(),
-                request.getUsername(),
-                passwordHash,
-                null   // salt
+            UUID.randomUUID().toString(), 
+            request.getUsername(), 
+            passwordHash, 
+            null
         );
-        taiKhoan.setNguoiDung(user);
-        
+        taiKhoan.setNguoiDung(finalUser);
         taiKhoanPasswordRepository.save(taiKhoan);
 
-        // Return user response with all fields
+        System.out.println("=== [SERVICE] Signup hoàn tất cho: " + finalUser.getId());
+
         return UserResponse.builder()
-                .id(user.getId())
-                .hoVaTen(user.getHoVaTen())
-                .soDienThoai(user.getSoDienThoai())
-                .CCCD(user.getCCCD())
-                .email(user.getEmail())
-                .anhDaiDien(user.getAnhDaiDien())
-                .trangThaiEmail(user.getTrangThaiEmail())
-                .trangThaiTaiKhoan(user.getTrangThaiTaiKhoan())
-                .roles(user.getRoles() != null ? user.getRoles().stream().collect(java.util.stream.Collectors.toSet()) : java.util.Collections.emptySet())
+                .id(finalUser.getId())
+                .hoVaTen(finalUser.getHoVaTen())
+                .email(finalUser.getEmail())
+                .roles(finalUser.getRoles() != null ? new HashSet<>(finalUser.getRoles()) : Collections.emptySet())
                 .build();
     }
 
     private String uploadProfileImage(String userId, MultipartFile file) throws IOException {
-        // Create uploads directory if it doesn't exist
         Path uploadsDir = Paths.get("uploads/profile-images").toAbsolutePath();
         Files.createDirectories(uploadsDir);
-
-        // Generate unique filename
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = originalFilename != null && originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : ".jpg";
+        String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
         String uniqueFilename = userId + "_" + System.currentTimeMillis() + fileExtension;
-
-        // Save file
         Path filePath = uploadsDir.resolve(uniqueFilename);
         Files.write(filePath, file.getBytes());
-
-        // Return relative path for storing in database
         return "uploads/profile-images/" + uniqueFilename;
     }
 }

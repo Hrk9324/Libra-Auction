@@ -1,4 +1,4 @@
-package io.github.guennhatking.libra_auction.dto;
+package io.github.guennhatking.libra_auction.dto.response;
 
 public class JwtResponse {
     private String token;

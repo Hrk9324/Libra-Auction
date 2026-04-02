@@ -1,7 +1,7 @@
 package io.github.guennhatking.libra_auction.controllers;
 
-import io.github.guennhatking.libra_auction.dto.GoogleLoginRequest;
-import io.github.guennhatking.libra_auction.dto.JwtResponse;
+import io.github.guennhatking.libra_auction.dto.request.GoogleLoginRequest;
+import io.github.guennhatking.libra_auction.dto.response.JwtResponse;
 import io.github.guennhatking.libra_auction.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

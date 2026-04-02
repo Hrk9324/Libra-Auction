@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
             })
         });
         const data = await res.json();
+        console.log(data);
+        console.log(res.status);
         if (!res.ok) {
             return NextResponse.json({ message: data.message || "Sign up failed" }, { status: res.status })
         }
