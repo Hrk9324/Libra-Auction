@@ -116,14 +116,6 @@ public class NguoiDung {
         this.trangThaiEmail = trangThaiEmail;
     }
 
-    public void datTrangThaiXacThucEmail(Enums.TrangThaiEmail trangThaiEmail) {
-        this.trangThaiEmail = trangThaiEmail;
-    }
-
-    public void datTrangThaiTaiKhoan(Enums.TrangThaiTaiKhoan trangThaiTaiKhoan) {
-        this.trangThaiTaiKhoan = trangThaiTaiKhoan;
-    }
-
     public void setEmail(String email) {
         this.email = email;
     }
