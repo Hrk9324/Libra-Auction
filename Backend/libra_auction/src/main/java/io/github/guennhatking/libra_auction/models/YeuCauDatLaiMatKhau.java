@@ -1,45 +1,39 @@
 package io.github.guennhatking.libra_auction.models;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
 @Entity
 public class YeuCauDatLaiMatKhau extends YeuCau {
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "yeu_cau_otp_id")
+    @OneToOne
     private YeuCauOTP yeuCauOTP;
 
     private String matKhauMoi;
 
+    // CONSTRUCTOR
     protected YeuCauDatLaiMatKhau() {
-        // Constructor mặc định cho JPA
     }
 
     public YeuCauDatLaiMatKhau(NguoiDung nguoiYeuCau) {
         super(nguoiYeuCau, Enums.LoaiYeuCau.QUEN_MAT_KHAU);
     }
 
-    @Override
-    public void kichHoat() {
-        if (yeuCauOTP != null && yeuCauOTP.trangThaiYeuCau == Enums.TrangThaiYeuCau.DANG_XU_LY) {
-            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.DANG_SU_DUNG;
-            System.out.println("Yêu cầu đặt lại mật khẩu đã được kích hoạt thành công.");
-        } else {
-            System.out.println("Yêu cầu OTP chưa được sử dụng. Kích hoạt thất bại.");
-        }
+    // GETTER
+    public YeuCauOTP getYeuCauOTP() {
+        return yeuCauOTP;
     }
 
-    @Override
-    public void suDung() {
-        if (this.trangThaiYeuCau == Enums.TrangThaiYeuCau.DANG_SU_DUNG) {
-            this.nguoiDung.capNhatMatKhau(this.matKhauMoi, null);
-            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.HOAN_THANH;
-            System.out.println("Mật khẩu đã được đặt lại thành công.");
-        } else {
-            System.out.println("Yêu cầu đặt lại mật khẩu chưa được kích hoạt hoặc đã sử dụng.");
-        }
+    public String getMatKhauMoi() {
+        return matKhauMoi;
+    }
+
+    // SETTER
+    public void setYeuCauOTP(YeuCauOTP yeuCauOTP) {
+        this.yeuCauOTP = yeuCauOTP;
+    }
+
+    public void setMatKhauMoi(String matKhauMoi) {
+        this.matKhauMoi = matKhauMoi;
     }
 }

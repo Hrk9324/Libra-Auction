@@ -1,24 +1,21 @@
 package io.github.guennhatking.libra_auction.models;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
 @Entity
 public class ThongTinPhienDauGia {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // string(10)
+    private String id;
 
     @OneToOne(mappedBy = "thongTinPhienDauGia")
     private PhienDauGia phienDauGia;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tai_san_id", unique = true)
+    @OneToOne
     private TaiSan taiSan;
 
     private long tienCoc;
@@ -26,30 +23,73 @@ public class ThongTinPhienDauGia {
     private long khoangGia;
     private String tieuDe;
 
+    // CONSTRUCTOR
     public ThongTinPhienDauGia() {
-        // Constructor mặc định
     }
 
-    public PhienDauGia getPhienDauGia() { return phienDauGia; }
+    public ThongTinPhienDauGia(long tienCoc, long giaKhoiDiem, long khoangGia, String tieuDe, TaiSan taiSan) {
+        this.tienCoc = tienCoc;
+        this.giaKhoiDiem = giaKhoiDiem;
+        this.khoangGia = khoangGia;
+        this.tieuDe = tieuDe;
+        this.taiSan = taiSan;
+    }
 
-    public long getTienCoc() { return tienCoc; }
-    public long getGiaKhoiDiem() { return giaKhoiDiem; }
-    public long getKhoangGia() { return khoangGia; }
-    public String getTieuDe() { return tieuDe; }
-    public TaiSan getTaiSan() { return taiSan; }
+    // GETTER
+    public String getId() {
+        return id;
+    }
 
-    //phienDauGia
-    public void setPhienDauGia(PhienDauGia phienDauGia) { this.phienDauGia = phienDauGia; }
-    //tienCoc
-    public void setTienCoc(long tienCoc) { this.tienCoc = tienCoc; }
-    //giaKhoiDiem
-    public void setGiaKhoiDiem(long giaKhoiDiem) { this.giaKhoiDiem = giaKhoiDiem; }
-    //khoangGia
-    public void setKhoangGia(long khoangGia) { this.khoangGia = khoangGia; }
-    //tieuDe
-    public void setTieuDe(String tieuDe) { this.tieuDe = tieuDe; }
-    //taiSan
-    public void setTaiSan(TaiSan taiSan) { this.taiSan = taiSan; }
-    
+    public PhienDauGia getPhienDauGia() {
+        return phienDauGia;
+    }
 
+    public long getTienCoc() {
+        return tienCoc;
+    }
+
+    public long getGiaKhoiDiem() {
+        return giaKhoiDiem;
+    }
+
+    public long getKhoangGia() {
+        return khoangGia;
+    }
+
+    public String getTieuDe() {
+        return tieuDe;
+    }
+
+    public TaiSan getTaiSan() {
+        return taiSan;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setPhienDauGia(PhienDauGia phienDauGia) {
+        this.phienDauGia = phienDauGia;
+    }
+
+    public void setTienCoc(long tienCoc) {
+        this.tienCoc = tienCoc;
+    }
+
+    public void setGiaKhoiDiem(long giaKhoiDiem) {
+        this.giaKhoiDiem = giaKhoiDiem;
+    }
+
+    public void setKhoangGia(long khoangGia) {
+        this.khoangGia = khoangGia;
+    }
+
+    public void setTieuDe(String tieuDe) {
+        this.tieuDe = tieuDe;
+    }
+
+    public void setTaiSan(TaiSan taiSan) {
+        this.taiSan = taiSan;
+    }
 }

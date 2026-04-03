@@ -8,35 +8,29 @@ public class YeuCauOTP extends YeuCau {
     private String maOTPDaTao;
     private String maOTPNguoiDungNhap;
 
+    // CONSTRUCTOR
     protected YeuCauOTP() {
-        // Constructor mặc định cho JPA
     }
 
     public YeuCauOTP(NguoiDung nguoiYeuCau) {
         super(nguoiYeuCau, Enums.LoaiYeuCau.OTP);
     }
 
-    public void setOTP(String maOTP) {
-        this.maOTPDaTao = maOTP;
+    // GETTER
+    public String getMaOTPDaTao() {
+        return maOTPDaTao;
     }
 
-    @Override
-    public void kichHoat() {
-        if (maOTPDaTao != null && maOTPDaTao.equals(maOTPNguoiDungNhap)) {
-            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.DANG_SU_DUNG;
-            System.out.println("Yêu cầu OTP đã được kích hoạt thành công.");
-        } else {
-            System.out.println("Mã OTP không hợp lệ. Kích hoạt thất bại.");
-        }
+    public String getMaOTPNguoiDungNhap() {
+        return maOTPNguoiDungNhap;
     }
 
-    @Override
-    public void suDung() {
-        if (this.trangThaiYeuCau == Enums.TrangThaiYeuCau.DANG_SU_DUNG) {
-            this.trangThaiYeuCau = Enums.TrangThaiYeuCau.HOAN_THANH;
-            System.out.println("Yêu cầu OTP đã được sử dụng.");
-        } else {
-            System.out.println("Yêu cầu OTP chưa được kích hoạt hoặc đã sử dụng.");
-        }
+    // SETTER
+    public void setMaOTPDaTao(String maOTPDaTao) {
+        this.maOTPDaTao = maOTPDaTao;
+    }
+
+    public void setMaOTPNguoiDungNhap(String maOTPNguoiDungNhap) {
+        this.maOTPNguoiDungNhap = maOTPNguoiDungNhap;
     }
 }

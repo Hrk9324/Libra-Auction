@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -19,14 +18,13 @@ public abstract class ThongBao {
     protected String id;
 
     @ManyToOne
-    @JoinColumn(name = "nguoi_nhan_id")
     protected NguoiDung nguoiNhan;
 
     protected String noiDung;
     protected LocalDateTime thoiGianGui;
 
+    // CONSTRUCTOR
     protected ThongBao() {
-        // Constructor mặc định cho JPA
     }
 
     public ThongBao(NguoiDung nguoiNhan, String noiDung) {
@@ -35,29 +33,37 @@ public abstract class ThongBao {
         this.thoiGianGui = LocalDateTime.now();
     }
 
-    public abstract void guiThongBao();
-
+    // GETTER
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public NguoiDung getNguoiNhan() {
         return nguoiNhan;
     }
 
-    public void setNguoiNhan(NguoiDung nguoiNhan) {
-        this.nguoiNhan = nguoiNhan;
-    }
-
     public String getNoiDung() {
         return noiDung;
     }
 
+    public LocalDateTime getThoiGianGui() {
+        return thoiGianGui;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setNguoiNhan(NguoiDung nguoiNhan) {
+        this.nguoiNhan = nguoiNhan;
+    }
+
     public void setNoiDung(String noiDung) {
         this.noiDung = noiDung;
+    }
+
+    public void setThoiGianGui(LocalDateTime thoiGianGui) {
+        this.thoiGianGui = thoiGianGui;
     }
 }

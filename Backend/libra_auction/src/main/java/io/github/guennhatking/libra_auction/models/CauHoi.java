@@ -1,32 +1,29 @@
 package io.github.guennhatking.libra_auction.models;
+
 import java.time.LocalDateTime;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
 public class CauHoi {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // string(10)
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "phien_dau_gia_id")
+    private String id;
+
+    @ManyToOne
     private PhienDauGia phienDauGia;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_hoi_id")
+    @ManyToOne
     private NguoiDung nguoiHoi;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_tra_loi_id")
+    @ManyToOne
     private NguoiDung nguoiTraLoi;
 
     private String noiDungHoi;
@@ -34,40 +31,91 @@ public class CauHoi {
     private LocalDateTime thoiGianHoi;
     private LocalDateTime thoiGianTraLoi;
 
-    @Enumerated(jakarta.persistence.EnumType.STRING)
-    private Enums.TinhTrangCauHoi tinhTrangCauHoi; // "chưa trả lời" | "đã trả lời" | "đã từ chối trả lời"
+    @Enumerated(EnumType.STRING)
+    private Enums.TinhTrangCauHoi tinhTrangCauHoi;
 
+    // CONSTRUCTOR
     public CauHoi() {
-        // Constructor mặc định
     }
 
-    public void traLoi(NguoiDung nguoiTraLoi, String noiDungTraLoi) {}
-    public void tuChoiTraLoi() {}
-    public String getId() { return id; }
-    public PhienDauGia getPhienDauGia() { return phienDauGia; }
+    public CauHoi(PhienDauGia phienDauGia, NguoiDung nguoiHoi, String noiDungHoi) {
+        this.phienDauGia = phienDauGia;
+        this.nguoiHoi = nguoiHoi;
+        this.noiDungHoi = noiDungHoi;
+        this.thoiGianHoi = LocalDateTime.now();
+    }
 
-    public NguoiDung getNguoiHoi() { return nguoiHoi; }
-    public NguoiDung getNguoiTraLoi() { return nguoiTraLoi; }
-    public String getNoiDungHoi() { return noiDungHoi; }
-    public String getNoiDungTraLoi() { return noiDungTraLoi; }
-    public LocalDateTime getThoiGianHoi() { return thoiGianHoi; }
-    public LocalDateTime getThoiGianTraLoi() { return thoiGianTraLoi; }
-    public Enums.TinhTrangCauHoi getTinhTrangCauHoi() { return tinhTrangCauHoi; }
+    // GETTER
+    public String getId() {
+        return id;
+    }
 
-    //id
-    public void setId(String id) { this.id = id; }
-    //phienDauGia
-    public void setPhienDauGia(PhienDauGia phienDauGia) { this.phienDauGia = phienDauGia; }
-    //nguoiHoi  
-    public void setNguoiHoi(NguoiDung nguoiHoi) { this.nguoiHoi = nguoiHoi; }
-    //noiDungHoi
-    public void setNoiDungHoi(String noiDungHoi) { this.noiDungHoi = noiDungHoi; }
-    //noiDungTraLoi
-    public void setNoiDungTraLoi(String noiDungTraLoi) { this.noiDungTraLoi = noiDungTraLoi; }
-    //thoiGianHoi
-    public void setThoiGianHoi(LocalDateTime thoiGianHoi) { this.thoiGianHoi = thoiGianHoi; }
-    //thoiGianTraLoi
-    public void setThoiGianTraLoi(LocalDateTime thoiGianTraLoi) { this.thoiGianTraLoi = thoiGianTraLoi; }
-    //tinhTrang
-    public void setTinhTrangCauHoi(Enums.TinhTrangCauHoi tinhTrangCauHoi) { this.tinhTrangCauHoi = tinhTrangCauHoi; }
+    public PhienDauGia getPhienDauGia() {
+        return phienDauGia;
+    }
+
+    public NguoiDung getNguoiHoi() {
+        return nguoiHoi;
+    }
+
+    public NguoiDung getNguoiTraLoi() {
+        return nguoiTraLoi;
+    }
+
+    public String getNoiDungHoi() {
+        return noiDungHoi;
+    }
+
+    public String getNoiDungTraLoi() {
+        return noiDungTraLoi;
+    }
+
+    public LocalDateTime getThoiGianHoi() {
+        return thoiGianHoi;
+    }
+
+    public LocalDateTime getThoiGianTraLoi() {
+        return thoiGianTraLoi;
+    }
+
+    public Enums.TinhTrangCauHoi getTinhTrangCauHoi() {
+        return tinhTrangCauHoi;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setPhienDauGia(PhienDauGia phienDauGia) {
+        this.phienDauGia = phienDauGia;
+    }
+
+    public void setNguoiHoi(NguoiDung nguoiHoi) {
+        this.nguoiHoi = nguoiHoi;
+    }
+
+    public void setNguoiTraLoi(NguoiDung nguoiTraLoi) {
+        this.nguoiTraLoi = nguoiTraLoi;
+    }
+
+    public void setNoiDungHoi(String noiDungHoi) {
+        this.noiDungHoi = noiDungHoi;
+    }
+
+    public void setNoiDungTraLoi(String noiDungTraLoi) {
+        this.noiDungTraLoi = noiDungTraLoi;
+    }
+
+    public void setThoiGianHoi(LocalDateTime thoiGianHoi) {
+        this.thoiGianHoi = thoiGianHoi;
+    }
+
+    public void setThoiGianTraLoi(LocalDateTime thoiGianTraLoi) {
+        this.thoiGianTraLoi = thoiGianTraLoi;
+    }
+
+    public void setTinhTrangCauHoi(Enums.TinhTrangCauHoi tinhTrangCauHoi) {
+        this.tinhTrangCauHoi = tinhTrangCauHoi;
+    }
 }

@@ -4,11 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
 
 @Entity
 public class TaiSan {
@@ -16,31 +13,74 @@ public class TaiSan {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @OneToOne(mappedBy = "taiSan", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "taiSan")
     private ThongTinPhienDauGia thongTinPhienDauGia;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "danh_muc_id")
+    @ManyToOne
     private DanhMuc danhMuc;
 
     private String tenTaiSan;
     private int soLuong;
     private String moTa;
 
-    public ThongTinPhienDauGia getThongTinPhienDauGia() { return thongTinPhienDauGia; }
-    public DanhMuc getDanhMuc() { return danhMuc; }
-    public String getTenTaiSan() { return tenTaiSan; }
-    public int getSoLuong() { return soLuong; }
-    public String getMoTa() { return moTa; }
-    public void themHinhAnh(String url) {}
+    // CONSTRUCTOR
+    public TaiSan() {
+    }
 
-    //setter
-    public void setThongTinPhienDauGia(ThongTinPhienDauGia thongTinPhienDauGia) { this.thongTinPhienDauGia = thongTinPhienDauGia; }
-    public void setDanhMuc(DanhMuc danhMuc) { this.danhMuc = danhMuc; }
-    public void setTenTaiSan(String tenTaiSan) { this.tenTaiSan = tenTaiSan; }
-    public void setSoLuong(int soLuong) { this.soLuong = soLuong; } 
-    public void setMoTa(String moTa) { this.moTa = moTa; }
+    public TaiSan(String tenTaiSan, int soLuong, String moTa, DanhMuc danhMuc) {
+        this.tenTaiSan = tenTaiSan;
+        this.soLuong = soLuong;
+        this.moTa = moTa;
+        this.danhMuc = danhMuc;
+    }
 
+    // GETTER
+    public String getId() {
+        return id;
+    }
 
+    public ThongTinPhienDauGia getThongTinPhienDauGia() {
+        return thongTinPhienDauGia;
+    }
 
+    public DanhMuc getDanhMuc() {
+        return danhMuc;
+    }
+
+    public String getTenTaiSan() {
+        return tenTaiSan;
+    }
+
+    public int getSoLuong() {
+        return soLuong;
+    }
+
+    public String getMoTa() {
+        return moTa;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setThongTinPhienDauGia(ThongTinPhienDauGia thongTinPhienDauGia) {
+        this.thongTinPhienDauGia = thongTinPhienDauGia;
+    }
+
+    public void setDanhMuc(DanhMuc danhMuc) {
+        this.danhMuc = danhMuc;
+    }
+
+    public void setTenTaiSan(String tenTaiSan) {
+        this.tenTaiSan = tenTaiSan;
+    }
+
+    public void setSoLuong(int soLuong) {
+        this.soLuong = soLuong;
+    }
+
+    public void setMoTa(String moTa) {
+        this.moTa = moTa;
+    }
 }

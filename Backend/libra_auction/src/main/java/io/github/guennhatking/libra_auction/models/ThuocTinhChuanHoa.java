@@ -9,22 +9,43 @@ import jakarta.persistence.Id;
 public class ThuocTinhChuanHoa {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // string(10)
+    private String id;
 
     private String tenThuocTinh;
     private String giaTri;
 
+    // CONSTRUCTOR
     public ThuocTinhChuanHoa() {
-        // Constructor mặc định
     }
 
-    public String getId() { return id; }
-    public String getTenThuocTinh() { return tenThuocTinh; }
-    public String getGiaTri() { return giaTri; }
+    public ThuocTinhChuanHoa(String tenThuocTinh, String giaTri) {
+        this.tenThuocTinh = tenThuocTinh;
+        this.giaTri = giaTri;
+    }
 
-    //getter setter
-    public void setId(String id) { this.id = id; }
-    public void setTenThuocTinh(String tenThuocTinh) { this.tenThuocTinh = tenThuocTinh; }
-    public void setGiaTri(String giaTri) { this.giaTri = giaTri;}
-    
+    // GETTER
+    public String getId() {
+        return id;
+    }
+
+    public String getTenThuocTinh() {
+        return tenThuocTinh;
+    }
+
+    public String getGiaTri() {
+        return giaTri;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTenThuocTinh(String tenThuocTinh) {
+        this.tenThuocTinh = tenThuocTinh;
+    }
+
+    public void setGiaTri(String giaTri) {
+        this.giaTri = giaTri;
+    }
 }

@@ -3,38 +3,66 @@ package io.github.guennhatking.libra_auction.models;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
+
 @Entity
 public class ThongTinThamGiaDauGia {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // string(10)
+    private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_tham_gia_id")
+    @ManyToOne
     private NguoiDung nguoiThamGia;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "phien_dau_gia_id")
+    @ManyToOne
     private PhienDauGia phienDauGia;
 
     private LocalDateTime thoiGianDangKy;
-    
+
+    // CONSTRUCTOR
     public ThongTinThamGiaDauGia() {
-        // Constructor mặc định
     }
-    //getter setter
-    public NguoiDung getNguoiThamGia() { return nguoiThamGia; }
-    public PhienDauGia getPhienDauGia() { return phienDauGia; }
-    public LocalDateTime getThoiGianDangKy() { return thoiGianDangKy; }
-    
-    public void setNguoiThamGia(NguoiDung nguoiThamGia) { this.nguoiThamGia = nguoiThamGia; }
-    public void setPhienDauGia(PhienDauGia phienDauGia) { this.phienDauGia = phienDauGia; }
-    public void setThoiGianDangKy(LocalDateTime thoiGianDangKy) { this.thoiGianDangKy = thoiGianDangKy; }
-    
+
+    public ThongTinThamGiaDauGia(NguoiDung nguoiThamGia, PhienDauGia phienDauGia) {
+        this.nguoiThamGia = nguoiThamGia;
+        this.phienDauGia = phienDauGia;
+        this.thoiGianDangKy = LocalDateTime.now();
+    }
+
+    // GETTER
+    public String getId() {
+        return id;
+    }
+
+    public NguoiDung getNguoiThamGia() {
+        return nguoiThamGia;
+    }
+
+    public PhienDauGia getPhienDauGia() {
+        return phienDauGia;
+    }
+
+    public LocalDateTime getThoiGianDangKy() {
+        return thoiGianDangKy;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setNguoiThamGia(NguoiDung nguoiThamGia) {
+        this.nguoiThamGia = nguoiThamGia;
+    }
+
+    public void setPhienDauGia(PhienDauGia phienDauGia) {
+        this.phienDauGia = phienDauGia;
+    }
+
+    public void setThoiGianDangKy(LocalDateTime thoiGianDangKy) {
+        this.thoiGianDangKy = thoiGianDangKy;
+    }
 }

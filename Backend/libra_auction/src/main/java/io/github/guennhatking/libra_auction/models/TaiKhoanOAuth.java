@@ -5,15 +5,15 @@ import jakarta.persistence.Entity;
 
 @Entity
 public class TaiKhoanOAuth extends TaiKhoan {
-    protected TaiKhoanOAuth() {
-        // Constructor mặc định cho JPA
-    }
-
-    private String provider;    //goole, facebook, github,..
+    private String provider;
     private String providerId;
 
+    // CONSTRUCTOR
+    protected TaiKhoanOAuth() {
+    }
+
     public TaiKhoanOAuth(String id, String username, String provider, String providerId) {
-        super(id, Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN, username);
+        super(id, username, Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN);
         if (provider == null || provider.isBlank()) {
             throw new IllegalArgumentException("Provider không được để trống.");
         }
@@ -21,11 +21,21 @@ public class TaiKhoanOAuth extends TaiKhoan {
         this.providerId = providerId;
     }
 
+    // GETTER
     public String getProvider() {
         return provider;
     }
 
     public String getProviderId() {
         return providerId;
+    }
+
+    // SETTER
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
     }
 }

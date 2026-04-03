@@ -1,36 +1,64 @@
 package io.github.guennhatking.libra_auction.models;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
 public class HinhAnhTaiSan {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // string(10)
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tai_san_id")
+    private String id;
+
+    @ManyToOne
     private TaiSan taiSan;
 
     private int thuTuHienThi;
-    private String hinhAnh; // url
+    private String hinhAnh;
 
+    // CONSTRUCTOR
     protected HinhAnhTaiSan() {
-        // Constructor mặc định cho JPA
     }
 
-    public TaiSan getTaiSan() { return null; }
-    public int getThuTuHienThi() { return 0; }
-    public String getHinhAnh() { return null; }
+    public HinhAnhTaiSan(TaiSan taiSan, int thuTuHienThi, String hinhAnh) {
+        this.taiSan = taiSan;
+        this.thuTuHienThi = thuTuHienThi;
+        this.hinhAnh = hinhAnh;
+    }
 
-    //setter
-    public void setTaiSan(TaiSan taiSan) { this.taiSan = taiSan; }
-    public void setThuTuHienThi(int thuTuHienThi) { this.thuTuHienThi = thuTuHienThi; }
-    public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
+    // GETTER
+    public String getId() {
+        return id;
+    }
+
+    public TaiSan getTaiSan() {
+        return taiSan;
+    }
+
+    public int getThuTuHienThi() {
+        return thuTuHienThi;
+    }
+
+    public String getHinhAnh() {
+        return hinhAnh;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTaiSan(TaiSan taiSan) {
+        this.taiSan = taiSan;
+    }
+
+    public void setThuTuHienThi(int thuTuHienThi) {
+        this.thuTuHienThi = thuTuHienThi;
+    }
+
+    public void setHinhAnh(String hinhAnh) {
+        this.hinhAnh = hinhAnh;
+    }
 }

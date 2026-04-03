@@ -10,41 +10,44 @@ import jakarta.persistence.ManyToMany;
 public class Role {
     @Id
     private String name;
+
     private String description;
 
     @ManyToMany
-    Set<Permission> permissions;
+    private Set<Permission> permissions;
 
-    // Constructors
-    public Role() {}
+    // CONSTRUCTOR
+    public Role() {
+    }
 
     public Role(String name, String description) {
         this.name = name;
         this.description = description;
     }
 
-    // Getters and Setters
+    // GETTER
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {
         return description;
     }
 
+    public Set<Permission> getPermissions() {
+        return permissions;
+    }
+
+    // SETTER
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public Set<Permission> getPermissions() {
-    return permissions;
-    }
-
     public void setPermissions(Set<Permission> permissions) {
-    this.permissions = permissions;
+        this.permissions = permissions;
     }
 }

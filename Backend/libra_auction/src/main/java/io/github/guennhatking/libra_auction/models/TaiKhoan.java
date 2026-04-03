@@ -4,11 +4,9 @@ import io.github.guennhatking.libra_auction.enums.Enums;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -22,15 +20,14 @@ public abstract class TaiKhoan {
     @Enumerated(EnumType.STRING)
     protected Enums.TrangThaiTaiKhoan trangThai;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_dung_id")
+    @ManyToOne
     protected NguoiDung nguoiDung;
 
+    // CONSTRUCTOR
     protected TaiKhoan() {
-        // Constructor mặc định cho JPA
     }
 
-    public TaiKhoan(String id, Enums.TrangThaiTaiKhoan trangThai, String username) {
+    public TaiKhoan(String id, String username, Enums.TrangThaiTaiKhoan trangThai) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID không được để trống.");
         }
@@ -39,40 +36,37 @@ public abstract class TaiKhoan {
         }
         this.id = id;
         this.username = username;
-        if (trangThai == null) {
-            this.trangThai = Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN;
-        }
-        else {
-            this.trangThai = trangThai;
-        }
+        this.trangThai = trangThai != null ? trangThai : Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN;
     }
 
+    // GETTER
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public Enums.TrangThaiTaiKhoan getTrangThai() {
         return trangThai;
     }
 
-    public void setTrangThai(Enums.TrangThaiTaiKhoan trangThai) {
-        this.trangThai = trangThai;
-    }
-
     public NguoiDung getNguoiDung() {
         return nguoiDung;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setTrangThai(Enums.TrangThaiTaiKhoan trangThai) {
+        this.trangThai = trangThai;
     }
 
     public void setNguoiDung(NguoiDung nguoiDung) {

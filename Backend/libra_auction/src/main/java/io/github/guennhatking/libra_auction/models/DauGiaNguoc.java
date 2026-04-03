@@ -1,20 +1,19 @@
-
 package io.github.guennhatking.libra_auction.models;
 
-public class DauGiaNguoc{
-    public boolean kiemTraHopLe(long giaHienTai, long giaMoi) { 
-        return giaMoi < giaHienTai; 
+public class DauGiaNguoc {
+    private String id;
+
+    // CONSTRUCTOR
+    public DauGiaNguoc() {
     }
 
-    public long tinhGiaThapNhat(long giaKhoiDiem, long giaThoiGianHienTai) {
-        return giaThoiGianHienTai;
+    // GETTER
+    public String getId() {
+        return id;
     }
 
-    public long tinhBuocGiamGia(long giaHienTai) {
-        return Math.max(1, giaHienTai / 10);
-    }
-
-    public boolean daKetThuc(long giaHienTai, long giaThapNhat) {
-        return giaHienTai <= giaThapNhat;
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
     }
 }

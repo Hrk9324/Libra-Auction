@@ -6,7 +6,7 @@ public class Enums {
         HOAT_DONG,
         KHOA
     }
-    
+
     public enum LoaiGiaoDich {
         THANH_TOAN,
         DAT_COC
@@ -45,7 +45,7 @@ public class Enums {
         HO_TRO_KHACH_HANG,
         OTP
     }
-    
+
     public enum TinhTrangCauHoi {
         CHUA_TRA_LOI,
         DA_TRA_LOI,
@@ -63,12 +63,14 @@ public class Enums {
         DA_DUYET,
         BI_TU_CHOI
     }
+
     public enum LoaiDauGia {
         DAU_GIA_LEN,
         DAU_GIA_XUONG,
         DAU_GIA_KIN,
         DAU_GIA_NGUOC
     }
+
     public enum TrangThaiPhien {
         CHUA_BAT_DAU,
         DANG_DIEN_RA,

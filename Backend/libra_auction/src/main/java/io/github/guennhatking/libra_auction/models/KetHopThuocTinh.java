@@ -1,13 +1,10 @@
 package io.github.guennhatking.libra_auction.models;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class KetHopThuocTinh {
@@ -15,21 +12,44 @@ public class KetHopThuocTinh {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tai_san_id")
+    @ManyToOne
     private TaiSan taiSan;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "thuoc_tinh_chuan_hoa_id")
+
+    @ManyToOne
     private ThuocTinhChuanHoa thuocTinhChuanHoa;
 
+    // CONSTRUCTOR
     protected KetHopThuocTinh() {
-        // Constructor mặc định cho JPA
     }
 
-    public TaiSan getTaiSan() { return null; }
-    public ThuocTinhChuanHoa getThuocTinhChuanHoa() { return null; }
+    public KetHopThuocTinh(TaiSan taiSan, ThuocTinhChuanHoa thuocTinhChuanHoa) {
+        this.taiSan = taiSan;
+        this.thuocTinhChuanHoa = thuocTinhChuanHoa;
+    }
 
-    // Setters
-    public void setTaiSan(TaiSan taiSan) { this.taiSan = taiSan; }
-    public void setThuocTinhChuanHoa(ThuocTinhChuanHoa thuocTinhChuanHoa) { this.thuocTinhChuanHoa = thuocTinhChuanHoa; }
+    // GETTER
+    public String getId() {
+        return id;
+    }
+
+    public TaiSan getTaiSan() {
+        return taiSan;
+    }
+
+    public ThuocTinhChuanHoa getThuocTinhChuanHoa() {
+        return thuocTinhChuanHoa;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTaiSan(TaiSan taiSan) {
+        this.taiSan = taiSan;
+    }
+
+    public void setThuocTinhChuanHoa(ThuocTinhChuanHoa thuocTinhChuanHoa) {
+        this.thuocTinhChuanHoa = thuocTinhChuanHoa;
+    }
 }

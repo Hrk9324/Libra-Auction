@@ -9,22 +9,43 @@ import jakarta.persistence.Id;
 public class DanhMuc {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id; // string(10)
+    private String id;
 
     private String tenDanhMuc;
-    private String hinhAnh; // url
+    private String hinhAnh;
 
+    // CONSTRUCTOR
     public DanhMuc() {
-        // Constructor mặc định
     }
 
-    public String getId() { return id; }
-    public String getTenDanhMuc() { return tenDanhMuc; }
-    public String getHinhAnh() { return hinhAnh; }
+    public DanhMuc(String tenDanhMuc, String hinhAnh) {
+        this.tenDanhMuc = tenDanhMuc;
+        this.hinhAnh = hinhAnh;
+    }
 
-    //setter
-    public void setId(String id) { this.id = id; }
-    public void setTenDanhMuc(String tenDanhMuc) { this.tenDanhMuc = tenDanhMuc; }
-    public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
-    
+    // GETTER
+    public String getId() {
+        return id;
+    }
+
+    public String getTenDanhMuc() {
+        return tenDanhMuc;
+    }
+
+    public String getHinhAnh() {
+        return hinhAnh;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setTenDanhMuc(String tenDanhMuc) {
+        this.tenDanhMuc = tenDanhMuc;
+    }
+
+    public void setHinhAnh(String hinhAnh) {
+        this.hinhAnh = hinhAnh;
+    }
 }

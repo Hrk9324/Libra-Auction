@@ -2,16 +2,14 @@ package io.github.guennhatking.libra_auction.models;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDateTime;
 
@@ -22,16 +20,14 @@ public abstract class YeuCau {
     @GeneratedValue(strategy = GenerationType.UUID)
     protected String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nguoi_dung_id")
+    @ManyToOne
     protected NguoiDung nguoiDung;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "thong_bao_id")
+
+    @ManyToOne
     protected ThongBao thongBao;
 
     protected String token;
-    
+
     @Enumerated(EnumType.STRING)
     protected Enums.LoaiYeuCau loaiYeuCau;
 
@@ -41,8 +37,8 @@ public abstract class YeuCau {
     protected LocalDateTime thoiGianHetHanKichHoat;
     protected LocalDateTime thoiGianHetHanSuDung;
 
+    // CONSTRUCTOR
     protected YeuCau() {
-        // Constructor mặc định cho JPA
     }
 
     public YeuCau(NguoiDung nguoiDung, Enums.LoaiYeuCau loaiYeuCau) {
@@ -51,7 +47,69 @@ public abstract class YeuCau {
         this.trangThaiYeuCau = Enums.TrangThaiYeuCau.KHOI_TAO;
     }
 
-    public abstract void kichHoat();
+    // GETTER
+    public String getId() {
+        return id;
+    }
 
-    public abstract void suDung();
+    public NguoiDung getNguoiDung() {
+        return nguoiDung;
+    }
+
+    public ThongBao getThongBao() {
+        return thongBao;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public Enums.LoaiYeuCau getLoaiYeuCau() {
+        return loaiYeuCau;
+    }
+
+    public Enums.TrangThaiYeuCau getTrangThaiYeuCau() {
+        return trangThaiYeuCau;
+    }
+
+    public LocalDateTime getThoiGianHetHanKichHoat() {
+        return thoiGianHetHanKichHoat;
+    }
+
+    public LocalDateTime getThoiGianHetHanSuDung() {
+        return thoiGianHetHanSuDung;
+    }
+
+    // SETTER
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setNguoiDung(NguoiDung nguoiDung) {
+        this.nguoiDung = nguoiDung;
+    }
+
+    public void setThongBao(ThongBao thongBao) {
+        this.thongBao = thongBao;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public void setLoaiYeuCau(Enums.LoaiYeuCau loaiYeuCau) {
+        this.loaiYeuCau = loaiYeuCau;
+    }
+
+    public void setTrangThaiYeuCau(Enums.TrangThaiYeuCau trangThaiYeuCau) {
+        this.trangThaiYeuCau = trangThaiYeuCau;
+    }
+
+    public void setThoiGianHetHanKichHoat(LocalDateTime thoiGianHetHanKichHoat) {
+        this.thoiGianHetHanKichHoat = thoiGianHetHanKichHoat;
+    }
+
+    public void setThoiGianHetHanSuDung(LocalDateTime thoiGianHetHanSuDung) {
+        this.thoiGianHetHanSuDung = thoiGianHetHanSuDung;
+    }
 }
