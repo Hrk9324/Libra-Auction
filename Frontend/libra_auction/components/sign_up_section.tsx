@@ -2,7 +2,6 @@
 import { FormEvent, useState } from "react";
 import PasswordInput from "./passwordInput";
 import { signUp } from "@/lib/sign_up";
-import router from "next/router";
 
 export default function SignUpSection() {
   const [fullName, setFullName] = useState("");
@@ -15,7 +14,7 @@ export default function SignUpSection() {
     e.preventDefault();
     setErrorMessage("");
     const onSuccess = () => {
-      router.push("/sign-in");
+      window.location.replace("/sign-in");
     };
     const onFailed = (message: string) => {
       setErrorMessage(message);

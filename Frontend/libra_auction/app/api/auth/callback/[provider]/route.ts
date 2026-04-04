@@ -1,13 +1,13 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const successUrl = new URL(`/auth-success`, process.env.NEXT_PUBLIC_BASE_SERVER_URL);
-const failedUrl = new URL(`/auth-failed`, process.env.NEXT_PUBLIC_BASE_SERVER_URL);
 export async function GET(request: NextRequest, { params }: {
     params: Promise<{ provider: string }>
 }) {
     const { provider } = await params;
     const searchParams = request.nextUrl.searchParams;
+    const successUrl = new URL(`/auth-success`, request.url);
+    const failedUrl = new URL(`/auth-failed`, request.url);
     if (provider === 'google') {
         const code = searchParams.get('code')
         try {

@@ -2,10 +2,8 @@
 import { FormEvent, useState } from "react";
 import PasswordInput from "./passwordInput";
 import { signInPassword } from "@/lib/sign_in";
-import { useRouter } from "next/navigation";
 
 export default function SignInWithPassword() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -13,7 +11,7 @@ export default function SignInWithPassword() {
     e.preventDefault();
     setErrorMessage("");
     const onSuccess = () => {
-      router.push("/");
+      window.location.replace("/");
     };
     const onFailed = (message: string) => {
       setErrorMessage(message);

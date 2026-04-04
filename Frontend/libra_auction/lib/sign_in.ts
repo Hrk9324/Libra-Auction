@@ -16,7 +16,11 @@ export async function signInPassword(username: string, password: string, onSucce
 }
 
 export async function signInGoogle(onSuccess: () => void, onFailed: () => void) {
-    window.open('/api/auth/google', "Google login", "width=500,height=600");
+    const w = 500;
+    const h = 600;
+    const left = (screen.width / 2) - (w / 2);
+    const top = (screen.height / 2) - (h / 2);
+    window.open('/api/auth/google', "Google login", `width=${w},height=${h},left=${left},top=${top}`);
     const handleMessage = (e: MessageEvent) => {
         if (e.data.type === 'AUTH_SUCCESS') {
             onSuccess();
