@@ -28,8 +28,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
+    implementation("com.cloudinary:cloudinary-http5:2.0.0")
+    implementation("com.cloudinary:cloudinary-taglib:2.0.0")
     implementation("org.mapstruct:mapstruct:${mapstruct_version}")
-
     annotationProcessor("org.mapstruct:mapstruct-processor:${mapstruct_version}")
     
     runtimeOnly("org.postgresql:postgresql")

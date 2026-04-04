@@ -35,8 +35,20 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET,
+                    "/api/categories",
+                    "/api/products",
+                    "/api/auction-sessions"
+                ).permitAll()
                 .requestMatchers(HttpMethod.POST,
+                    "/api/products",
+                    "/identity/signin",
+                    "/identity/signin/password",
+                    "/identity/signup",
+                    "/identity/google",
+                    "/identity/refresh",
                     "/auth/signin",
+                    "/auth/signin/password",
                     "/auth/signup",
                     "/auth/google",
                     "/auth/refresh"

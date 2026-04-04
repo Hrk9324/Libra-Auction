@@ -12,6 +12,7 @@ import io.github.guennhatking.libra_auction.repositories.TaiKhoanPasswordReposit
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,11 +39,20 @@ public class UserService {
 
     @Transactional
     public NguoiDung createPasswordUser(String email, String username, String password, String hoVaTen) {
+        return createPasswordUser(email, username, password, hoVaTen, null, null, null);
+    }
+
+    @Transactional
+    public NguoiDung createPasswordUser(String email, String username, String password, String hoVaTen,
+                                        String soDienThoai, String cccd, String anhDaiDien) {
         if (taiKhoanPasswordRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("The username already exists");
         }
 
         NguoiDung user = new NguoiDung(hoVaTen, email);
+        user.setSoDienThoai(soDienThoai);
+        user.setCccd(cccd);
+        user.setAnhDaiDien(anhDaiDien);
         user.setTrangThaiEmail(Enums.TrangThaiEmail.CHUA_XAC_THUC);
         user.setTrangThaiTaiKhoan(Enums.TrangThaiTaiKhoan.CHO_XAC_NHAN);
 
@@ -111,7 +121,7 @@ public class UserService {
     private void assignDefaultRole(NguoiDung user) {
         Optional<Role> defaultRole = roleRepository.findById("USER");
         if (defaultRole.isPresent()) {
-            user.setRoles(List.of(defaultRole.get()));
+            user.setRoles(new ArrayList<>(List.of(defaultRole.get())));
             nguoiDungRepository.save(user);
         }
     }
