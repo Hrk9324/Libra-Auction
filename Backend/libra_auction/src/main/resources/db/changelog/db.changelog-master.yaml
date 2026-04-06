@@ -1,0 +1,94 @@
+databaseChangeLog:
+  - changeSet:
+      id: update-category-names
+      author: system
+      changes:
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: ten_danh_muc
+                  value: 'Đất đai và Bất động sản'
+            where: id = 'cat-001'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: ten_danh_muc
+                  value: 'Xe cộ và Phương tiện giao thông'
+            where: id = 'cat-002'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: ten_danh_muc
+                  value: 'Tàu thuyền và Thiết bị hàng hải'
+            where: id = 'cat-003'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: ten_danh_muc
+                  value: 'Máy bay và Thiết bị hàng không'
+            where: id = 'cat-004'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: ten_danh_muc
+                  value: 'Máy móc công nghiệp và Thiết bị'
+            where: id = 'cat-005'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: ten_danh_muc
+                  value: 'Công nghệ và Điện tử tiêu dùng'
+            where: id = 'cat-006'
+
+  - changeSet:
+      id: update-category-images
+      author: system
+      changes:
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: hinh_anh
+                  value: 'https://maisonoffice.vn/wp-content/uploads/2024/04/3-thua-dat-hoac-cong-trinh-co-dinh-the-hien-bat-dong-san-khong-di-chuyen-1.jpg'
+            where: id = 'cat-001'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: hinh_anh
+                  value: 'https://trongtanvn.vn/wp-content/uploads/2024/07/phuong-tien-giao-thong-co-gioi-duong-bo-7.jpg'
+            where: id = 'cat-002'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: hinh_anh
+                  value: 'https://images.unsplash.com/photo-1751859279488-2857d62ee5d0?q=80&w=1383&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            where: id = 'cat-003'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: hinh_anh
+                  value: 'https://plus.unsplash.com/premium_photo-1679758630196-a284f1466313?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            where: id = 'cat-004'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: hinh_anh
+                  value: 'https://plus.unsplash.com/premium_photo-1664303321511-3db9ce2146a3?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            where: id = 'cat-005'
+        - update:
+            tableName: danh_muc
+            columns:
+              - column:
+                  name: hinh_anh
+                  value: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?q=80&w=1420&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            where: id = 'cat-006'
