@@ -2,6 +2,7 @@ package io.github.guennhatking.libra_auction.services;
 
 import io.github.guennhatking.libra_auction.models.NguoiDung;
 import io.github.guennhatking.libra_auction.models.TaiKhoanPassword;
+import io.github.guennhatking.libra_auction.viewmodels.request.SignupFormRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.GoogleLoginRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.GoogleUserInfo;
 import io.github.guennhatking.libra_auction.viewmodels.request.RefreshTokenRequest;
@@ -35,6 +36,17 @@ public class AuthenticationService {
             request.username(),
             request.password(),
             request.fullName()
+        );
+
+        return tokenService.generateTokens(newUser.getId());
+    }
+
+    public JwtResponse signup(SignupFormRequest request) throws Exception {
+        NguoiDung newUser = userService.createPasswordUser(
+            request.getEmail(),
+            request.getUsername(),
+            request.getPassword(),
+            request.getFullName()
         );
 
         return tokenService.generateTokens(newUser.getId());
