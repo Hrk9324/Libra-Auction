@@ -120,7 +120,7 @@ public class JwtRSA {
         Signature sig = Signature.getInstance(SIGNATURE_ALGORITHM);
         sig.initSign(privateKey);
 
-        String headerAndPayload = encodeHeader() + payload;
+        String headerAndPayload = encodeHeader() + "." + payload;
         sig.update(headerAndPayload.getBytes());
 
         byte[] signatureBytes = sig.sign();
