@@ -1,6 +1,7 @@
 package io.github.guennhatking.libra_auction.models;
 
 import io.github.guennhatking.libra_auction.enums.Enums;
+import io.github.guennhatking.libra_auction.enums.Enums.TinhTrangGiaoDich;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -24,6 +25,11 @@ public class GiaoDich {
 
     private long soTien;
     private LocalDateTime ngayTao;
+
+    @Enumerated(EnumType.STRING)
+    private TinhTrangGiaoDich tinhTrangGiaoDich = TinhTrangGiaoDich.DANG_XU_LY;
+
+    private String maGiaoDichCuaDoiTac; // Lưu lại mã giao dịch của VNPay
 
     // CONSTRUCTOR
     protected GiaoDich() {
@@ -52,6 +58,14 @@ public class GiaoDich {
         return ngayTao;
     }
 
+    public TinhTrangGiaoDich geTinhTrangGiaoDich() {
+        return tinhTrangGiaoDich;
+    }
+
+    public String getMaGiaoDichCuaDoiTac() {
+        return maGiaoDichCuaDoiTac;
+    }
+
     // SETTER
     public void setId(String id) {
         this.id = id;
@@ -67,5 +81,13 @@ public class GiaoDich {
 
     public void setNgayTao(LocalDateTime ngayTao) {
         this.ngayTao = ngayTao;
+    }
+
+    public void setTinhTrangGiaoDich(TinhTrangGiaoDich tinhTrangGiaoDich) {
+        this.tinhTrangGiaoDich = tinhTrangGiaoDich;
+    }
+
+    public void setMaGiaoDichCuaDoiTac(String maGiaoDichCuaDoiTac) {
+        this.maGiaoDichCuaDoiTac = maGiaoDichCuaDoiTac;
     }
 }
