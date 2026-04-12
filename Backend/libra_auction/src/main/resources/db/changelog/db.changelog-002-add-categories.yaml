@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-categories
+      author: system
+      changes:
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-001 }
+              - column: { name: ten_danh_muc, value: 'Đất đai và Bất động sản' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912812/661660761_961046839668362_3927027004678900513_n_v2mw4y.jpg' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-002 }
+              - column: { name: ten_danh_muc, value: 'Xe cộ và Phương tiện giao thông' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912809/523810730_759294703315574_4326157927593001122_n_kgqxxw.png' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-003 }
+              - column: { name: ten_danh_muc, value: 'Tàu thuyền và Thiết bị hàng hải' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912806/665347866_1208083581202286_3765571102103886479_n_baqkta.png' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-004 }
+              - column: { name: ten_danh_muc, value: 'Máy bay và Thiết bị hàng không' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912802/660403396_1282325740695645_3787476536454303634_n_sljr9r.jpg' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-005 }
+              - column: { name: ten_danh_muc, value: 'Máy móc công nghiệp và Thiết bị' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912797/661087675_1488573742978984_8562084573728957944_n_mnzgpd.jpg' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-006 }
+              - column: { name: ten_danh_muc, value: 'Công nghệ và Điện tử tiêu dùng' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775914009/download_i89gpg.jpg' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-007 }
+              - column: { name: ten_danh_muc, value: 'Tàu thuyền' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775913569/ap25218636360036-1754532436619351388902_hqnfdg.webp' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-008 }
+              - column: { name: ten_danh_muc, value: 'Ngựa' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775913611/the-shelby-horses-v0-klmdpend0jac1_bp3h18.webp' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-009 }
+              - column: { name: ten_danh_muc, value: 'Báu vật gia truyền' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775913652/download_v1ogjp.jpg' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-010 }
+              - column: { name: ten_danh_muc, value: 'Quần áo hàng hiệu' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775913715/download_zlxsdw.jpg' }
+
+        - insert:
+            tableName: danh_muc
+            columns:
+              - column: { name: id, value: cat-011 }
+              - column: { name: ten_danh_muc, value: 'Túi xách hàng hiệu' }
+              - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775913732/shopping_bfosqm.webp' }
