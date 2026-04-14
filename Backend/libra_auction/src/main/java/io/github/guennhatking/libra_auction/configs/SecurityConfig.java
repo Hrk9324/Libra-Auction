@@ -36,10 +36,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        // Allow all localhost origins and WebSocket origins
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -56,13 +59,18 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/auction-websocket", "/auction-websocket/**").permitAll()
+                .requestMatchers("/app/**").permitAll()
+                .requestMatchers("/topic/**").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/api/categories",
                     "/api/categories/**",
                     "/api/products",
                     "/api/products/**",
                     "/api/auction-sessions",
-                    "/api/auction-sessions/**"
+                    "/api/auction-sessions/**",
+                    "/api/auctions/*/bids",
+                    "/api/auctions/*/bids/count"
                 ).permitAll()
                 .requestMatchers(HttpMethod.POST,
                     "/api/auction-sessions",

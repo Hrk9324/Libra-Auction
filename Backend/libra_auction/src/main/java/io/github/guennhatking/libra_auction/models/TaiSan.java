@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
+import java.util.List;
 
 @Entity
 public class TaiSan {
@@ -18,6 +20,12 @@ public class TaiSan {
 
     @ManyToOne
     private DanhMuc danhMuc;
+
+    @OneToMany(mappedBy = "taiSan")
+    private List<HinhAnhTaiSan> hinhAnhTaiSanList;
+
+    @OneToMany(mappedBy = "taiSan")
+    private List<ThuocTinhTaiSan> thuocTinhTaiSanList;
 
     private String tenTaiSan;
     private Integer soLuong;
@@ -59,6 +67,14 @@ public class TaiSan {
         return moTa;
     }
 
+    public List<HinhAnhTaiSan> getHinhAnhTaiSanList() {
+        return hinhAnhTaiSanList;
+    }
+
+    public List<ThuocTinhTaiSan> getThuocTinhTaiSanList() {
+        return thuocTinhTaiSanList;
+    }
+
     // SETTER
     public void setId(String id) {
         this.id = id;
@@ -82,5 +98,13 @@ public class TaiSan {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
+    }
+
+    public void setHinhAnhTaiSanList(List<HinhAnhTaiSan> hinhAnhTaiSanList) {
+        this.hinhAnhTaiSanList = hinhAnhTaiSanList;
+    }
+
+    public void setThuocTinhTaiSanList(List<ThuocTinhTaiSan> thuocTinhTaiSanList) {
+        this.thuocTinhTaiSanList = thuocTinhTaiSanList;
     }
 }

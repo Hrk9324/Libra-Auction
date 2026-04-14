@@ -11,6 +11,7 @@ import io.github.guennhatking.libra_auction.repositories.TaiSanRepository;
 import io.github.guennhatking.libra_auction.viewmodels.request.AuctionSessionCreateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.AuctionSessionUpdateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.AuctionSessionResponse;
+import io.github.guennhatking.libra_auction.viewmodels.response.ProductResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AuctionSessionService {
@@ -38,20 +40,7 @@ public class AuctionSessionService {
     public List<AuctionSessionResponse> getAuctionSessions() {
         return phienDauGiaRepository.findAll().stream()
             .sorted(Comparator.comparing(PhienDauGia::getThoiGianTao, Comparator.nullsLast(Comparator.reverseOrder())))
-            .map(session -> {
-                TaiSan product = session.getTaiSan();
-                String categoryId = product != null && product.getDanhMuc() != null ? product.getDanhMuc().getId() : "uncategorized";
-
-                return new AuctionSessionResponse(
-                    session.getId(),
-                    product != null ? resolveProductImage(product) : null,
-                    resolveAuctionTitle(session, product),
-                    categoryId,
-                    session.getGiaKhoiDiem(),
-                    session.getLichSuDatGia() != null ? session.getLichSuDatGia().size() : 0,
-                    calculateTimeLeft(session)
-                );
-            })
+            .map(this::toAuctionSessionResponse)
             .toList();
     }
 
@@ -128,25 +117,60 @@ public class AuctionSessionService {
         phienDauGiaRepository.delete(session);
     }
 
-    private String resolveProductImage(TaiSan product) {
-        Optional<HinhAnhTaiSan> firstImage = hinhAnhTaiSanRepository.findByTaiSanIdOrderByThuTuHienThiAsc(product.getId()).stream().findFirst();
-        return firstImage.map(HinhAnhTaiSan::getHinhAnh)
-            .orElseGet(() -> product.getDanhMuc() != null ? product.getDanhMuc().getHinhAnh() : null);
-    }
-
     private AuctionSessionResponse toAuctionSessionResponse(PhienDauGia session) {
+        AuctionSessionResponse response = new AuctionSessionResponse();
         TaiSan product = session.getTaiSan();
-        String categoryId = product != null && product.getDanhMuc() != null ? product.getDanhMuc().getId() : "uncategorized";
-
-        return new AuctionSessionResponse(
-            session.getId(),
-            product != null ? resolveProductImage(product) : null,
-            resolveAuctionTitle(session, product),
-            categoryId,
-            session.getGiaKhoiDiem(),
-            session.getLichSuDatGia() != null ? session.getLichSuDatGia().size() : 0,
-            calculateTimeLeft(session)
-        );
+        
+        // Category info
+        if (product != null && product.getDanhMuc() != null) {
+            response.setCategory_id(product.getDanhMuc().getId());
+            response.setCategory_name(product.getDanhMuc().getTenDanhMuc());
+        } else {
+            response.setCategory_id("uncategorized");
+        }
+        
+        // Auction info
+        response.setAuction_id(session.getId());
+        response.setAuction_name(resolveAuctionTitle(session, product));
+        response.setAuction_status(session.getTrangThaiPhien() != null ? session.getTrangThaiPhien().toString() : "CHUA_BAT_DAU");
+        response.setAuction_type(session.getLoaiDauGia() != null ? session.getLoaiDauGia().toString() : "DAU_GIA_LEN");
+        response.setStart_time(session.getThoiGianBatDau());
+        response.setDuration(session.getThoiLuong());
+        
+        // Price info
+        response.setStarting_price(session.getGiaKhoiDiem());
+        response.setMin_bid_increment(session.getBuocGiaNhoNhat());
+        response.setCurrent_price(session.getGiaKhoiDiem()); // Default to starting price if no bids
+        
+        // Product info
+        if (product != null) {
+            response.setProduct_id(product.getId());
+            response.setProduct_name(product.getTenTaiSan());
+            response.setQuantity(product.getSoLuong());
+            response.setDescription(product.getMoTa());
+            
+            // Images
+            if (product.getHinhAnhTaiSanList() != null && !product.getHinhAnhTaiSanList().isEmpty()) {
+                List<String> imageUrls = product.getHinhAnhTaiSanList().stream()
+                    .map(HinhAnhTaiSan::getHinhAnh)
+                    .collect(Collectors.toList());
+                response.setImages(imageUrls);
+            }
+            
+            // Attributes
+            if (product.getThuocTinhTaiSanList() != null && !product.getThuocTinhTaiSanList().isEmpty()) {
+                List<AuctionSessionResponse.AttributeDTO> attributes = product.getThuocTinhTaiSanList().stream()
+                    .map(attr -> new AuctionSessionResponse.AttributeDTO(attr.getTenThuocTinh(), attr.getGiaTri()))
+                    .collect(Collectors.toList());
+                response.setAttributes(attributes);
+            }
+        }
+        
+        // Bids info
+        response.setTotal_bids(session.getLichSuDatGia() != null ? session.getLichSuDatGia().size() : 0);
+        response.setTotal_participants(session.getDanhSachThamGia() != null ? session.getDanhSachThamGia().size() : 0);
+        
+        return response;
     }
 
     private String resolveAuctionTitle(PhienDauGia session, TaiSan product) {
@@ -154,16 +178,5 @@ public class AuctionSessionService {
             return session.getThongTinPhienDauGia().getTieuDe();
         }
         return product != null ? product.getTenTaiSan() : session.getId();
-    }
-
-    private long calculateTimeLeft(PhienDauGia session) {
-        LocalDateTime startTime = session.getThoiGianBatDau();
-        if (startTime == null) {
-            return 0L;
-        }
-
-        LocalDateTime endTime = startTime.plusSeconds(session.getThoiLuong());
-        long millis = Duration.between(LocalDateTime.now(), endTime).toMillis();
-        return Math.max(millis, 0L);
     }
 }

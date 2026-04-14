@@ -61,6 +61,7 @@ public class PhienDauGia {
 
     private long giaKhoiDiem;
     private long buocGiaNhoNhat;
+    private long giaHienTai;
 
     // CONSTRUCTOR
     protected PhienDauGia() {
@@ -144,6 +145,10 @@ public class PhienDauGia {
         return buocGiaNhoNhat;
     }
 
+    public long getGiaHienTai() {
+        return giaHienTai;
+    }
+
     // SETTER
     public void setId(String id) {
         this.id = id;
@@ -211,6 +216,10 @@ public class PhienDauGia {
 
     public void setBuocGiaNhoNhat(long buocGiaNhoNhat) {
         this.buocGiaNhoNhat = buocGiaNhoNhat;
+    }
+
+    public void setGiaHienTai(long giaHienTai) {
+        this.giaHienTai = giaHienTai;
     }
 }
    

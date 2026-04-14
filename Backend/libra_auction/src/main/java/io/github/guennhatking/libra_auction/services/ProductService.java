@@ -4,9 +4,12 @@ import io.github.guennhatking.libra_auction.models.DanhMuc;
 import io.github.guennhatking.libra_auction.models.HinhAnhTaiSan;
 import io.github.guennhatking.libra_auction.models.TaiSan;
 import io.github.guennhatking.libra_auction.models.ThongTinPhienDauGia;
+import io.github.guennhatking.libra_auction.models.ThuocTinhTaiSan;
+import io.github.guennhatking.libra_auction.models.PhienDauGia;
 import io.github.guennhatking.libra_auction.repositories.DanhMucRepository;
 import io.github.guennhatking.libra_auction.repositories.HinhAnhTaiSanRepository;
 import io.github.guennhatking.libra_auction.repositories.TaiSanRepository;
+import io.github.guennhatking.libra_auction.repositories.PhienDauGiaRepository;
 import io.github.guennhatking.libra_auction.viewmodels.request.ProductCreateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.ProductUpdateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.ProductResponse;
@@ -15,39 +18,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
     private final DanhMucRepository danhMucRepository;
     private final TaiSanRepository taiSanRepository;
     private final HinhAnhTaiSanRepository hinhAnhTaiSanRepository;
+    private final PhienDauGiaRepository phienDauGiaRepository;
 
     public ProductService(DanhMucRepository danhMucRepository,
                           TaiSanRepository taiSanRepository,
-                          HinhAnhTaiSanRepository hinhAnhTaiSanRepository) {
+                          HinhAnhTaiSanRepository hinhAnhTaiSanRepository,
+                          PhienDauGiaRepository phienDauGiaRepository) {
         this.danhMucRepository = danhMucRepository;
         this.taiSanRepository = taiSanRepository;
         this.hinhAnhTaiSanRepository = hinhAnhTaiSanRepository;
+        this.phienDauGiaRepository = phienDauGiaRepository;
     }
 
     @Transactional(readOnly = true)
     public List<ProductResponse> getProducts() {
         return taiSanRepository.findAll().stream()
-            .map(product -> {
-                ThongTinPhienDauGia auctionInfo = product.getThongTinPhienDauGia();
-                long startingBid = auctionInfo != null ? auctionInfo.getGiaKhoiDiem() : 0L;
-                String categoryId = product.getDanhMuc() != null ? product.getDanhMuc().getId() : "uncategorized";
-
-                return new ProductResponse(
-                    product.getId(),
-                    resolveProductImage(product),
-                    product.getTenTaiSan(),
-                    startingBid,
-                    0,
-                    null,
-                    "/auctions/" + categoryId + "/" + product.getId()
-                );
-            })
+            .map(this::toProductResponse)
             .toList();
     }
 
@@ -124,24 +117,54 @@ public class ProductService {
     }
 
     private ProductResponse toProductResponse(TaiSan product) {
-        ThongTinPhienDauGia auctionInfo = product.getThongTinPhienDauGia();
-        long startingBid = auctionInfo != null ? auctionInfo.getGiaKhoiDiem() : 0L;
-        String categoryId = product.getDanhMuc() != null ? product.getDanhMuc().getId() : "uncategorized";
-
-        return new ProductResponse(
-            product.getId(),
-            resolveProductImage(product),
-            product.getTenTaiSan(),
-            startingBid,
-            0,
-            null,
-            "/auctions/" + categoryId + "/" + product.getId()
-        );
-    }
-
-    private String resolveProductImage(TaiSan product) {
-        Optional<HinhAnhTaiSan> firstImage = hinhAnhTaiSanRepository.findByTaiSanIdOrderByThuTuHienThiAsc(product.getId()).stream().findFirst();
-        return firstImage.map(HinhAnhTaiSan::getHinhAnh)
-            .orElseGet(() -> product.getDanhMuc() != null ? product.getDanhMuc().getHinhAnh() : null);
+        ProductResponse response = new ProductResponse();
+        
+        // Product info
+        response.setProduct_id(product.getId());
+        response.setProduct_name(product.getTenTaiSan());
+        response.setQuantity(product.getSoLuong());
+        response.setDescription(product.getMoTa());
+        
+        // Category info
+        if (product.getDanhMuc() != null) {
+            response.setCategory_id(product.getDanhMuc().getId());
+            response.setCategory_name(product.getDanhMuc().getTenDanhMuc());
+        }
+        
+        // Auction info - get first/active auction session for this product
+        List<PhienDauGia> auctionSessions = phienDauGiaRepository.findByTaiSan(product);
+        if (auctionSessions != null && !auctionSessions.isEmpty()) {
+            PhienDauGia auctionSession = auctionSessions.get(0); // Get first auction session
+            response.setAuction_id(auctionSession.getId());
+            response.setAuction_name(product.getTenTaiSan());
+            response.setAuction_status(auctionSession.getTrangThaiPhien() != null ? auctionSession.getTrangThaiPhien().toString() : "UPCOMING");
+            response.setAuction_type(auctionSession.getLoaiDauGia() != null ? auctionSession.getLoaiDauGia().toString() : "DAU_GIA_LEN");
+            response.setStart_time(auctionSession.getThoiGianBatDau());
+            response.setDuration(auctionSession.getThoiLuong());
+            response.setStarting_price(auctionSession.getGiaKhoiDiem());
+            response.setMin_bid_increment(auctionSession.getBuocGiaNhoNhat());
+            response.setCurrent_price(auctionSession.getGiaKhoiDiem()); // Default to starting price
+        }
+        
+        // Images
+        if (product.getHinhAnhTaiSanList() != null && !product.getHinhAnhTaiSanList().isEmpty()) {
+            List<String> imageUrls = product.getHinhAnhTaiSanList().stream()
+                .map(HinhAnhTaiSan::getHinhAnh)
+                .collect(Collectors.toList());
+            response.setImages(imageUrls);
+        }
+        
+        // Attributes
+        if (product.getThuocTinhTaiSanList() != null && !product.getThuocTinhTaiSanList().isEmpty()) {
+            List<ProductResponse.AttributeDTO> attributes = product.getThuocTinhTaiSanList().stream()
+                .map(attr -> new ProductResponse.AttributeDTO(attr.getTenThuocTinh(), attr.getGiaTri()))
+                .collect(Collectors.toList());
+            response.setAttributes(attributes);
+        }
+        
+        response.setTotal_bids(0);
+        response.setTotal_participants(0);
+        
+        return response;
     }
 }

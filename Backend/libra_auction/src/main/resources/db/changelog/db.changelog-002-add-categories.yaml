@@ -7,35 +7,35 @@ databaseChangeLog:
             tableName: danh_muc
             columns:
               - column: { name: id, value: cat-001 }
-              - column: { name: ten_danh_muc, value: 'Đất đai và Bất động sản' }
+              - column: { name: ten_danh_muc, value: 'Bất động sản' }
               - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912812/661660761_961046839668362_3927027004678900513_n_v2mw4y.jpg' }
 
         - insert:
             tableName: danh_muc
             columns:
               - column: { name: id, value: cat-002 }
-              - column: { name: ten_danh_muc, value: 'Xe cộ và Phương tiện giao thông' }
+              - column: { name: ten_danh_muc, value: 'Mô hình đồ chơi limited' }
               - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912809/523810730_759294703315574_4326157927593001122_n_kgqxxw.png' }
 
         - insert:
             tableName: danh_muc
             columns:
               - column: { name: id, value: cat-003 }
-              - column: { name: ten_danh_muc, value: 'Tàu thuyền và Thiết bị hàng hải' }
+              - column: { name: ten_danh_muc, value: 'Xe cộ và Phương tiện giao thông' }
               - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912806/665347866_1208083581202286_3765571102103886479_n_baqkta.png' }
 
         - insert:
             tableName: danh_muc
             columns:
               - column: { name: id, value: cat-004 }
-              - column: { name: ten_danh_muc, value: 'Máy bay và Thiết bị hàng không' }
+              - column: { name: ten_danh_muc, value: 'Vũ khí hiện đại' }
               - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912802/660403396_1282325740695645_3787476536454303634_n_sljr9r.jpg' }
 
         - insert:
             tableName: danh_muc
             columns:
               - column: { name: id, value: cat-005 }
-              - column: { name: ten_danh_muc, value: 'Máy móc công nghiệp và Thiết bị' }
+              - column: { name: ten_danh_muc, value: 'Đồ cổ và Đồ gia truyền' }
               - column: { name: hinh_anh, value: 'https://res.cloudinary.com/ddwwoglff/image/upload/v1775912797/661087675_1488573742978984_8562084573728957944_n_mnzgpd.jpg' }
 
         - insert:
