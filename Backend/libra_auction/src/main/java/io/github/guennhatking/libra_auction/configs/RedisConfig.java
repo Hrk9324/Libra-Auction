@@ -1,5 +1,6 @@
 package io.github.guennhatking.libra_auction.configs;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -8,13 +9,25 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 @Configuration
 public class RedisConfig {
 
+    @Value("${spring.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.redis.port}")
+    private int redisPort;
+
+    @Value("${spring.redis.username}")
+    private String redisUsername;
+
+    @Value("${spring.redis.password}")
+    private String redisPassword;
+
     @Bean
     public LettuceConnectionFactory lettuceConnectionFactory() {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
-        redisConfig.setHostName("redis-18721.c251.east-us-mz.azure.cloud.redislabs.com");
-        redisConfig.setPort(18721);
-        redisConfig.setUsername("default");
-        redisConfig.setPassword("kSqohyHylRNItOORlOzxeR9blWt4Cg3d");
+        redisConfig.setHostName(redisHost);
+        redisConfig.setPort(redisPort);
+        redisConfig.setUsername(redisUsername);
+        redisConfig.setPassword(redisPassword);
         redisConfig.setDatabase(0);
 
         return new LettuceConnectionFactory(redisConfig);
