@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -55,6 +56,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payments/vnpay/callback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/payments/vnpay/ipn").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payments/vnpay/verify-callback").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payments/vnpay/test-hash").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

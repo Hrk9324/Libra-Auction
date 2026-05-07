@@ -6,6 +6,7 @@ import io.github.guennhatking.libra_auction.viewmodels.request.RefreshTokenReque
 import io.github.guennhatking.libra_auction.viewmodels.request.SigninRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.SignupRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.JwtResponse;
+import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.TokenResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,26 +25,26 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<JwtResponse> signup(@Valid @RequestBody SignupRequest request) throws Exception {
+    public ResponseEntity<ServerAPIResponse<JwtResponse>> signup(@Valid @RequestBody SignupRequest request) throws Exception {
         JwtResponse response = authenticationService.signup(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<JwtResponse> signin(@Valid @RequestBody SigninRequest request) throws Exception {
+    public ResponseEntity<ServerAPIResponse<JwtResponse>> signin(@Valid @RequestBody SigninRequest request) throws Exception {
         JwtResponse response = authenticationService.signin(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
     @PostMapping("/google")
-    public ResponseEntity<JwtResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) throws Exception {
+    public ResponseEntity<ServerAPIResponse<JwtResponse>> googleLogin(@Valid @RequestBody GoogleLoginRequest request) throws Exception {
         JwtResponse response = authenticationService.googleLogin(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) throws Exception {
+    public ResponseEntity<ServerAPIResponse<TokenResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) throws Exception {
         String newAccessToken = authenticationService.refreshToken(request);
-        return ResponseEntity.ok(new TokenResponse(newAccessToken, System.currentTimeMillis() / 1000 + 86400));
+        return ResponseEntity.ok(ServerAPIResponse.success(new TokenResponse(newAccessToken, System.currentTimeMillis() / 1000 + 86400)));
     }
 }
