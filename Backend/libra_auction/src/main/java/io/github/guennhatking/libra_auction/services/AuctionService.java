@@ -3,6 +3,7 @@ package io.github.guennhatking.libra_auction.services;
 import io.github.guennhatking.libra_auction.enums.auction.TrangThaiKiemDuyet;
 import io.github.guennhatking.libra_auction.enums.auction.TrangThaiPhien;
 import io.github.guennhatking.libra_auction.mappers.AuctionMapper;
+import io.github.guennhatking.libra_auction.mappers.ProductResponseMapper;
 import io.github.guennhatking.libra_auction.models.auction.PhienDauGia;
 import io.github.guennhatking.libra_auction.models.auction.ThongTinPhienDauGia;
 import io.github.guennhatking.libra_auction.models.person.NguoiDung;
@@ -13,6 +14,7 @@ import io.github.guennhatking.libra_auction.repositories.product.TaiSanRepositor
 import io.github.guennhatking.libra_auction.viewmodels.request.AuctionCreateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.AuctionUpdateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.AuctionResponse;
+import io.github.guennhatking.libra_auction.viewmodels.response.ProductResponse;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -24,15 +26,18 @@ import java.util.List;
 public class AuctionService {
         private final PhienDauGiaRepository phienDauGiaRepository;
         private final AuctionMapper auctionMapper;
+        private final ProductResponseMapper productResponseMapper;
         private final TaiSanRepository taiSanRepository;
         private final NguoiDungRepository nguoiDungRepository;
 
         public AuctionService(PhienDauGiaRepository phienDauGiaRepository,
                         AuctionMapper auctionMapper,
+                        ProductResponseMapper productResponseMapper,
                         TaiSanRepository taiSanRepository,
                         NguoiDungRepository nguoiDungRepository) {
                 this.phienDauGiaRepository = phienDauGiaRepository;
                 this.auctionMapper = auctionMapper;
+                this.productResponseMapper = productResponseMapper;
                 this.taiSanRepository = taiSanRepository;
                 this.nguoiDungRepository = nguoiDungRepository;
         }
@@ -50,6 +55,15 @@ public class AuctionService {
         public AuctionResponse getAuctionById(String id) {
                 PhienDauGia session = phienDauGiaRepository.findById(id)
                                 .orElseThrow(() -> new IllegalArgumentException("Auction session not found"));
+                // For public endpoint, only return approved auctions
+                if (session.getTrangThaiKiemDuyet() != TrangThaiKiemDuyet.DA_DUYET) {
+                        throw new IllegalArgumentException("Auction session not found");
+                }
+                // Also check if the product is approved
+                if (session.getTaiSan() == null || 
+                    session.getTaiSan().getTrangThaiKiemDuyet() != TrangThaiKiemDuyet.DA_DUYET) {
+                        throw new IllegalArgumentException("Auction session not found");
+                }
                 return auctionMapper.toAuctionResponse(session);
         }
 
@@ -59,7 +73,15 @@ public class AuctionService {
                                 .findByIdAndTaiSan_DanhMuc_Id(id, categoryId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "Auction not found in this category"));
-
+                // For public endpoint, only return approved auctions
+                if (session.getTrangThaiKiemDuyet() != TrangThaiKiemDuyet.DA_DUYET) {
+                        throw new IllegalArgumentException("Auction not found in this category");
+                }
+                // Also check if the product is approved
+                if (session.getTaiSan() == null || 
+                    session.getTaiSan().getTrangThaiKiemDuyet() != TrangThaiKiemDuyet.DA_DUYET) {
+                        throw new IllegalArgumentException("Auction not found in this category");
+                }
                 return auctionMapper.toAuctionResponse(session);
         }
 
@@ -159,5 +181,79 @@ public class AuctionService {
                 PhienDauGia saved = phienDauGiaRepository.save(session);
 
                 return auctionMapper.toAuctionResponse(saved);
+        }
+
+        // ========== MERGED ADMIN APPROVAL METHODS ==========
+        // Approves both auction and its related product
+
+        @Transactional
+        public AuctionResponse approveAuctionWithProduct(String id, String adminId) {
+                PhienDauGia session = phienDauGiaRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Auction session not found"));
+
+                // Approve the auction
+                session.setTrangThaiKiemDuyet(TrangThaiKiemDuyet.DA_DUYET);
+                PhienDauGia saved = phienDauGiaRepository.save(session);
+
+                // Also approve the related product
+                TaiSan product = saved.getTaiSan();
+                if (product != null) {
+                        product.setTrangThaiKiemDuyet(TrangThaiKiemDuyet.DA_DUYET);
+                        taiSanRepository.save(product);
+                }
+
+                return auctionMapper.toAuctionResponse(saved);
+        }
+
+        @Transactional
+        public AuctionResponse rejectAuctionWithProduct(String id, String adminId, String reason) {
+                PhienDauGia session = phienDauGiaRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Auction session not found"));
+
+                // Reject the auction
+                session.setTrangThaiKiemDuyet(TrangThaiKiemDuyet.BI_TU_CHOI);
+                PhienDauGia saved = phienDauGiaRepository.save(session);
+
+                // Also reject the related product
+                TaiSan product = saved.getTaiSan();
+                if (product != null) {
+                        product.setTrangThaiKiemDuyet(TrangThaiKiemDuyet.BI_TU_CHOI);
+                        taiSanRepository.save(product);
+                }
+
+                return auctionMapper.toAuctionResponse(saved);
+        }
+
+        // ========== PUBLIC PRODUCT RETRIEVAL METHODS ==========
+        // Get product from an approved auction to ensure security
+
+        @Transactional(readOnly = true)
+        public ProductResponse getProductFromApprovedAuction(
+                        String auctionId, String productId) {
+                PhienDauGia session = phienDauGiaRepository.findById(auctionId)
+                                .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
+
+                // Verify auction is approved
+                if (session.getTrangThaiKiemDuyet() != TrangThaiKiemDuyet.DA_DUYET) {
+                        throw new IllegalArgumentException("Auction is not approved");
+                }
+
+                TaiSan product = session.getTaiSan();
+                if (product == null) {
+                        throw new IllegalArgumentException("Product not found in this auction");
+                }
+
+                // Verify it's the correct product
+                if (!product.getId().equals(productId)) {
+                        throw new IllegalArgumentException("Product does not belong to this auction");
+                }
+
+                // Verify product is also approved
+                if (product.getTrangThaiKiemDuyet() != TrangThaiKiemDuyet.DA_DUYET) {
+                        throw new IllegalArgumentException("Product is not approved");
+                }
+
+                // Return product response
+                return productResponseMapper.toProductResponse(product);
         }
 }

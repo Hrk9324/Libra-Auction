@@ -2,6 +2,8 @@ package io.github.guennhatking.libra_auction.controllers;
 
 import io.github.guennhatking.libra_auction.services.ProductService;
 import io.github.guennhatking.libra_auction.services.ProductSearchService;
+import io.github.guennhatking.libra_auction.services.UserService;
+import io.github.guennhatking.libra_auction.services.AuctionService;
 import io.github.guennhatking.libra_auction.viewmodels.request.ProductCreateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.ProductUpdateRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.ProductSearchRequest;
@@ -11,6 +13,7 @@ import io.github.guennhatking.libra_auction.viewmodels.response.ProductResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
 import jakarta.validation.Valid;
 import io.github.guennhatking.libra_auction.security.JwtUserDetails;
+import io.github.guennhatking.libra_auction.models.person.NguoiDung;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,16 +28,33 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 public class ProductController {
     private final ProductService productService;
     private final ProductSearchService productSearchService;
+    private final UserService userService;
+    private final AuctionService auctionService;
 
-    public ProductController(ProductService productService, ProductSearchService productSearchService) {
+    public ProductController(ProductService productService, ProductSearchService productSearchService,
+            UserService userService, AuctionService auctionService) {
         this.productService = productService;
         this.productSearchService = productSearchService;
+        this.userService = userService;
+        this.auctionService = auctionService;
+    }
+
+    // Helper method to check if user is admin
+    private boolean isAdminUser(String userId) {
+        Optional<NguoiDung> user = userService.findById(userId);
+        if (user.isEmpty()) {
+            return false;
+        }
+        return user.get().getRoles() != null && 
+               user.get().getRoles().stream()
+                   .anyMatch(role -> "ADMIN".equalsIgnoreCase(role.getName()));
     }
 
     @GetMapping("/public/products")
@@ -61,10 +81,18 @@ public class ProductController {
         return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
-    @GetMapping("/public/products/{id}")
-    public ResponseEntity<ServerAPIResponse<ProductResponse>> getProductById(@PathVariable String id) {
-        ProductResponse response = productService.getProductById(id);
-        return ResponseEntity.ok(ServerAPIResponse.success(response));
+    @GetMapping("/public/auctions/{auction_id}/products/{product_id}")
+    public ResponseEntity<ServerAPIResponse<ProductResponse>> getProductByIdInAuction(
+            @PathVariable String auction_id,
+            @PathVariable String product_id) {
+        // Get product via auction to ensure only approved auctions and products are accessible
+        try {
+            ProductResponse response = auctionService.getProductFromApprovedAuction(auction_id, product_id);
+            return ResponseEntity.ok(ServerAPIResponse.success(response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ServerAPIResponse.error(e.getMessage()));
+        }
     }
 
     @PostMapping("/products")
@@ -129,6 +157,11 @@ public class ProductController {
                     .body(ServerAPIResponse.error("Authentication required"));
         }
 
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
         ProductResponse response = productService.approveProduct(id, userDetails.getUserId());
         return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
@@ -142,6 +175,11 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ServerAPIResponse.error("Authentication required"));
+        }
+
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
         }
 
         String reason = request != null ? request.get("reason") : null;
@@ -158,6 +196,11 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ServerAPIResponse.error("Authentication required"));
+        }
+
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
         }
 
         ProductSearchRequest request = new ProductSearchRequest(
@@ -178,6 +221,11 @@ public class ProductController {
                     .body(ServerAPIResponse.error("Authentication required"));
         }
 
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
         ProductSearchRequest request = new ProductSearchRequest(
                 null, null, null, page, pageSize, null, null, null, "DA_DUYET");
         
@@ -194,6 +242,11 @@ public class ProductController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ServerAPIResponse.error("Authentication required"));
+        }
+
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
         }
 
         ProductSearchRequest request = new ProductSearchRequest(

@@ -2,6 +2,7 @@ package io.github.guennhatking.libra_auction.controllers;
 
 import io.github.guennhatking.libra_auction.services.AuctionSearchService;
 import io.github.guennhatking.libra_auction.services.AuctionService;
+import io.github.guennhatking.libra_auction.services.UserService;
 import io.github.guennhatking.libra_auction.utils.ParseDateTime;
 import io.github.guennhatking.libra_auction.viewmodels.request.AuctionCreateRequest;
 import io.github.guennhatking.libra_auction.security.JwtUserDetails;
@@ -11,6 +12,7 @@ import io.github.guennhatking.libra_auction.viewmodels.request.AuctionUpdateRequ
 import io.github.guennhatking.libra_auction.viewmodels.response.AuctionResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.PageResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
+import io.github.guennhatking.libra_auction.models.person.NguoiDung;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +28,32 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
 public class AuctionController {
     private final AuctionService auctionService;
     private final AuctionSearchService searchService;
+    private final UserService userService;
 
     public AuctionController(AuctionService auctionService,
-            AuctionSearchService searchService) {
+            AuctionSearchService searchService,
+            UserService userService) {
         this.auctionService = auctionService;
         this.searchService = searchService;
+        this.userService = userService;
+    }
+
+    // Helper method to check if user is admin
+    private boolean isAdminUser(String userId) {
+        Optional<NguoiDung> user = userService.findById(userId);
+        if (user.isEmpty()) {
+            return false;
+        }
+        return user.get().getRoles() != null && 
+               user.get().getRoles().stream()
+                   .anyMatch(role -> "ADMIN".equalsIgnoreCase(role.getName()));
     }
 
     @GetMapping("/public/categories/{categoryId}/auctions")
@@ -59,7 +76,7 @@ public class AuctionController {
                 timeStart, timeEnd, status, null,
                 page, pageSize, sortBy, sortOrder);
 
-        PageResponse<AuctionResponse> result = searchService.searchAuctions(criteria);
+        PageResponse<AuctionResponse> result = searchService.searchPublicAuctions(criteria);
 
         return ResponseEntity.ok(ServerAPIResponse.success(result));
     }
@@ -83,7 +100,7 @@ public class AuctionController {
                 timeStart, timeEnd, status, null,
                 page, pageSize, sortBy, sortOrder);
 
-        PageResponse<AuctionResponse> result = searchService.searchAuctions(criteria);
+        PageResponse<AuctionResponse> result = searchService.searchPublicAuctions(criteria);
 
         return ResponseEntity.ok(ServerAPIResponse.success(result));
     }
@@ -202,7 +219,12 @@ public class AuctionController {
                     .body(ServerAPIResponse.error("Authentication required"));
         }
 
-        AuctionResponse response = auctionService.approveAuction(id, userDetails.getUserId());
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
+        AuctionResponse response = auctionService.approveAuctionWithProduct(id, userDetails.getUserId());
         return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
@@ -217,8 +239,13 @@ public class AuctionController {
                     .body(ServerAPIResponse.error("Authentication required"));
         }
 
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
         String reason = request != null ? request.get("reason") : null;
-        AuctionResponse response = auctionService.rejectAuction(id, userDetails.getUserId(), reason);
+        AuctionResponse response = auctionService.rejectAuctionWithProduct(id, userDetails.getUserId(), reason);
         return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
@@ -231,6 +258,11 @@ public class AuctionController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ServerAPIResponse.error("Authentication required"));
+        }
+
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
         }
 
         AuctionSearchRequest request = buildSearchCriteria(
@@ -253,6 +285,11 @@ public class AuctionController {
                     .body(ServerAPIResponse.error("Authentication required"));
         }
 
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
         AuctionSearchRequest request = buildSearchCriteria(
                 null, null, null, null, null,
                 null, null, null, "DA_DUYET",
@@ -271,6 +308,11 @@ public class AuctionController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ServerAPIResponse.error("Authentication required"));
+        }
+
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
         }
 
         AuctionSearchRequest request = buildSearchCriteria(
