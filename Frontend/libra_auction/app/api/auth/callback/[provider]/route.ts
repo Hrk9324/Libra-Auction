@@ -1,3 +1,5 @@
+import { ServerAPICall } from "@/lib/server_API_call";
+import { JWTResponse } from "@/types/jwt_response";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,41 +13,41 @@ export async function GET(request: NextRequest, { params }: {
     if (provider === 'google') {
         const code = searchParams.get('code')
         try {
-            const res = await fetch(process.env.BACKEND_SERVER_URL! + '/auth/google', {
+            const req: RequestInit = {
                 method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     'code': code,
                 })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                return NextResponse.redirect(failedUrl);
             }
-            const jwtToken = data.token;
-            const refreshToken = data.refreshToken;
-            const cookieStore = await cookies();
-            cookieStore.set({
-                name: 'jwtToken',
-                value: jwtToken,
-                httpOnly: true,
-                secure: true,
-                maxAge: 60 * 60 * 24 // 1 day
-            });
-            cookieStore.set({
-                name: 'refreshToken',
-                value: refreshToken,
-                httpOnly: true,
-                secure: true,
-                maxAge: 60 * 60 * 24 * 7 // 7 days
-            })
-            return NextResponse.redirect(successUrl);
+            const res = await ServerAPICall<JWTResponse>("/auth/google", req);
+            if (res.isSuccess && res.data) {
+                const jwtToken = res.data.token;
+                const refreshToken = res.data.refreshToken;
+                const cookieStore = await cookies();
+                cookieStore.set({
+                    name: 'jwtToken',
+                    value: jwtToken,
+                    httpOnly: true,
+                    secure: true,
+                    maxAge: res.data.accessTokenExpiration
+                });
+                cookieStore.set({
+                    name: 'refreshToken',
+                    value: refreshToken,
+                    httpOnly: true,
+                    secure: true,
+                    maxAge: res.data.refreshTokenExpiration
+                })
+                return NextResponse.redirect(successUrl);
+            }
+            throw new Error(res.errorMessage || "Failed to sign in");
         }
-        catch (error) {
+        catch (e) {
+            console.error(e);
             return NextResponse.redirect(failedUrl);
         }
     }
-    return NextResponse.redirect(failedUrl);
 }
