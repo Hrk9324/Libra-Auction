@@ -2,7 +2,6 @@ package io.github.guennhatking.libra_auction.controllers;
 
 import io.github.guennhatking.libra_auction.security.JwtUserDetails;
 import io.github.guennhatking.libra_auction.services.VNPayService;
-import io.github.guennhatking.libra_auction.properties.VNPayProperties;
 import io.github.guennhatking.libra_auction.viewmodels.request.VNPayDepositRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.VerifyPaymentRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
@@ -20,13 +19,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/payments/vnpay")
 public class VNPayController {
-
     private final VNPayService vnPayService;
-    private final VNPayProperties vnPayProperties;
 
-    public VNPayController(VNPayService vnPayService, VNPayProperties vnPayProperties) {
+    public VNPayController(VNPayService vnPayService) {
         this.vnPayService = vnPayService;
-        this.vnPayProperties = vnPayProperties;
     }
 
     @PostMapping("/create-deposit")
