@@ -3,7 +3,6 @@ package io.github.guennhatking.libra_auction.models.auction;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import io.github.guennhatking.libra_auction.enums.auction.LoaiDauGia;
 import io.github.guennhatking.libra_auction.enums.auction.TrangThaiKiemDuyet;
 import io.github.guennhatking.libra_auction.enums.auction.TrangThaiPhien;
 import io.github.guennhatking.libra_auction.models.person.NguoiDung;
@@ -29,11 +28,12 @@ public class PhienDauGia {
     @ManyToOne
     private NguoiDung nguoiTao;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private ThongTinPhienDauGia thongTinPhienDauGia;
-
     private OffsetDateTime thoiGianBatDau;
     private long thoiLuong;
+
+    private long tienCoc;
+    private long giaKhoiDiem;
+    private long khoangGia;
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "phienDauGia")
     private KetQuaDauGia ketQuaDauGia;
@@ -54,9 +54,6 @@ public class PhienDauGia {
     private TrangThaiKiemDuyet trangThaiKiemDuyet;
 
     @Enumerated(EnumType.STRING)
-    private LoaiDauGia loaiDauGia;
-
-    @Enumerated(EnumType.STRING)
     private TrangThaiPhien trangThaiPhien;
 
     private OffsetDateTime thoiGianTao;
@@ -64,22 +61,63 @@ public class PhienDauGia {
     @ManyToOne
     private TaiSan taiSan;
 
-    private long giaKhoiDiem;
     private long buocGiaNhoNhat;
     private long giaHienTai;
 
     // CONSTRUCTOR
-    protected PhienDauGia() {
+    public PhienDauGia() {
     }
 
-    public PhienDauGia(NguoiDung nguoiTao, ThongTinPhienDauGia thongTinPhienDauGia, OffsetDateTime thoiGianBatDau, long giaKhoiDiem, long buocGiaNhoNhat) {
+    public PhienDauGia(
+            NguoiDung nguoiTao,
+            TaiSan taiSan,
+            OffsetDateTime thoiGianBatDau,
+            long thoiLuong,
+            long tienCoc,
+            long giaKhoiDiem,
+            long khoangGia,
+            long buocGiaNhoNhat) {
         this.nguoiTao = nguoiTao;
-        this.thongTinPhienDauGia = thongTinPhienDauGia;
+        this.taiSan = taiSan;
         this.thoiGianBatDau = thoiGianBatDau;
+        this.thoiLuong = thoiLuong;
+        this.tienCoc = tienCoc;
         this.giaKhoiDiem = giaKhoiDiem;
+        this.khoangGia = khoangGia;
         this.buocGiaNhoNhat = buocGiaNhoNhat;
-        this.thoiGianTao = OffsetDateTime.now(ZoneOffset.ofHours(7));
+        this.thoiGianTao = OffsetDateTime.now(ZoneOffset.UTC);
+
+        this.giaHienTai = giaKhoiDiem;
     }
+
+    public PhienDauGia(
+            NguoiDung nguoiTao,
+            TaiSan taiSan,
+            OffsetDateTime thoiGianBatDau,
+            long thoiLuong,
+            long tienCoc,
+            long giaKhoiDiem,
+            long khoangGia,
+            long buocGiaNhoNhat,
+            TrangThaiKiemDuyet trangThaiKiemDuyet,
+            TrangThaiPhien trangThaiPhien,
+            OffsetDateTime thoiGianTao) {
+        this.nguoiTao = nguoiTao;
+        this.taiSan = taiSan;
+        this.thoiGianBatDau = thoiGianBatDau;
+        this.thoiLuong = thoiLuong;
+        this.tienCoc = tienCoc;
+        this.giaKhoiDiem = giaKhoiDiem;
+        this.khoangGia = khoangGia;
+        this.buocGiaNhoNhat = buocGiaNhoNhat;
+        this.trangThaiKiemDuyet = trangThaiKiemDuyet;
+        this.trangThaiPhien = trangThaiPhien;
+        this.thoiGianTao = thoiGianTao != null ? thoiGianTao : OffsetDateTime.now(ZoneOffset.UTC);
+
+        this.giaHienTai = giaKhoiDiem;
+    }
+
+
 
     // GETTER
     public String getId() {
@@ -88,10 +126,6 @@ public class PhienDauGia {
 
     public NguoiDung getNguoiTao() {
         return nguoiTao;
-    }
-
-    public ThongTinPhienDauGia getThongTinPhienDauGia() {
-        return thongTinPhienDauGia;
     }
 
     public OffsetDateTime getThoiGianBatDau() {
@@ -126,10 +160,6 @@ public class PhienDauGia {
         return trangThaiKiemDuyet;
     }
 
-    public LoaiDauGia getLoaiDauGia() {
-        return loaiDauGia;
-    }
-
     public TrangThaiPhien getTrangThaiPhien() {
         return trangThaiPhien;
     }
@@ -144,6 +174,14 @@ public class PhienDauGia {
 
     public long getGiaKhoiDiem() {
         return giaKhoiDiem;
+    }
+
+    public long getTienCoc() {
+        return tienCoc;
+    }
+
+    public long getKhoangGia() {
+        return khoangGia;
     }
 
     public long getBuocGiaNhoNhat() {
@@ -161,10 +199,6 @@ public class PhienDauGia {
 
     public void setNguoiTao(NguoiDung nguoiTao) {
         this.nguoiTao = nguoiTao;
-    }
-
-    public void setThongTinPhienDauGia(ThongTinPhienDauGia thongTinPhienDauGia) {
-        this.thongTinPhienDauGia = thongTinPhienDauGia;
     }
 
     public void setThoiGianBatDau(OffsetDateTime thoiGianBatDau) {
@@ -199,10 +233,6 @@ public class PhienDauGia {
         this.trangThaiKiemDuyet = trangThaiKiemDuyet;
     }
 
-    public void setLoaiDauGia(LoaiDauGia loaiDauGia) {
-        this.loaiDauGia = loaiDauGia;
-    }
-
     public void setTrangThaiPhien(TrangThaiPhien trangThaiPhien) {
         this.trangThaiPhien = trangThaiPhien;
     }
@@ -219,6 +249,14 @@ public class PhienDauGia {
         this.giaKhoiDiem = giaKhoiDiem;
     }
 
+    public void setTienCoc(long tienCoc) {
+        this.tienCoc = tienCoc;
+    }
+
+    public void setKhoangGia(long khoangGia) {
+        this.khoangGia = khoangGia;
+    }
+
     public void setBuocGiaNhoNhat(long buocGiaNhoNhat) {
         this.buocGiaNhoNhat = buocGiaNhoNhat;
     }
@@ -227,4 +265,3 @@ public class PhienDauGia {
         this.giaHienTai = giaHienTai;
     }
 }
-   

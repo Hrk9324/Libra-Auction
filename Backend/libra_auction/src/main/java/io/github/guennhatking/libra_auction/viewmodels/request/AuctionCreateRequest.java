@@ -7,9 +7,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import java.time.OffsetDateTime;
 
-import io.github.guennhatking.libra_auction.enums.auction.LoaiDauGia;
-import io.github.guennhatking.libra_auction.validators.FutureTime;
-
 public record AuctionCreateRequest(
         @NotBlank(message = "taiSanId is required") String taiSanId,
 
@@ -22,7 +19,6 @@ public record AuctionCreateRequest(
 
         @NotNull(message = "giaKhoiDiem is required") @Positive(message = "giaKhoiDiem must be greater than 0") Long giaKhoiDiem,
 
-        @NotNull(message = "buocGiaNhoNhat is required") @Positive(message = "buocGiaNhoNhat must be greater than 0") Long buocGiaNhoNhat,
-
-        @NotNull(message = "loaiDauGia is required") LoaiDauGia loaiDauGia) {
+        @NotNull(message = "buocGiaNhoNhat is required") @Positive(message = "buocGiaNhoNhat must be greater than 0") Long buocGiaNhoNhat
+) {
 }

@@ -1,6 +1,5 @@
 package io.github.guennhatking.libra_auction.controllers;
 
-import io.github.guennhatking.libra_auction.enums.auction.LoaiDauGia;
 import io.github.guennhatking.libra_auction.enums.auction.TrangThaiPhien;
 import io.github.guennhatking.libra_auction.models.auction.PhienDauGia;
 import io.github.guennhatking.libra_auction.repositories.auction.PhienDauGiaRepository;
@@ -77,14 +76,7 @@ public class AuctionWebSocketController {
                 return;
             }
 
-            // Route to appropriate handler based on auction type
-            if (auction.getLoaiDauGia().equals(LoaiDauGia.DAU_GIA_LEN)) {
-                handleAscendingAuction(bidMessage, auction);
-            } else {
-                String errorMsg = "Unknown auction type: " + auction.getLoaiDauGia();
-                logger.error(errorMsg);
-                sendErrorNotification(bidMessage.auctionId(), errorMsg);
-            }
+            handleAscendingAuction(bidMessage, auction);
 
             // After processing bid, check if auction should be extended
             // If a bid is placed within 5 minutes of end time, extend by 5 minutes
@@ -137,8 +129,6 @@ public class AuctionWebSocketController {
         // Broadcast to all participants (bids are visible)
         broadcastBid(bidMessage.auctionId(), bidResponse);
     }
-
-
 
     /**
      * Helper: Create standard bid response

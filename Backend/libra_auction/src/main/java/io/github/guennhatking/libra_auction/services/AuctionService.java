@@ -5,7 +5,6 @@ import io.github.guennhatking.libra_auction.enums.auction.TrangThaiPhien;
 import io.github.guennhatking.libra_auction.mappers.AuctionMapper;
 import io.github.guennhatking.libra_auction.mappers.ProductResponseMapper;
 import io.github.guennhatking.libra_auction.models.auction.PhienDauGia;
-import io.github.guennhatking.libra_auction.models.auction.ThongTinPhienDauGia;
 import io.github.guennhatking.libra_auction.models.person.NguoiDung;
 import io.github.guennhatking.libra_auction.models.product.TaiSan;
 import io.github.guennhatking.libra_auction.repositories.auction.PhienDauGiaRepository;
@@ -93,34 +92,18 @@ public class AuctionService {
                 TaiSan product = taiSanRepository.findById(request.taiSanId())
                                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-                if (product.getThongTinPhienDauGia() != null) {
-                        throw new IllegalArgumentException("Product already has an auction session");
-                }
-
                 NguoiDung nguoiTao = nguoiDungRepository.findById(userId)
                                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-                ThongTinPhienDauGia auctionInfo = new ThongTinPhienDauGia(
-                                request.tienCoc(),
-                                request.giaKhoiDiem(),
-                                request.buocGiaNhoNhat(),
-                                product.getTenTaiSan(),
-                                product);
-
-                PhienDauGia session = new PhienDauGia(
-                                nguoiTao,
-                                auctionInfo,
-                                request.thoiGianBatDau(),
-                                request.giaKhoiDiem(),
-                                request.buocGiaNhoNhat());
+                PhienDauGia session = new PhienDauGia();
+                session.setNguoiTao(nguoiTao);
                 session.setTaiSan(product);
                 session.setThoiLuong(request.thoiLuong());
-                session.setLoaiDauGia(request.loaiDauGia());
                 session.setTrangThaiKiemDuyet(TrangThaiKiemDuyet.CHUA_DUYET);
                 session.setTrangThaiPhien(TrangThaiPhien.CHUA_BAT_DAU);
 
+
                 PhienDauGia savedSession = phienDauGiaRepository.save(session);
-                product.setThongTinPhienDauGia(savedSession.getThongTinPhienDauGia());
 
                 return auctionMapper.toAuctionResponse(savedSession);
         }
@@ -141,7 +124,7 @@ public class AuctionService {
                 session.setThoiLuong(request.thoiLuong());
                 session.setGiaKhoiDiem(request.giaKhoiDiem());
                 session.setBuocGiaNhoNhat(request.buocGiaNhoNhat());
-                session.setLoaiDauGia(request.loaiDauGia());
+                session.setTienCoc(request.tienCoc());
 
                 PhienDauGia updatedSession = phienDauGiaRepository.save(session);
 

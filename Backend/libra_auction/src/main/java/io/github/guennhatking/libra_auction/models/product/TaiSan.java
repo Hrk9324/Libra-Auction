@@ -13,7 +13,7 @@ import jakarta.persistence.OneToMany;
 import java.util.List;
 
 import io.github.guennhatking.libra_auction.enums.auction.TrangThaiKiemDuyet;
-import io.github.guennhatking.libra_auction.models.auction.ThongTinPhienDauGia;
+import io.github.guennhatking.libra_auction.models.auction.PhienDauGia;
 import io.github.guennhatking.libra_auction.models.person.NguoiDung;
 
 @Entity
@@ -26,7 +26,7 @@ public class TaiSan {
     private NguoiDung nguoiTao;
 
     @OneToOne(mappedBy = "taiSan")
-    private ThongTinPhienDauGia thongTinPhienDauGia;
+    private PhienDauGia phienDauGia;
 
     @ManyToOne
     private DanhMuc danhMuc;
@@ -77,8 +77,8 @@ public class TaiSan {
         return nguoiTao;
     }
 
-    public ThongTinPhienDauGia getThongTinPhienDauGia() {
-        return thongTinPhienDauGia;
+    public PhienDauGia getPhienDauGia() {
+        return phienDauGia;
     }
 
     public DanhMuc getDanhMuc() {
@@ -118,8 +118,8 @@ public class TaiSan {
         this.nguoiTao = nguoiTao;
     }
 
-    public void setThongTinPhienDauGia(ThongTinPhienDauGia thongTinPhienDauGia) {
-        this.thongTinPhienDauGia = thongTinPhienDauGia;
+    public void setPhienDauGia(PhienDauGia phienDauGia) {
+        this.phienDauGia = phienDauGia;
     }
 
     public void setDanhMuc(DanhMuc danhMuc) {

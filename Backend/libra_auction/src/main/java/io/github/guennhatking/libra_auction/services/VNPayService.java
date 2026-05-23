@@ -2,9 +2,7 @@ package io.github.guennhatking.libra_auction.services;
 
 import io.github.guennhatking.libra_auction.enums.transaction.LoaiGiaoDich;
 import io.github.guennhatking.libra_auction.enums.transaction.TinhTrangGiaoDich;
-import io.github.guennhatking.libra_auction.enums.transaction.TrangThaiVNPay;
 import io.github.guennhatking.libra_auction.models.auction.PhienDauGia;
-import io.github.guennhatking.libra_auction.models.auction.ThongTinPhienDauGia;
 import io.github.guennhatking.libra_auction.models.auction.ThongTinThamGiaDauGia;
 import io.github.guennhatking.libra_auction.models.person.NguoiDung;
 import io.github.guennhatking.libra_auction.models.transaction.GiaoDichDatCoc;
@@ -42,15 +40,10 @@ import java.util.Map;
 @Service
 public class VNPayService {
     private final VNPayProperties vnPayProperties;
-    private final GiaoDichRepository giaoDichRepository;
-    private final GiaoDichThanhToanRepository giaoDichThanhToanRepository;
     private final GiaoDichDatCocRepository giaoDichDatCocRepository;
     private final ThongTinThamGiaDauGiaRepository thongTinThamGiaDauGiaRepository;
     private final NguoiDungRepository nguoiDungRepository;
     private final PhienDauGiaRepository phienDauGiaRepository;
-
-    // Cache để lưu trạng thái thanh toán (trong thực tế nên dùng Redis)
-    private final Map<String, TrangThaiVNPay> paymentStatusCache = new HashMap<>();
 
     public VNPayService(VNPayProperties vnPayProperties,
             GiaoDichRepository giaoDichRepository,
@@ -60,8 +53,6 @@ public class VNPayService {
             ThongTinThamGiaDauGiaRepository thongTinThamGiaDauGiaRepository,
             PhienDauGiaRepository phienDauGiaRepository) {
         this.vnPayProperties = vnPayProperties;
-        this.giaoDichRepository = giaoDichRepository;
-        this.giaoDichThanhToanRepository = giaoDichThanhToanRepository;
         this.nguoiDungRepository = nguoiDungRepository;
         this.giaoDichDatCocRepository = giaoDichDatCocRepository;
         this.thongTinThamGiaDauGiaRepository = thongTinThamGiaDauGiaRepository;
@@ -82,8 +73,7 @@ public class VNPayService {
         PhienDauGia phienDauGia = phienDauGiaRepository.findById(request.phienDauGiaId())
                 .orElseThrow(() -> new RuntimeException("Phiên đấu giá không tồn tại"));
 
-        ThongTinPhienDauGia thongTinPhienDauGia = phienDauGia.getThongTinPhienDauGia();
-        GiaoDichDatCoc deposit = new GiaoDichDatCoc(thongTinPhienDauGia.getTienCoc(),
+        GiaoDichDatCoc deposit = new GiaoDichDatCoc(phienDauGia.getTienCoc(),
                 user, thongTinThamGiaDauGia);
 
         deposit.setLoaiGiaoDich(LoaiGiaoDich.DAT_COC);
@@ -100,7 +90,7 @@ public class VNPayService {
         String vnp_IpAddr = getClientIp(servletRequest);
         String vnp_TmnCode = vnPayProperties.getTmnCode();
 
-        long amount = thongTinPhienDauGia.getTienCoc() * 100; // VNPay tính theo đơn vị xu (nhân 100)
+        long amount = phienDauGia.getTienCoc() * 100; // VNPay tính theo đơn vị xu (nhân 100)
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
@@ -145,6 +135,14 @@ public class VNPayService {
 
         // 6. Trả về thông tin cho Frontend
         return new VNPayPaymentResponse(paymentUrl);
+    }
+
+    @Transactional
+    public VNPayPaymentResponse createPaymentForWinner(String phienDauGiaId, String userId, long amount) {
+        // Tạo giao dịch thanh toán cho người thắng cuộc
+        // Logic tương tự như createDeposit nhưng với loại giao dịch khác (THANH_TOAN_DAU_GIA)
+        // và có thể lưu thêm thông tin về phiên đấu giá, người nhận tiền, v.v.
+        return null; // Placeholder
     }
 
     @Transactional

@@ -1,7 +1,6 @@
 package io.github.guennhatking.libra_auction.viewmodels.response;
 
 import io.github.guennhatking.libra_auction.enums.transaction.TrangThaiVNPay;
-import io.github.guennhatking.libra_auction.enums.transaction.TinhTrangGiaoDich;
 
 /**
  * Response thông tin giao dịch VNPay
