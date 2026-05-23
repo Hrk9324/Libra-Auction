@@ -16,8 +16,6 @@ public interface AuctionRegistrationMapper {
     @Mapping(source = "nguoiThamGia.email", target = "email") 
     @Mapping(source = "phienDauGia.id", target = "auctionSessionId")
 
-    @Mapping(source = "phienDauGia.thongTinPhienDauGia.tieuDe", target = "auctionTitle", defaultValue = "Unknown")
-
     @Mapping(source = "thoiGianDangKy", target = "registrationTime")
     AuctionRegistrationResponse toResponse(ThongTinThamGiaDauGia entity);
 

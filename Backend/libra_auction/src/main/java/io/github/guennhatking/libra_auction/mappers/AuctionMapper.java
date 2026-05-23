@@ -21,7 +21,6 @@ public interface AuctionMapper {
     @Mapping(source = "id", target = "auction_id")
 
     @Mapping(source = "trangThaiPhien", target = "auction_status", defaultValue = "CHUA_BAT_DAU")
-    @Mapping(source = "loaiDauGia", target = "auction_type", defaultValue = "DAU_GIA_LEN")
     @Mapping(source = "trangThaiKiemDuyet", target = "approval_status")
     @Mapping(source = "thoiGianBatDau", target = "start_time")
     @Mapping(source = "thoiLuong", target = "duration")

@@ -4,6 +4,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import io.github.guennhatking.libra_auction.models.person.NguoiDung;
+import io.github.guennhatking.libra_auction.models.transaction.GiaoDichThanhToan;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +23,9 @@ public class KetQuaDauGia {
 
     @ManyToOne
     private NguoiDung nguoiThangDauGia;
+
+    @OneToOne(mappedBy = "ketQuaDauGia")
+    private GiaoDichThanhToan giaoDichThanhToan;
 
     private OffsetDateTime thoiGianKetThuc;
     private long giaTrungDauGia;
@@ -56,6 +60,10 @@ public class KetQuaDauGia {
 
     public long getGiaTrungDauGia() {
         return giaTrungDauGia;
+    }
+
+    public GiaoDichThanhToan getGiaoDichThanhToan() {
+        return giaoDichThanhToan;
     }
 
     // SETTER

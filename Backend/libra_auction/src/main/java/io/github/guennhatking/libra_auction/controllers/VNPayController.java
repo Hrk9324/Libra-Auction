@@ -3,9 +3,11 @@ package io.github.guennhatking.libra_auction.controllers;
 import io.github.guennhatking.libra_auction.security.JwtUserDetails;
 import io.github.guennhatking.libra_auction.services.VNPayService;
 import io.github.guennhatking.libra_auction.viewmodels.request.VNPayDepositRequest;
+import io.github.guennhatking.libra_auction.viewmodels.request.VNPayPaymentRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.VerifyPaymentRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.VNPayPaymentResponse;
+import io.github.guennhatking.libra_auction.viewmodels.response.VNPayTransactionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -46,8 +48,28 @@ public class VNPayController {
         }
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<ServerAPIResponse<Boolean>> verifyPayment(
+    @PostMapping("/create-payment")
+    public ResponseEntity<ServerAPIResponse<VNPayPaymentResponse>> createPayment(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @Valid @RequestBody VNPayPaymentRequest request,
+            HttpServletRequest servletRequest) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Người dùng chưa đăng nhập"));
+        }
+
+        try {
+            VNPayPaymentResponse response = vnPayService.createPayment(request, userDetails.getUserId(),
+                    servletRequest);
+            return ResponseEntity.ok(ServerAPIResponse.success(response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ServerAPIResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/deposit/successed")
+    public ResponseEntity<ServerAPIResponse<Boolean>> depositSuccessed(
             @AuthenticationPrincipal JwtUserDetails userDetails,
             @Valid @RequestBody VerifyPaymentRequest request) {
         System.out.println("Received verify payment request: " + request);
@@ -57,7 +79,7 @@ public class VNPayController {
         }
 
         try {
-            boolean isVerified = vnPayService.verifyPayment(request);
+            boolean isVerified = vnPayService.depositSuccessed(request);
             return ResponseEntity.ok(ServerAPIResponse.success(isVerified));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -65,27 +87,41 @@ public class VNPayController {
         }
     }
 
-    /**
-     * Lấy thông tin giao dịch thanh toán
-     * GET /api/payments/vnpay/{transactionId}
-     */
-    // @GetMapping("/{transactionId}")
-    // public ResponseEntity<ServerAPIResponse<VNPayTransactionResponse>> getTransaction(
-    //         @AuthenticationPrincipal JwtUserDetails userDetails,
-    //         @PathVariable String transactionId) {
+    @PostMapping("/payment/successed")
+    public ResponseEntity<ServerAPIResponse<Boolean>> paymentSuccessed(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @Valid @RequestBody VerifyPaymentRequest request) {
+        System.out.println("Received verify payment request: " + request);
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Người dùng chưa đăng nhập"));
+        }
 
-    //     if (userDetails == null) {
-    //         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-    //                 .body(ServerAPIResponse.error("Người dùng chưa đăng nhập"));
-    //     }
+        try {
+            boolean isVerified = vnPayService.paymentSuccessed(request);
+            return ResponseEntity.ok(ServerAPIResponse.success(isVerified));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ServerAPIResponse.error(e.getMessage()));
+        }
+    }
 
-    //     try {
-    //         VNPayTransactionResponse response = vnPayService.getTransaction(transactionId);
-    //         return ResponseEntity.ok(ServerAPIResponse.success(response));
-    //     } catch (RuntimeException e) {
-    //         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    //                 .body(ServerAPIResponse.error(e.getMessage()));
-    //     }
-    // }
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<ServerAPIResponse<VNPayTransactionResponse>> getTransaction(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @PathVariable String transactionId) {
 
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Người dùng chưa đăng nhập"));
+        }
+
+        try {
+            VNPayTransactionResponse response = vnPayService.getTransactionStatus(transactionId);
+            return ResponseEntity.ok(ServerAPIResponse.success(response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ServerAPIResponse.error(e.getMessage()));
+        }
+    }
 }
