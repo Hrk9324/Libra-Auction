@@ -58,11 +58,11 @@ public class AuctionRegistrationService {
                                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
                 // 2. Kiểm tra Phiên đấu giá
-                PhienDauGia auctionSession = phienDauGiaRepository.findById(request.auctionSessionId())
-                                .orElseThrow(() -> new IllegalArgumentException("Auction session not found"));
+                PhienDauGia auction = phienDauGiaRepository.findById(request.auctionId())
+                                .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
 
                 // 3. Kiểm tra đăng ký trùng lặp (Logic cũ giữ nguyên)
-                boolean alreadyRegistered = Optional.ofNullable(auctionSession.getDanhSachThamGia())
+                boolean alreadyRegistered = Optional.ofNullable(auction.getDanhSachThamGia())
                                 .orElse(Collections.emptyList())
                                 .stream()
                                 .anyMatch(reg -> reg.getNguoiThamGia().getId().equals(userId));
@@ -72,7 +72,7 @@ public class AuctionRegistrationService {
                 }
 
                 // 4. Tạo và lưu đăng ký
-                ThongTinThamGiaDauGia registration = new ThongTinThamGiaDauGia(user, auctionSession);
+                ThongTinThamGiaDauGia registration = new ThongTinThamGiaDauGia(user, auction);
                 ThongTinThamGiaDauGia savedRegistration = thongTinThamGiaDauGiaRepository.save(registration);
 
                 return auctionRegistrationMapper.toResponse(savedRegistration);
@@ -100,15 +100,15 @@ public class AuctionRegistrationService {
         }
 
         @Transactional(readOnly = true)
-        public List<AuctionRegistrationResponse> getRegistrationsByAuctionSessionId(String auctionSessionId) {
+        public List<AuctionRegistrationResponse> getRegistrationsByAuctionId(String auctionId) {
                 // 1. Kiểm tra phiên đấu giá có tồn tại không
-                if (!phienDauGiaRepository.existsById(auctionSessionId)) {
-                        throw new IllegalArgumentException("Auction session not found");
+                if (!phienDauGiaRepository.existsById(auctionId)) {
+                        throw new IllegalArgumentException("Auction not found");
                 }
 
                 // 2. Lấy dữ liệu từ DB thông qua phương thức mới ở Repository
                 List<ThongTinThamGiaDauGia> entities = thongTinThamGiaDauGiaRepository
-                                .findByPhienDauGiaId(auctionSessionId);
+                                .findByPhienDauGiaId(auctionId);
 
                 // 3. Sử dụng Mapper để chuyển đổi sang danh sách Response
                 return auctionRegistrationMapper.toResponseList(entities);

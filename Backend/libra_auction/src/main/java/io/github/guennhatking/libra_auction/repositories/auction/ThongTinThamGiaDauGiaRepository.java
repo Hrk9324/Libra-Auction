@@ -8,6 +8,6 @@ import io.github.guennhatking.libra_auction.models.auction.ThongTinThamGiaDauGia
 
 public interface ThongTinThamGiaDauGiaRepository extends JpaRepository<ThongTinThamGiaDauGia, String> {
     List<ThongTinThamGiaDauGia> findByNguoiThamGiaId(String userId);
-    List<ThongTinThamGiaDauGia> findByPhienDauGiaId(String auctionSessionId);
-    Optional<ThongTinThamGiaDauGia> findByNguoiThamGiaIdAndPhienDauGiaId(String userId, String auctionSessionId);
+    List<ThongTinThamGiaDauGia> findByPhienDauGiaId(String auctionId);
+    Optional<ThongTinThamGiaDauGia> findByNguoiThamGiaIdAndPhienDauGiaId(String userId, String auctionId);
 }

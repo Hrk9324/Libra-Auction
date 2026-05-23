@@ -76,8 +76,8 @@ public class AuctionRegistrationController {
         return auctionRegistrationService.getRegistrationsByUserId(userId);
     }
 
-    @GetMapping("/auction/{auctionSessionId}")
-    public List<AuctionRegistrationResponse> getRegistrationsByAuctionSessionId(@PathVariable String auctionSessionId) {
-        return auctionRegistrationService.getRegistrationsByAuctionSessionId(auctionSessionId);
+    @GetMapping("/auction/{auctionId}")
+    public List<AuctionRegistrationResponse> getRegistrationsByAuctionId(@PathVariable String auctionId) {
+        return auctionRegistrationService.getRegistrationsByAuctionId(auctionId);
     }
 }

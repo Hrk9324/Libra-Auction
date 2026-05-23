@@ -6,7 +6,7 @@ public record AuctionRegistrationResponse(
     String id,
     String userId,
     String email,
-    String auctionSessionId,
+    String auctionId,
     OffsetDateTime registrationTime
 ) {
 }
