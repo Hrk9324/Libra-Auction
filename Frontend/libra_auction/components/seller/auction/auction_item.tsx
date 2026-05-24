@@ -1,7 +1,7 @@
 "use client";
 
 import { Auction } from "@/types/auction/auction";
-import { AuctionStatus } from "@/types/status";
+import { ApprovalStatus, AuctionStatus } from "@/types/status";
 
 interface AuctionItemProps {
     auction: Auction;
@@ -15,6 +15,12 @@ const statusConfig: Record<AuctionStatus, { label: string, classes: string }> = 
     "DANG_DIEN_RA": { label: 'Live', classes: 'bg-green-50 text-green-600 border-green-100' },
     "DA_KET_THUC": { label: 'Ended', classes: 'bg-gray-50 text-gray-500 border-gray-100' },
     "BI_HUY": { label: 'Cancelled', classes: 'bg-red-50 text-red-600 border-red-100' },
+};
+
+const approvalStatusConfig: Record<ApprovalStatus, { label: string; classes: string }> = {
+    CHUA_DUYET: { label: 'Pending', classes: 'bg-amber-50 text-amber-700 border-amber-100' },
+    DA_DUYET: { label: 'Approved', classes: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+    BI_TU_CHOI: { label: 'Rejected', classes: 'bg-red-50 text-red-700 border-red-100' },
 };
 
 export const AuctionItem = ({ auction, onView, onEdit, onDelete }: AuctionItemProps) => {
@@ -36,6 +42,9 @@ export const AuctionItem = ({ auction, onView, onEdit, onDelete }: AuctionItemPr
                         <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-lg border ${status.classes}`}>
                             {status.label}
                         </span>
+                        <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-lg border ${approvalStatusConfig[auction.approval_status].classes}`}>
+                            {approvalStatusConfig[auction.approval_status].label}
+                        </span>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
@@ -55,7 +64,7 @@ export const AuctionItem = ({ auction, onView, onEdit, onDelete }: AuctionItemPr
                 {/* View Action */}
                 <button
                     onClick={() => onView(auction.auction_id)}
-                    className="p-2 text-gray-400 hover:text-[var(--primary-color)] hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-400 hover:text-(--primary-color) hover:bg-blue-50 rounded-lg transition-colors"
                     title="View details"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
