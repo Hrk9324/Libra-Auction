@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "run-backend-task",
+      "type": "shell",
+      "command": "cd Backend/libra_auction && ./gradlew bootRun"
+    },
+    {
+      "label": "run-frontend-task",
+      "type": "shell",
+      "command": "cd Frontend/libra_auction && pnpm dev"
+    }
+  ]
+}

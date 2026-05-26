@@ -1,8 +1,15 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "interactive",
-    "conventionalCommits.scopes": [
-        "backend",
-        "frontend"
-    ]
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "conventionalCommits.scopes": ["backend", "frontend"],
+  "VsCodeTaskButtons.tasks": [
+    {
+      "label": "Run backend",
+      "task": "run-backend-task"
+    },
+    {
+      "label": "Run frontend",
+      "task": "run-frontend-task"
+    }
+  ]
 }
