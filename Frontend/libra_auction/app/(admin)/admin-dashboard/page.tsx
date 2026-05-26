@@ -3,34 +3,29 @@
 import { useState, useEffect } from "react";
 import { fetchPendingUsers } from "@/services/fetch_pending_users";
 import { fetchPendingAuctions } from "@/services/fetch_pending_auctions";
-import { fetchPendingProducts } from "@/services/fetch_pending_products";
 
 interface PendingData {
   pendingUsers: number;
   pendingAuctions: number;
-  pendingProducts: number;
 }
 
 export default function AdminDashboardPage() {
   const [pendingData, setPendingData] = useState<PendingData>({
     pendingUsers: 0,
     pendingAuctions: 0,
-    pendingProducts: 0,
   });
 
   useEffect(() => {
     const fetchPendingData = async () => {
       try {
-        const [usersResponse, auctionsResponse, productsResponse] = await Promise.all([
+        const [usersResponse, auctionsResponse] = await Promise.all([
           fetchPendingUsers(0, 1),
           fetchPendingAuctions(0, 1),
-          fetchPendingProducts(0, 1),
         ]);
 
         setPendingData({
           pendingUsers: usersResponse.totalElements,
           pendingAuctions: auctionsResponse.totalElements,
-          pendingProducts: productsResponse.totalElements,
         });
       } catch (error) {
         console.error('Error fetching pending data:', error);
@@ -81,12 +76,6 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-lg border border-[#AFD3E2] p-5">
           <p className="text-xs font-semibold text-gray-600 uppercase">Pending Auctions</p>
           <p className="text-2xl font-bold text-orange-600 mt-1">{pendingData.pendingAuctions}</p>
-        </div>
-
-        {/* Pending Products Card */}
-        <div className="bg-white rounded-lg border border-[#AFD3E2] p-5">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Pending Products</p>
-          <p className="text-2xl font-bold text-orange-600 mt-1">{pendingData.pendingProducts}</p>
         </div>
       </div>
 
