@@ -224,7 +224,7 @@ export default function AuctionsApprovalPage() {
               <tr className="border-b border-gray-200 bg-gray-50">
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Image</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product Description</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Category</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Starting Price</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Start Time</th>
@@ -261,7 +261,11 @@ export default function AuctionsApprovalPage() {
                       />
                     </td>
                     <td className="px-6 py-4 text-sm font-medium text-gray-700">{row.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{row.productName}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 max-w-md">
+                      <span className="block truncate" title={row.description}>
+                        {row.description || "-"}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-700">{row.category}</td>
                     <td className="px-6 py-4 text-sm font-semibold text-[#19A7CE]">{formatPrice(row.startingPrice)}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{row.startTime}</td>
