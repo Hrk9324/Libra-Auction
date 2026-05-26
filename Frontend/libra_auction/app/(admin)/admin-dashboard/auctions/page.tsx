@@ -97,13 +97,13 @@ export default function AuctionsApprovalPage() {
   useEffect(() => {
     const fetchPendingAuctions = async () => {
       try {
-        const response = await fetch('/api/admin/auctions/pending');
-        if (response.ok) {
-          const data = await response.json();
-          setAuctions(data);
-        } else {
-          console.error('Failed to fetch pending auctions:', response.statusText);
-        }
+        // const response = await fetch('/api/admin/auctions/pending');
+        // if (response.ok) {
+        //   const data = await response.json();
+        //   setAuctions(data);
+        // } else {
+        //   console.error('Failed to fetch pending auctions:', response.statusText);
+        // }
       } catch (error) {
         console.error('Error fetching pending auctions:', error);
       }

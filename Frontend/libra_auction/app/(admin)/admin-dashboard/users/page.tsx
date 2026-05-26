@@ -87,13 +87,13 @@ export default function UsersApprovalPage() {
   useEffect(() => {
     const fetchPendingUsers = async () => {
       try {
-        const response = await fetch('/api/admin/users/pending');
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data);
-        } else {
-          console.error('Failed to fetch pending users:', response.statusText);
-        }
+        // const response = await fetch('/api/admin/users/pending');
+        // if (response.ok) {
+        //   const data = await response.json();
+        //   setUsers(data);
+        // } else {
+        //   console.error('Failed to fetch pending users:', response.statusText);
+        // }
       } catch (error) {
         console.error('Error fetching pending users:', error);
       }
