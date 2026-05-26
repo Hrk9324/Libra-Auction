@@ -40,18 +40,37 @@ export default function AdminDashboardPage() {
       try {
         // Fetch pending users
         const usersResponse = await fetch('/api/admin/users/pending');
-        const usersData = await usersResponse.json();
-        const pendingUsersCount = Array.isArray(usersData) ? usersData.length : 0;
+        let pendingUsersCount = 0;
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          // backend returns { success: true, data: { content: [...] } }
+          const content = usersData?.data?.content ?? (Array.isArray(usersData) ? usersData : null);
+          pendingUsersCount = Array.isArray(content) ? content.length : 0;
+        } else {
+          console.warn('Failed to fetch pending users', usersResponse.status);
+        }
 
         // Fetch pending auctions
         const auctionsResponse = await fetch('/api/admin/auctions/pending');
-        const auctionsData = await auctionsResponse.json();
-        const pendingAuctionsCount = Array.isArray(auctionsData) ? auctionsData.length : 0;
+        let pendingAuctionsCount = 0;
+        if (auctionsResponse.ok) {
+          const auctionsData = await auctionsResponse.json();
+          const content = auctionsData?.data?.content ?? (Array.isArray(auctionsData) ? auctionsData : null);
+          pendingAuctionsCount = Array.isArray(content) ? content.length : 0;
+        } else {
+          console.warn('Failed to fetch pending auctions', auctionsResponse.status);
+        }
 
         // Fetch pending products
         const productsResponse = await fetch('/api/admin/products/pending');
-        const productsData = await productsResponse.json();
-        const pendingProductsCount = Array.isArray(productsData) ? productsData.length : 0;
+        let pendingProductsCount = 0;
+        if (productsResponse.ok) {
+          const productsData = await productsResponse.json();
+          const content = productsData?.data?.content ?? (Array.isArray(productsData) ? productsData : null);
+          pendingProductsCount = Array.isArray(content) ? content.length : 0;
+        } else {
+          console.warn('Failed to fetch pending products', productsResponse.status);
+        }
 
         setPendingData({
           pendingUsers: pendingUsersCount,

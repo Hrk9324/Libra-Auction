@@ -7,6 +7,7 @@ import io.github.guennhatking.libra_auction.enums.auth.TokenType;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Collection;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,13 +28,15 @@ public class JwtRSA {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(headerJson.getBytes());
     }
 
-    public String createToken(String userId, TokenType type, Long expirationTime) throws Exception {
+    public String createToken(String userId, Collection<String> roles, TokenType type, Long expirationTime) throws Exception {
         long issuedAtTime = System.currentTimeMillis();
         long expiryTime = issuedAtTime + expirationTime;
 
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("sub", userId);
         claimsMap.put("type", type.toString());
+        claimsMap.put("role", roles == null || roles.isEmpty() ? null : roles.iterator().next());
+        claimsMap.put("roles", roles);
         claimsMap.put("iat", issuedAtTime / 1000);
         claimsMap.put("exp", expiryTime / 1000);
 
@@ -104,8 +107,23 @@ public class JwtRSA {
             json.append("\"").append(entry.getKey()).append("\":");
 
             Object value = entry.getValue();
-            if (value instanceof String) {
+            if (value == null) {
+                json.append("null");
+            } else if (value instanceof String) {
                 json.append("\"").append(value).append("\"");
+            } else if (value instanceof Collection<?>) {
+                json.append("[");
+                boolean firstItem = true;
+                for (Object item : (Collection<?>) value) {
+                    if (!firstItem) json.append(",");
+                    if (item == null) {
+                        json.append("null");
+                    } else {
+                        json.append("\"").append(item).append("\"");
+                    }
+                    firstItem = false;
+                }
+                json.append("]");
             } else {
                 json.append(value);
             }

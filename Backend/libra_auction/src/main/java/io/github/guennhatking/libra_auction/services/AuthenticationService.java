@@ -38,7 +38,7 @@ public class AuthenticationService {
             request.fullName()
         );
 
-        return tokenService.generateTokens(newUser.getId());
+        return tokenService.generateTokens(newUser);
     }
 
     public JwtResponse signup(SignupFormRequest request) throws Exception {
@@ -49,7 +49,7 @@ public class AuthenticationService {
             request.fullName()
         );
 
-        return tokenService.generateTokens(newUser.getId());
+        return tokenService.generateTokens(newUser);
     }
 
     public JwtResponse signin(SigninRequest request) throws Exception {
@@ -64,8 +64,7 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
-        String userId = taiKhoan.getNguoiDung().getId();
-        return tokenService.generateTokens(userId);
+        return tokenService.generateTokens(taiKhoan.getNguoiDung());
     }
 
     public JwtResponse googleLogin(GoogleLoginRequest request) throws Exception {
@@ -78,7 +77,7 @@ public class AuthenticationService {
             userInfo.picture()
         );
 
-        return tokenService.generateTokens(user.getId());
+        return tokenService.generateTokens(user);
     }
 
     public String refreshToken(RefreshTokenRequest request) throws Exception {

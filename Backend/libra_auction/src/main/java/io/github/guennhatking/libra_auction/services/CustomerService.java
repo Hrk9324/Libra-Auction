@@ -74,7 +74,7 @@ public class CustomerService {
         taiKhoan.setTrangThai(AccountStatus.CHO_XAC_NHAN);
         taiKhoanPasswordRepository.save(taiKhoan);
 
-        assignDefaultRole(savedUser);
+        savedUser = assignDefaultRole(savedUser);
 
         return savedUser;
     }
@@ -105,7 +105,7 @@ public class CustomerService {
         oauthAccount.setTrangThai(AccountStatus.HOAT_DONG);
         taiKhoanOAuthRepository.save(oauthAccount);
 
-        assignDefaultRole(savedUser);
+        savedUser = assignDefaultRole(savedUser);
 
         return savedUser;
     }
@@ -126,11 +126,50 @@ public class CustomerService {
         return taiKhoanOAuthRepository.findByProviderId(providerId);
     }
 
-    private void assignDefaultRole(Customer user) {
-        Optional<Role> defaultRole = roleRepository.findById("USER");
-        if (defaultRole.isPresent()) {
-            user.setRoles(new ArrayList<>(List.of(defaultRole.get())));
-            nguoiDungRepository.save(user);
+        // Search pending users (accounts awaiting confirmation)
+        public io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<io.github.guennhatking.libra_auction.viewmodels.response.CustomerResponse>
+            searchPendingUsers(Integer page, Integer pageSize) {
+
+        java.util.List<Customer> all = nguoiDungRepository.findAll();
+
+        java.util.List<Customer> filtered = all.stream()
+            .filter(u -> u.getTrangThaiTaiKhoan() != null
+                && u.getTrangThaiTaiKhoan() == AccountStatus.CHO_XAC_NHAN)
+            .collect(java.util.stream.Collectors.toList());
+
+        // Simple pagination logic
+        int p = page != null ? page : 0;
+        int ps = pageSize != null ? pageSize : 20;
+        int totalElements = filtered.size();
+        int totalPages = (totalElements + ps - 1) / ps;
+        int start = Math.min(p * ps, totalElements);
+        int end = Math.min(start + ps, totalElements);
+        java.util.List<Customer> pageContent = filtered.subList(start, end);
+
+        org.mapstruct.factory.Mappers.getMapper(io.github.guennhatking.libra_auction.mappers.CustomerMapper.class);
+        io.github.guennhatking.libra_auction.mappers.CustomerMapper mapper = org.mapstruct.factory.Mappers
+            .getMapper(io.github.guennhatking.libra_auction.mappers.CustomerMapper.class);
+
+        java.util.List<io.github.guennhatking.libra_auction.viewmodels.response.CustomerResponse> content = pageContent.stream()
+            .map(mapper::toResponse)
+            .collect(java.util.stream.Collectors.toList());
+
+        return new io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<>(
+            content,
+            totalPages,
+            (long) totalElements,
+            p,
+            ps,
+            p == 0,
+            p == Math.max(0, totalPages - 1)
+        );
         }
+
+    private Customer assignDefaultRole(Customer user) {
+        Role defaultRole = roleRepository.findById("USER")
+                .orElseGet(() -> roleRepository.save(new Role("USER", "User")));
+
+        user.setRoles(new ArrayList<>(List.of(defaultRole)));
+        return nguoiDungRepository.save(user);
     }
 }
