@@ -56,20 +56,6 @@ export default function UserMenuDropdown({
               </Link>
             ))}
 
-            {/* Divider trước Admin Dashboard */}
-            {isAdmin && <div className="border-t border-gray-100 my-1"></div>}
-
-            {/* Admin Dashboard Link - chỉ hiển thị nếu là admin */}
-            {isAdmin && (
-              <Link
-                href="/admin-dashboard"
-                className="block px-4 py-2 text-sm text-[#19A7CE] font-semibold hover:bg-blue-50 transition"
-                onClick={() => setIsOpen(false)}
-              >
-                🔧 Admin Dashboard
-              </Link>
-            )}
-
             <div className="border-t border-gray-100 my-1"></div>
 
             <Link 

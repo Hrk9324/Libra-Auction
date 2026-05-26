@@ -19,6 +19,7 @@ export default async function AdminHeader({ title, breadcrumb }: AdminHeaderProp
 
   const authedUserActionItems = [
     { value: "Profile", href: "/profile" },
+    { value: "Seller Dashboard", href: "/seller-dashboard" },
     { value: "Auction Lobby", href: "/" },
   ];
 

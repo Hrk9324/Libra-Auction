@@ -50,20 +50,6 @@ export default function UserMenuDropdown({
               </Link>
             ))}
 
-            {/* Nếu user là admin, hiển thị link tới Admin Dashboard */}
-            {userInfo?.roles && userInfo.roles.some(r => r.name === 'ADMIN') && (
-              <>
-                <div className="border-t border-gray-100 my-1"></div>
-                <Link
-                  href="/admin-dashboard"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Admin Dashboard
-                </Link>
-              </>
-            )}
-
             <div className="border-t border-gray-100 my-1"></div>
 
             <Link 
