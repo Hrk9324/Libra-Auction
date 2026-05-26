@@ -151,29 +151,29 @@ export default function AuctionsApprovalPage() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Pending</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{pendingCount}</p>
+        <div className="bg-white p-4 rounded-xl border border-[#AFD3E2] shadow-sm shadow-[#AFD3E2]/20">
+          <p className="text-xs font-semibold text-[#5A7184] uppercase">Pending</p>
+          <p className="text-2xl font-bold text-[#146C94] mt-1">{pendingCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Approved</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{approvedCount}</p>
+        <div className="bg-white p-4 rounded-xl border border-[#AFD3E2] shadow-sm shadow-[#AFD3E2]/20">
+          <p className="text-xs font-semibold text-[#5A7184] uppercase">Approved</p>
+          <p className="text-2xl font-bold text-[#146C94] mt-1">{approvedCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Rejected</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{rejectedCount}</p>
+        <div className="bg-white p-4 rounded-xl border border-[#AFD3E2] shadow-sm shadow-[#AFD3E2]/20">
+          <p className="text-xs font-semibold text-[#5A7184] uppercase">Rejected</p>
+          <p className="text-2xl font-bold text-[#146C94] mt-1">{rejectedCount}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
         <h3 className="text-lg font-bold text-[#146C94] mb-4">Filter by Status</h3>
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={() => setStatusFilter("ALL")}
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "ALL"
-                ? "bg-[#19A7CE] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-[#19A7CE] text-white shadow-sm shadow-[#19A7CE]/30"
+                : "bg-[#F6FBFC] text-[#5A7184] hover:bg-[#EAF7FB]"
             }`}
           >
             All
@@ -183,7 +183,7 @@ export default function AuctionsApprovalPage() {
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "PENDING"
                 ? "bg-amber-500 text-white"
-                : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                : "bg-amber-50 text-amber-800 hover:bg-amber-100"
             }`}
           >
             Pending ({pendingCount})
@@ -193,7 +193,7 @@ export default function AuctionsApprovalPage() {
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "APPROVED"
                 ? "bg-green-600 text-white"
-                : "bg-green-100 text-green-800 hover:bg-green-200"
+                : "bg-green-50 text-green-800 hover:bg-green-100"
             }`}
           >
             Approved ({approvedCount})
@@ -203,7 +203,7 @@ export default function AuctionsApprovalPage() {
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "REJECTED"
                 ? "bg-red-600 text-white"
-                : "bg-red-100 text-red-800 hover:bg-red-200"
+                : "bg-red-50 text-red-800 hover:bg-red-100"
             }`}
           >
             Rejected ({rejectedCount})
@@ -212,42 +212,42 @@ export default function AuctionsApprovalPage() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
           {error}
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#AFD3E2] overflow-hidden shadow-sm shadow-[#AFD3E2]/20">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Image</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product Description</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Category</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Starting Price</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Start Time</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+              <tr className="border-b border-[#AFD3E2] bg-[#F6FBFC]">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Image</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Product Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Product Description</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Category</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Starting Price</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Start Time</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Status</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="px-6 py-8 text-center text-gray-500" colSpan={8}>
+                  <td className="px-6 py-8 text-center text-[#5A7184]" colSpan={8}>
                     Loading...
                   </td>
                 </tr>
               ) : filteredAuctions.length === 0 ? (
                 <tr>
-                  <td className="px-6 py-8 text-center text-gray-500" colSpan={8}>
+                  <td className="px-6 py-8 text-center text-[#5A7184]" colSpan={8}>
                     No auctions available
                   </td>
                 </tr>
               ) : (
                 filteredAuctions.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={row.id} className="border-b border-[#EAF3F6] hover:bg-[#F8FCFD]">
                     <td className="px-6 py-4">
                       <Image
                         src={row.image}
@@ -260,35 +260,35 @@ export default function AuctionsApprovalPage() {
                         }}
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-700">{row.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700 max-w-md">
+                    <td className="px-6 py-4 text-sm font-medium text-[#5A7184]">{row.name}</td>
+                    <td className="px-6 py-4 text-sm text-[#5A7184] max-w-md">
                       <span className="block truncate" title={row.description}>
                         {row.description || "-"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{row.category}</td>
+                    <td className="px-6 py-4 text-sm text-[#5A7184]">{row.category}</td>
                     <td className="px-6 py-4 text-sm font-semibold text-[#19A7CE]">{formatPrice(row.startingPrice)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{row.startTime}</td>
+                    <td className="px-6 py-4 text-sm text-[#5A7184]">{row.startTime}</td>
                     <td className="px-6 py-4 text-sm">{getStatusBadge(row.status)}</td>
                     <td className="px-6 py-4 text-sm">
                       <div className="flex gap-2 flex-wrap">
                         <button
                           onClick={() => setSelectedAuction({ isOpen: true, data: row })}
-                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs font-semibold"
+                          className="px-3 py-1 bg-[#EAF7FB] text-[#146C94] rounded hover:bg-[#D7EFF7] text-xs font-semibold"
                         >
                           Details
                         </button>
                         <button
                           onClick={() => handleApprove(row)}
                           disabled={actionLoadingId === row.id || row.status !== "PENDING"}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                          className="px-3 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Approve
                         </button>
                         <button
                           onClick={() => handleReject(row)}
                           disabled={actionLoadingId === row.id || row.status !== "PENDING"}
-                          className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                          className="px-3 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 text-xs font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Reject
                         </button>

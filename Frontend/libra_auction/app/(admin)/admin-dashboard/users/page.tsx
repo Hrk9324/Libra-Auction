@@ -82,29 +82,29 @@ export default function UsersApprovalPage() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Pending Users</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{totalUsers}</p>
+        <div className="bg-white p-4 rounded-xl border border-[#AFD3E2] shadow-sm shadow-[#AFD3E2]/20">
+          <p className="text-xs font-semibold text-[#5A7184] uppercase">Pending Users</p>
+          <p className="text-2xl font-bold text-[#146C94] mt-1">{totalUsers}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Active Accounts</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
+        <div className="bg-white p-4 rounded-xl border border-[#AFD3E2] shadow-sm shadow-[#AFD3E2]/20">
+          <p className="text-xs font-semibold text-[#5A7184] uppercase">Active Accounts</p>
+          <p className="text-2xl font-bold text-[#146C94] mt-1">{activeCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <p className="text-xs font-semibold text-gray-600 uppercase">Locked Accounts</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{lockedCount}</p>
+        <div className="bg-white p-4 rounded-xl border border-[#AFD3E2] shadow-sm shadow-[#AFD3E2]/20">
+          <p className="text-xs font-semibold text-[#5A7184] uppercase">Locked Accounts</p>
+          <p className="text-2xl font-bold text-[#146C94] mt-1">{lockedCount}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
         <h3 className="text-lg font-bold text-[#146C94] mb-4">Filter by Account Status</h3>
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={() => setStatusFilter("ALL")}
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "ALL"
-                ? "bg-[#19A7CE] text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-[#19A7CE] text-white shadow-sm shadow-[#19A7CE]/30"
+                : "bg-[#F6FBFC] text-[#5A7184] hover:bg-[#EAF7FB]"
             }`}
           >
             All
@@ -114,7 +114,7 @@ export default function UsersApprovalPage() {
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "CHO_XAC_NHAN"
                 ? "bg-amber-500 text-white"
-                : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+                : "bg-amber-50 text-amber-800 hover:bg-amber-100"
             }`}
           >
             Pending ({pendingCount})
@@ -124,7 +124,7 @@ export default function UsersApprovalPage() {
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "HOAT_DONG"
                 ? "bg-green-600 text-white"
-                : "bg-green-100 text-green-800 hover:bg-green-200"
+                : "bg-green-50 text-green-800 hover:bg-green-100"
             }`}
           >
             Active ({activeCount})
@@ -134,7 +134,7 @@ export default function UsersApprovalPage() {
             className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
               statusFilter === "KHOA"
                 ? "bg-red-600 text-white"
-                : "bg-red-100 text-red-800 hover:bg-red-200"
+                : "bg-red-50 text-red-800 hover:bg-red-100"
             }`}
           >
             Locked ({lockedCount})
@@ -148,36 +148,36 @@ export default function UsersApprovalPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#AFD3E2] overflow-hidden shadow-sm shadow-[#AFD3E2]/20">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Avatar</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Full Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Phone</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">CCCD</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Email Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Account Status</th>
+              <tr className="border-b border-[#AFD3E2] bg-[#F6FBFC]">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Avatar</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Full Name</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Email</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Phone</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">CCCD</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Email Status</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-[#146C94]">Account Status</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td className="px-6 py-8 text-center text-gray-500" colSpan={7}>
+                  <td className="px-6 py-8 text-center text-[#5A7184]" colSpan={7}>
                     Loading...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td className="px-6 py-8 text-center text-gray-500" colSpan={7}>
+                  <td className="px-6 py-8 text-center text-[#5A7184]" colSpan={7}>
                     No pending users available
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr key={row.id} className="border-b border-[#EAF3F6] hover:bg-[#F8FCFD]">
                     <td className="px-6 py-4">
                       <Image
                         src={row.avatar}
@@ -190,9 +190,9 @@ export default function UsersApprovalPage() {
                         }}
                       />
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-700">{row.hoVaTen}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{row.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{row.soDienThoai || "-"}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-[#5A7184]">{row.hoVaTen}</td>
+                    <td className="px-6 py-4 text-sm text-[#5A7184]">{row.email}</td>
+                    <td className="px-6 py-4 text-sm text-[#5A7184]">{row.soDienThoai || "-"}</td>
                     <td className="px-6 py-4 text-sm font-semibold text-[#19A7CE]">{row.CCCD || "-"}</td>
                     <td className="px-6 py-4 text-sm">{getStatusBadge(row.emailStatus)}</td>
                     <td className="px-6 py-4 text-sm">{getStatusBadge(row.accountStatus)}</td>
