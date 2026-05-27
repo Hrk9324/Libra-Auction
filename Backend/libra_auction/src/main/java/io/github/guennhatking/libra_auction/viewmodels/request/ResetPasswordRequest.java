@@ -9,9 +9,6 @@ public record ResetPasswordRequest(
     @Email(message = "INVALID_EMAIL")
     String email,
 
-    @NotBlank(message = "OTP không được để trống.")
-    String otp,
-
     @NotBlank(message = "Mật khẩu mới không được để trống.")
     @Size(min = 6, message = "INVALID_PASSWORD")
     String newPassword

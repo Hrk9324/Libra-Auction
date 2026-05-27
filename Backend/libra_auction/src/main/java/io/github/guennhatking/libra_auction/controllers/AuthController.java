@@ -119,14 +119,11 @@ public class AuthController {
     }
 
     @PostMapping("/password/reset")
-    @Operation(summary = "Reset Password with OTP", description = "Reset user password using OTP received via email")
+    @Operation(summary = "Reset Password", description = "Reset user password")
     @ApiResponse(responseCode = "200", description = "Password reset successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid or expired OTP")
+    @ApiResponse(responseCode = "400", description = "User not found")
     public ResponseEntity<ServerAPIResponse<String>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
-        if (!otpService.verify(OTP_PURPOSE_PASSWORD, request.email(), request.otp())) {
-            throw new IllegalArgumentException("OTP không hợp lệ hoặc đã hết hạn.");
-        }
         customerService.resetPassword(request.email(), request.newPassword());
         return ResponseEntity.ok(ServerAPIResponse.success("Đặt lại mật khẩu thành công."));
     }
