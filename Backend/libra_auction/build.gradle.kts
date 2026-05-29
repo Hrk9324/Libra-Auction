@@ -47,6 +47,10 @@ dependencies {
     // LIQUIDBASE
     implementation("org.springframework.boot:spring-boot-starter-liquibase")
 
+    // SWAGGER / OPENAPI
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
+    implementation("io.swagger.core.v3:swagger-annotations-jakarta:2.2.15")
+
     // CLOUDINARY
     implementation("com.cloudinary:cloudinary-http5:${cloudinaryVersion}")
 

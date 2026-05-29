@@ -148,6 +148,36 @@ public class EmailNotificationService {
         }
     }
     
+    public void sendEmailVerificationOtp(String toEmail, String otp) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("[" + auctionName + "] Mã xác thực email của bạn");
+            message.setText(buildEmailVerificationOtpBody(otp));
+            mailSender.send(message);
+            logger.info("Email verification OTP sent to {}", toEmail);
+        } catch (Exception e) {
+            logger.error("Error sending email verification OTP: {}", e.getMessage(), e);
+            throw new RuntimeException("Không thể gửi email. Vui lòng thử lại.");
+        }
+    }
+
+    public void sendPasswordResetOtp(String toEmail, String otp) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("[" + auctionName + "] Mã đặt lại mật khẩu của bạn");
+            message.setText(buildPasswordResetOtpBody(otp));
+            mailSender.send(message);
+            logger.info("Password reset OTP sent to {}", toEmail);
+        } catch (Exception e) {
+            logger.error("Error sending password reset OTP: {}", e.getMessage(), e);
+            throw new RuntimeException("Không thể gửi email. Vui lòng thử lại.");
+        }
+    }
+
     // ==================== Email Body Templates ====================
     
     private String buildAuctionStartedEmailBody(String productName, String auctionId, String startTime) {
@@ -195,6 +225,27 @@ public class EmailNotificationService {
                "ID Phiên: " + auctionId + "\n\n" +
                "Vui lòng thanh toán trong vòng 3 ngày để hoàn thành giao dịch.\n\n" +
                "Cảm ơn bạn đã sử dụng " + auctionName + "!\n\n" +
+               "Trân trọng,\n" +
+               auctionName + " Team";
+    }
+
+    private String buildEmailVerificationOtpBody(String otp) {
+        return "Xin chào,\n\n" +
+               "Mã xác thực email của bạn là:\n\n" +
+               "    " + otp + "\n\n" +
+               "Mã này có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.\n\n" +
+               "Nếu bạn không yêu cầu xác thực email, hãy bỏ qua email này.\n\n" +
+               "Trân trọng,\n" +
+               auctionName + " Team";
+    }
+
+    private String buildPasswordResetOtpBody(String otp) {
+        return "Xin chào,\n\n" +
+               "Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n\n" +
+               "Mã OTP đặt lại mật khẩu:\n\n" +
+               "    " + otp + "\n\n" +
+               "Mã này có hiệu lực trong 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.\n\n" +
+               "Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.\n\n" +
                "Trân trọng,\n" +
                auctionName + " Team";
     }

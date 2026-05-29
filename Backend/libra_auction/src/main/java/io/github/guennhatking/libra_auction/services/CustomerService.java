@@ -126,6 +126,47 @@ public class CustomerService {
         return taiKhoanOAuthRepository.findByProviderId(providerId);
     }
 
+    @Transactional
+    public void changePassword(String userId, String currentPassword, String newPassword) {
+        TaiKhoanPassword account = taiKhoanPasswordRepository.findByNguoiDungId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Tài khoản không tồn tại hoặc không dùng mật khẩu."));
+
+        if (!passwordService.verifyPassword(currentPassword, account.getPasswordHash())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không đúng.");
+        }
+
+        account.setPasswordHash(passwordService.encodePassword(newPassword));
+        taiKhoanPasswordRepository.save(account);
+    }
+
+    @Transactional
+    public void markEmailVerified(String email) {
+        Customer customer = nguoiDungRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với email này."));
+
+        customer.setTrangThaiEmail(EmailStatus.DA_XAC_THUC);
+        if (customer.getTrangThaiTaiKhoan() == AccountStatus.CHO_XAC_NHAN) {
+            customer.setTrangThaiTaiKhoan(AccountStatus.HOAT_DONG);
+        }
+        nguoiDungRepository.save(customer);
+
+        taiKhoanPasswordRepository.findByNguoiDungEmail(email).ifPresent(acc -> {
+            if (acc.getTrangThai() == AccountStatus.CHO_XAC_NHAN) {
+                acc.setTrangThai(AccountStatus.HOAT_DONG);
+                taiKhoanPasswordRepository.save(acc);
+            }
+        });
+    }
+
+    @Transactional
+    public void resetPassword(String email, String newPassword) {
+        TaiKhoanPassword account = taiKhoanPasswordRepository.findByNguoiDungEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email này."));
+
+        account.setPasswordHash(passwordService.encodePassword(newPassword));
+        taiKhoanPasswordRepository.save(account);
+    }
+
         // Search pending users (accounts awaiting confirmation)
         public io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse>
             searchPendingUsers(Integer page, Integer pageSize) {
