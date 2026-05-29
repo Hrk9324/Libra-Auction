@@ -20,15 +20,10 @@ import io.github.guennhatking.libra_auction.services.CustomerService;
 import io.github.guennhatking.libra_auction.viewmodels.request.ChangePasswordRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.CustomerResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
-@Tag(name = "User", description = "User profile and account management endpoints")
 public class CustomerController {
     private final CustomerService userService;
     private final CustomerMapper userMapper;
@@ -39,9 +34,6 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get User Info", description = "Retrieve user profile information by user ID")
-    @ApiResponse(responseCode = "200", description = "User info retrieved successfully")
-    @ApiResponse(responseCode = "404", description = "User not found")
     public ResponseEntity<ServerAPIResponse<CustomerResponse>> getUserInfo(@PathVariable String id) {
         Optional<Customer> user = userService.findById(id);
 
@@ -54,11 +46,6 @@ public class CustomerController {
     }
 
     @PostMapping("/change-password")
-    @SecurityRequirement(name = "bearer-jwt")
-    @Operation(summary = "Change Password", description = "Change user's password. Requires current password to verify identity")
-    @ApiResponse(responseCode = "200", description = "Password changed successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid current password")
-    @ApiResponse(responseCode = "401", description = "Unauthorized - valid JWT token required")
     public ResponseEntity<ServerAPIResponse<String>> changePassword(
             @AuthenticationPrincipal JwtUserDetails principal,
             @Valid @RequestBody ChangePasswordRequest request) {
