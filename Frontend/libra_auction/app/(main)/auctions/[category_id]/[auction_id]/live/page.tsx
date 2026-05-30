@@ -2,7 +2,6 @@ import BreadCrumb from "@/components/main/auction/breadcrumb";
 import { fetchPublicAuction } from "@/services/fetch_public_auction";
 import { notFound } from "next/navigation";
 import LiveAuctionView from "@/components/main/auction/live_auction_view";
-import AuctionQuestionsSection from "@/components/main/auction/auction_questions_section";
 
 export default async function LivePage(props: {
   params: Promise<{ category_id: string; auction_id: string }>;
@@ -36,7 +35,6 @@ export default async function LivePage(props: {
     <>
       <BreadCrumb breadcrumbItems={breadcrumb_items} />
       <LiveAuctionView auction={auction} backendServerUrl={backendServerUrl} role="user" />
-      <AuctionQuestionsSection auctionId={auction.auction_id} />
     </>
   );
 }

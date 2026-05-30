@@ -5,16 +5,13 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
     const jwtTokenInfo = await getJWTTokenInfo();
     if (!jwtTokenInfo.token) {
-        throw new Error("User's credentials not found");
+        return NextResponse.redirect(new URL("/sign-in", req.url));
     }
 
     try {
-        // 1. Lấy tất cả params từ URL VNPAY gửi về
         const searchParams = req.nextUrl.searchParams;
         const paramsObj = Object.fromEntries(searchParams.entries());
 
-        // 2. Cấu hình request sử dụng ServerAPICall
-        // Giả sử kết quả trả về là một boolean (true/false)
         const requestConfig: RequestInit = {
             method: "POST",
             headers: {
@@ -24,24 +21,36 @@ export async function GET(req: NextRequest) {
             body: JSON.stringify(paramsObj),
         };
 
-        // Gọi API sang Backend
-        const res = await ServerAPICall<boolean | null>("/api/payments/vnpay/verify", requestConfig);
+        // Determine endpoint based on order info
+        const orderInfo = searchParams.get("vnp_OrderInfo") || "";
+        let endpoint = "/api/payments/vnpay/deposit/successed";
 
-        // 3. Xử lý kết quả trả về
-        if (res.isSuccess) {
-            // res.data lúc này sẽ là giá trị boolean từ Backend
-            return NextResponse.json({
-                success: res.data,
-                message: res.data ? "Xác thực giao dịch thành công" : "Giao dịch không hợp lệ"
-            }, { status: 200 });
+        // Extract auction ID from order info for redirect
+        let auctionId = "";
+        // Order format: "Thanh toan tien coc cho dau gia: {auctionId}"
+        const depositMatch = orderInfo.match(/dau gia:\s*(.+)/);
+        if (depositMatch) {
+            auctionId = depositMatch[1].trim();
         }
 
-        // Trường hợp Backend trả về lỗi (isSuccess = false)
-        throw new Error(res.errorMessage || "Xác thực giao dịch thất bại");
+        const res = await ServerAPICall<boolean | null>(endpoint, requestConfig);
+
+        const status = (res.isSuccess && res.data) ? "success" : "failed";
+
+        if (auctionId) {
+            return NextResponse.redirect(
+                new URL(`/api/payment/handle?auctionId=${auctionId}&status=${status}`, req.url)
+            );
+        }
+
+        // Fallback: redirect to home with status
+        return NextResponse.redirect(
+            new URL(`/?payment=${status}`, req.url)
+        );
 
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        console.error("Lỗi xác thực VNPAY:", errorMessage);
+        console.error("VNPay verification error:", errorMessage);
 
         return NextResponse.json({
             success: false,

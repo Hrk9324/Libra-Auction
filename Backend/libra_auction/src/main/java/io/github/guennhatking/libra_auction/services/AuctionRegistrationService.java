@@ -100,6 +100,14 @@ public class AuctionRegistrationService {
         }
 
         @Transactional(readOnly = true)
+        public AuctionRegistrationResponse getRegistrationByUserAndAuction(String userId, String auctionId) {
+                AuctionParticipationInfo registration = participationInfoRepository
+                                .findByParticipantIdAndAuctionId(userId, auctionId)
+                                .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+                return auctionRegistrationMapper.toResponse(registration);
+        }
+
+        @Transactional(readOnly = true)
         public List<AuctionRegistrationResponse> getRegistrationsByAuctionId(String auctionId) {
                 // 1. Kiem tra phien dau gia co ton tai khong
                 if (!auctionRepository.existsById(auctionId)) {

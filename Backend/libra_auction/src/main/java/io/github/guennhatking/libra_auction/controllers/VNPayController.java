@@ -124,4 +124,16 @@ public class VNPayController {
                     .body(ServerAPIResponse.error(e.getMessage()));
         }
     }
+
+    @GetMapping("/deposit/status/{auctionId}")
+    public ResponseEntity<ServerAPIResponse<Boolean>> isDepositPaid(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @PathVariable String auctionId) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Authentication required"));
+        }
+        boolean paid = vnPayService.isDepositPaid(userDetails.getUserId(), auctionId);
+        return ResponseEntity.ok(ServerAPIResponse.success(paid));
+    }
 }

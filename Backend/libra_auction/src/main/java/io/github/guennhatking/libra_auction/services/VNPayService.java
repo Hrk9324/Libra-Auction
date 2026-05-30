@@ -427,4 +427,11 @@ public class VNPayService {
 
         return request.getRemoteAddr();
     }
+
+    @Transactional(readOnly = true)
+    public boolean isDepositPaid(String userId, String auctionId) {
+        return depositTransactionRepository
+                .findByDepositorIdAndAuctionIdAndStatus(userId, auctionId, TransactionStatus.SUCCESS)
+                .isPresent();
+    }
 }

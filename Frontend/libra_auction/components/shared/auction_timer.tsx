@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface AuctionTimerProps {
   endTimeMs: number;
@@ -17,31 +17,38 @@ export default function AuctionTimer({
   onEnd,
   size = "md",
 }: AuctionTimerProps) {
+  // Track accumulated pause duration
+  const pausedStartRef = useRef<number | null>(null);
+  const totalPausedMsRef = useRef(0);
+  const prevIsPausedRef = useRef(isPaused);
+
+  // When isPaused changes from false -> true, record pause start
+  if (isPaused && !prevIsPausedRef.current) {
+    pausedStartRef.current = Date.now();
+  }
+  // When isPaused changes from true -> false, accumulate pause duration
+  if (!isPaused && prevIsPausedRef.current && pausedStartRef.current !== null) {
+    totalPausedMsRef.current += Date.now() - pausedStartRef.current;
+    pausedStartRef.current = null;
+  }
+  prevIsPausedRef.current = isPaused;
+
+  // Adjusted end time = original endTime + total paused duration
+  const adjustedEndTime = endTimeMs + totalPausedMsRef.current;
+
   const [timeLeftMs, setTimeLeftMs] = useState(() =>
-    Math.max(0, endTimeMs - Date.now())
+    Math.max(0, adjustedEndTime - Date.now())
   );
-  const [pausedAt, setPausedAt] = useState<number | null>(null);
-  const [pausedRemaining, setPausedRemaining] = useState<number | null>(null);
 
   useEffect(() => {
     if (isPaused) {
-      // Capture the remaining time when paused
-      if (pausedAt === null) {
-        setPausedAt(Date.now());
-        setPausedRemaining(Math.max(0, endTimeMs - Date.now()));
-      }
+      // While paused, don't tick — but show frozen remaining time
+      setTimeLeftMs(Math.max(0, adjustedEndTime - Date.now()));
       return;
     }
 
-    // If resuming from pause, adjust endTime
-    if (pausedAt !== null && pausedRemaining !== null) {
-      // Timer continues from where it was paused
-      setPausedAt(null);
-      setPausedRemaining(null);
-    }
-
     const interval = setInterval(() => {
-      const remaining = Math.max(0, endTimeMs - Date.now());
+      const remaining = Math.max(0, adjustedEndTime - Date.now());
       setTimeLeftMs(remaining);
       onTick?.(remaining);
 
@@ -52,9 +59,9 @@ export default function AuctionTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [endTimeMs, isPaused, pausedAt, pausedRemaining, onTick, onEnd]);
+  }, [isPaused, adjustedEndTime, onTick, onEnd]);
 
-  const displayMs = isPaused && pausedRemaining !== null ? pausedRemaining : timeLeftMs;
+  const displayMs = timeLeftMs;
 
   const hours = Math.floor(displayMs / (1000 * 60 * 60));
   const minutes = Math.floor((displayMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -63,11 +70,10 @@ export default function AuctionTimer({
   const pad = (n: number) => n.toString().padStart(2, "0");
   const timeStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
-  // Color based on time remaining
   const getColorClass = () => {
     if (isPaused) return "text-yellow-600";
-    if (displayMs <= 60 * 1000) return "text-red-600"; // < 1 min
-    if (displayMs <= 5 * 60 * 1000) return "text-yellow-600"; // < 5 min
+    if (displayMs <= 60 * 1000) return "text-red-600";
+    if (displayMs <= 5 * 60 * 1000) return "text-yellow-600";
     return "text-green-600";
   };
 

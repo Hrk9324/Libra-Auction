@@ -97,12 +97,41 @@ export default function LiveAuctionView({
     auctionSocket.subscribe(bidsTopic, (body: unknown) => {
       if (!isRecord(body)) return;
       const bid = body as unknown as BidUpdate;
-      if (typeof bid.bidAmount === "number") {
-        setCurrentBid(bid.bidAmount);
+
+      // Parse bidAmount - handle both number and string
+      const bidAmount = typeof bid.bidAmount === "number"
+        ? bid.bidAmount
+        : typeof bid.bidAmount === "string"
+          ? Number(bid.bidAmount)
+          : undefined;
+
+      // Parse currentPrice from server (may be sent as currentPrice or current_price)
+      const serverPrice = bid.currentPrice ?? bid.current_price;
+      const price = typeof serverPrice === "number"
+        ? serverPrice
+        : typeof serverPrice === "string"
+          ? Number(serverPrice)
+          : undefined;
+
+      // Skip error responses
+      if (bid.status === "ERROR") {
+        addNotification(`Lỗi: ${bid.bidderName || "Không thể đặt giá"}`);
+        return;
+      }
+
+      // Update current price - prefer server price, fallback to bidAmount
+      if (typeof price === "number" && price > 0) {
+        setCurrentBid(price);
+      } else if (typeof bidAmount === "number" && bidAmount > 0) {
+        setCurrentBid(bidAmount);
+      }
+
+      // Add to bid history
+      if (typeof bidAmount === "number" && bidAmount > 0) {
         setBids((prev) => [
           {
             bidderName: bid.bidderName || "Unknown",
-            amount: bid.bidAmount!,
+            amount: bidAmount,
             time: bid.bidTime
               ? new Date(bid.bidTime).toLocaleTimeString("vi-VN")
               : new Date().toLocaleTimeString("vi-VN"),
@@ -112,14 +141,11 @@ export default function LiveAuctionView({
         ]);
         setTotalBids((prev) => prev + 1);
         setHighestBidder(bid.bidderName || "--");
-        // Check if current user is highest bidder (simplified - in production, compare bidderId)
-        if (bid.bidderName) {
-          setIsHighestBidder(false); // Would need current user ID to compare
+        // Reset highest bidder flag if someone else outbid
+        if (bid.bidderName && bid.bidderName !== "You" && bid.bidderName !== "Bạn") {
+          setIsHighestBidder(false);
         }
-      }
-      const price = bid.currentPrice ?? bid.current_price;
-      if (typeof price === "number" && price > 0) {
-        setCurrentBid(price);
+        addNotification(`${bid.bidderName || "Người chơi"} đã đặt giá ${CurrencyFormat(bidAmount)}`);
       }
     });
 
@@ -205,13 +231,28 @@ export default function LiveAuctionView({
     setShowConfirm(false);
     setIsBidding(true);
     try {
+      // Optimistic update - update UI immediately
+      setCurrentBid(value);
+      setBids((prev) => [
+        {
+          bidderName: "Bạn",
+          amount: value,
+          time: new Date().toLocaleTimeString("vi-VN"),
+          status: "SUCCESS",
+        },
+        ...prev,
+      ]);
+      setTotalBids((prev) => prev + 1);
+      setHighestBidder("Bạn");
+      setIsHighestBidder(true);
+      setBidValue("");
+      addNotification(`Đã đặt giá ${CurrencyFormat(value)}`);
+
       auctionSocket.send("/app/bid", {
         auctionId: auction.auction_id,
         bidAmount: value,
-        bidderName: "You", // Would use actual user name
+        bidderName: "You",
       });
-      setBidValue("");
-      addNotification(`Đã đặt giá ${CurrencyFormat(value)}`);
     } catch (err) {
       console.error(err);
       addNotification("Lỗi khi đặt giá");
@@ -228,16 +269,16 @@ export default function LiveAuctionView({
   const isPaused = auctionStatus === "PAUSED";
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pt-8 px-6 md:px-16 pb-12">
-      <div className="mx-auto max-w-6xl">
+    <div className="min-h-screen bg-gray-50/50 pt-10 px-16 pb-12">
+      <div className="mx-auto">
         {/* Status Banner */}
         {statusMessage && (
           <div
-            className={`mb-4 rounded-xl p-4 text-center font-semibold ${
+            className={`mb-6 rounded-2xl p-5 text-center font-semibold text-lg ${
               isPaused
                 ? "bg-yellow-50 text-yellow-800 border border-yellow-200"
                 : isEnded
-                ? "bg-gray-50 text-gray-600 border border-gray-200"
+                ? "bg-gray-100 text-gray-600 border border-gray-200"
                 : "bg-blue-50 text-blue-800 border border-blue-200"
             }`}
           >
@@ -247,34 +288,34 @@ export default function LiveAuctionView({
 
         {/* Role Indicator */}
         {role === "admin" && (
-          <div className="mb-4 rounded-xl p-3 bg-blue-50 text-blue-700 border border-blue-200 text-sm text-center">
+          <div className="mb-6 rounded-2xl p-4 bg-blue-50 text-blue-700 border border-blue-200 text-center">
             Admin - Chế độ giám sát
           </div>
         )}
 
         {/* Highest Bidder Indicator */}
         {role === "user" && isHighestBidder && canBid && (
-          <div className="mb-4 rounded-xl p-3 bg-green-50 text-green-700 border border-green-200 text-sm text-center font-semibold">
+          <div className="mb-6 rounded-2xl p-4 bg-green-50 text-green-700 border border-green-200 text-center font-semibold text-lg">
             Bạn đang là người giữ giá cao nhất!
           </div>
         )}
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 p-8 lg:p-12">
             {/* Left Column - Product & History */}
-            <div className="lg:col-span-2">
+            <div className="flex flex-col gap-6">
               {/* Product Image */}
-              <div className="relative aspect-video w-full rounded-xl bg-gray-100 overflow-hidden">
+              <div className="relative aspect-square w-full rounded-2xl bg-gray-50 border border-gray-100 overflow-hidden shadow-sm flex items-center justify-center">
                 <Image
                   src={auction.images?.[0] || "/placeholder-image.jpg"}
                   alt={auction.product_name}
                   fill
-                  className="object-contain p-6"
+                  className="object-contain p-4"
                 />
                 {/* Live Badge */}
                 <div className="absolute top-4 left-4">
                   <span
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-white ${
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold text-white ${
                       auctionStatus === "IN_PROGRESS"
                         ? "bg-red-500"
                         : auctionStatus === "PAUSED"
@@ -283,9 +324,9 @@ export default function LiveAuctionView({
                     }`}
                   >
                     {auctionStatus === "IN_PROGRESS" && (
-                      <span className="relative flex h-2 w-2">
+                      <span className="relative flex h-2.5 w-2.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
                       </span>
                     )}
                     {auctionStatus === "IN_PROGRESS"
@@ -298,106 +339,119 @@ export default function LiveAuctionView({
               </div>
 
               {/* Product Info */}
-              <div className="mt-4 flex items-start justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    {auction.product_name}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {auction.category_name} • #{auction.product_id}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                    {auction.description}
-                  </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-gray-500 font-medium uppercase tracking-wider">
+                  <span>{auction.category_name}</span>
+                  <span>#{auction.product_id}</span>
                 </div>
+                <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                  {auction.product_name}
+                </h1>
+                <p className="text-base text-gray-500 line-clamp-3">
+                  {auction.description}
+                </p>
               </div>
 
-              {/* Timer */}
-              <div className="mt-4">
-                <AuctionTimer
-                  endTimeMs={endTimeMs}
-                  isPaused={isPaused}
-                  size="md"
-                />
-              </div>
-
-              {/* Bid History */}
-              <div className="mt-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Lịch sử trả giá ({totalBids} bids)
-                </h3>
-                <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
-                  <BidHistory bids={bids} maxHeight="300px" />
+              {/* Notifications */}
+              <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                <p className="text-lg font-semibold text-gray-800 mb-3">
+                  Thông báo
+                </p>
+                <div className="max-h-60 overflow-auto space-y-2">
+                  {notifications.length === 0 ? (
+                    <p className="text-sm text-gray-400">Chưa có thông báo</p>
+                  ) : (
+                    notifications.map((note, idx) => (
+                      <p
+                        key={idx}
+                        className="text-sm text-gray-500 border-b border-gray-100 py-2"
+                      >
+                        {note}
+                      </p>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Right Column - Price & Bid */}
-            <aside className="flex flex-col gap-4">
+            <aside className="flex flex-col gap-6 h-full">
               {/* Current Price */}
-              <div className="bg-gradient-to-r from-[#146C94] to-[#19A7CE] rounded-xl p-5">
-                <p className="text-xs text-white/70 uppercase tracking-wider">
+              <div className="bg-gradient-to-br from-[#146C94] to-[#19A7CE] rounded-2xl p-8">
+                <p className="text-sm text-white/70 uppercase tracking-wider font-medium">
                   Giá hiện tại
                 </p>
-                <p className="text-3xl font-bold text-white mt-1">
+                <p className="text-4xl font-bold text-white mt-2">
                   {CurrencyFormat(currentBid)}
                 </p>
-                <p className="text-xs text-white/60 mt-1">
+                <p className="text-sm text-white/60 mt-3">
                   Bước giá tối thiểu: {CurrencyFormat(auction.min_bid_increment)}
                 </p>
               </div>
 
-              {/* Highest Bidder */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                <p className="text-xs text-gray-500">
-                  Người giữ giá cao nhất
-                </p>
-                <p className="text-sm font-bold text-gray-800 mt-1">
-                  {highestBidder}
-                </p>
+              {/* Highest Bidder & Timer */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                  <p className="text-sm text-gray-500 mb-2">
+                    Người giữ giá cao nhất
+                  </p>
+                  <p className="text-xl font-bold text-gray-900 truncate">
+                    {highestBidder}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+                  <p className="text-sm text-gray-500 mb-2">
+                    Thời gian còn lại
+                  </p>
+                  <AuctionTimer
+                    endTimeMs={endTimeMs}
+                    isPaused={isPaused}
+                    size="sm"
+                  />
+                </div>
               </div>
 
               {/* Bid Form - Buyer Only */}
               {role === "user" && (
-                <div className="bg-white rounded-xl p-4 border border-gray-100">
+                <div className="bg-(--primary-color)/10 border border-(--primary-color)/5 rounded-2xl p-6 relative overflow-hidden">
                   {canBid ? (
                     <>
-                      <label className="block text-sm font-semibold text-gray-700">
+                      <label className="block text-lg font-semibold text-gray-900 mb-1">
                         Đặt giá của bạn
                       </label>
-                      <p className="text-xs text-gray-400 mt-1 mb-3">
-                        Tối thiểu: {CurrencyFormat(minimumBid)}
+                      <p className="text-sm text-gray-500 mb-5">
+                        Giá tối thiểu: <span className="font-semibold text-[#19A7CE]">{CurrencyFormat(minimumBid)}</span>
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <input
                           type="number"
                           min={minimumBid}
                           value={bidValue}
                           onChange={(e) => setBidValue(e.target.value)}
                           placeholder={String(minimumBid)}
-                          className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-[#19A7CE]/40 text-sm"
+                          className="flex-1 bg-white border border-gray-200 rounded-xl px-5 py-4 outline-none focus:ring-2 focus:ring-[#19A7CE]/40 focus:border-[#19A7CE] text-base"
                         />
                         <button
                           onClick={handleBidClick}
                           disabled={isBidding || !bidValue}
-                          className="bg-[#19A7CE] text-white px-5 py-3 rounded-xl font-bold hover:bg-[#146C94] transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                          className="bg-[#19A7CE] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#146C94] transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
                         >
-                          {isBidding ? "Đang đặt..." : "Place Bid"}
+                          {isBidding ? "Đang đặt..." : "Đặt giá"}
                         </button>
                       </div>
                     </>
                   ) : isPaused ? (
                     <div className="text-center py-4">
-                      <p className="text-yellow-600 font-semibold">
+                      <p className="text-yellow-700 font-semibold text-lg">
                         Phiên đấu giá đang tạm dừng
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-sm text-yellow-600/70 mt-1">
                         Không thể đặt giá lúc này
                       </p>
                     </div>
                   ) : isEnded ? (
                     <div className="text-center py-4">
-                      <p className="text-gray-500 font-semibold">
+                      <p className="text-gray-600 font-semibold text-lg">
                         Phiên đấu giá đã kết thúc
                       </p>
                     </div>
@@ -405,26 +459,13 @@ export default function LiveAuctionView({
                 </div>
               )}
 
-              {/* Notifications */}
-
-              {/* Notifications */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex-1">
-                <p className="text-sm font-semibold text-gray-700 mb-2">
-                  Thông báo
-                </p>
-                <div className="max-h-48 overflow-auto space-y-1">
-                  {notifications.length === 0 ? (
-                    <p className="text-xs text-gray-400">Chưa có thông báo</p>
-                  ) : (
-                    notifications.map((note, idx) => (
-                      <p
-                        key={idx}
-                        className="text-xs text-gray-500 border-b border-gray-100 py-1"
-                      >
-                        {note}
-                      </p>
-                    ))
-                  )}
+              {/* Bid History */}
+              <div className="flex-1 flex flex-col min-h-0">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  Lịch sử trả giá ({totalBids} bids)
+                </h3>
+                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 flex-1 min-h-0">
+                  <BidHistory bids={bids} maxHeight="100%" />
                 </div>
               </div>
             </aside>
@@ -434,27 +475,27 @@ export default function LiveAuctionView({
 
       {/* Bid Confirmation Dialog */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl">
-            <h4 className="text-lg font-bold text-[#146C94] mb-2">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h4 className="text-2xl font-bold text-[#146C94] mb-3">
               Xác nhận đặt giá
             </h4>
-            <p className="text-sm text-gray-600 mb-1">
+            <p className="text-base text-gray-600 mb-2">
               Bạn có chắc muốn đặt giá:
             </p>
-            <p className="text-2xl font-bold text-[#19A7CE] mb-6">
+            <p className="text-3xl font-bold text-[#19A7CE] mb-8">
               {CurrencyFormat(Number(bidValue))}
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-4 justify-end">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg text-sm font-semibold hover:bg-gray-200 transition"
+                className="px-6 py-3 text-gray-600 bg-gray-100 rounded-xl text-base font-semibold hover:bg-gray-200 transition"
               >
                 Hủy
               </button>
               <button
                 onClick={confirmBid}
-                className="px-6 py-2 bg-[#19A7CE] text-white rounded-lg text-sm font-bold hover:bg-[#146C94] transition"
+                className="px-8 py-3 bg-[#19A7CE] text-white rounded-xl text-base font-bold hover:bg-[#146C94] transition"
               >
                 Xác nhận
               </button>

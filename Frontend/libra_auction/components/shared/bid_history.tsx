@@ -28,8 +28,8 @@ export default function BidHistory({
 
   return (
     <div
-      className="overflow-auto space-y-2 pr-1"
-      style={{ maxHeight }}
+      className="overflow-auto space-y-2 pr-1 h-full"
+      style={maxHeight === "100%" ? { height: "100%" } : { maxHeight }}
     >
       {bids.map((bid, idx) => (
         <div

@@ -1,17 +1,12 @@
 package io.github.guennhatking.libra_auction.services;
 
 import io.github.guennhatking.libra_auction.enums.auth.TokenType;
-import io.github.guennhatking.libra_auction.models.account.Role;
 import io.github.guennhatking.libra_auction.models.person.Customer;
 import io.github.guennhatking.libra_auction.security.JwtRSA;
 import io.github.guennhatking.libra_auction.security.JwtUtils;
 import io.github.guennhatking.libra_auction.viewmodels.response.JwtResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class TokenService {

@@ -80,4 +80,25 @@ public class AuctionRegistrationController {
     public List<AuctionRegistrationResponse> getRegistrationsByAuctionId(@PathVariable String auctionId) {
         return auctionRegistrationService.getRegistrationsByAuctionId(auctionId);
     }
+
+    @GetMapping("/user/{userId}/auction/{auctionId}")
+    public ResponseEntity<ServerAPIResponse<AuctionRegistrationResponse>> getRegistrationByUserAndAuction(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @PathVariable String userId, @PathVariable String auctionId) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Authentication required"));
+        }
+        if (!userDetails.getUserId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Access denied"));
+        }
+        try {
+            AuctionRegistrationResponse response = auctionRegistrationService.getRegistrationByUserAndAuction(userId, auctionId);
+            return ResponseEntity.ok(ServerAPIResponse.success(response));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ServerAPIResponse.error(e.getMessage()));
+        }
+    }
 }

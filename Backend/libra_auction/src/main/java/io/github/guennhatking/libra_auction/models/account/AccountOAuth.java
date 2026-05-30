@@ -2,8 +2,10 @@ package io.github.guennhatking.libra_auction.models.account;
 
 import io.github.guennhatking.libra_auction.enums.account.AccountStatus;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "account_oauth")
 public class AccountOAuth extends Account {
     private String provider;
     private String providerId;

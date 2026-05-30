@@ -3,9 +3,14 @@ import { useState, useEffect } from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { Auction } from "@/types/auction/auction";
+import { UserInfo } from "@/types/user_info";
 import { CurrencyFormat } from '@/utils/currency_format';
 import { TimeFormat } from '@/utils/time_format';
 import { DurationFormat } from '@/utils/duration_format';
+import { checkRegistration } from '@/services/register_auction';
+import { getIdFromToken } from '@/lib/get_id_from_token';
+import { fetchUserInfo } from '@/services/fetch_user_info';
+import RegistrationConfirmDialog from './registration_confirm_dialog';
 import countdown from '@/public/countdown.png';
 import startFlag from '@/public/start_flag.png';
 import increment from '@/public/increment.png';
@@ -19,8 +24,11 @@ export default function AuctionInfoSection({
   autionInfos: Auction
 }) {
   const [activeImage, setActiveImage] = useState(autionInfos.images[0]);
-  const [isRegistering, setIsRegistering] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const isLive = autionInfos.auction_status === "IN_PROGRESS";
   const startDate = new Date(autionInfos.start_time);
 
@@ -59,20 +67,35 @@ export default function AuctionInfoSection({
     return () => clearInterval(timer);
   }, [autionInfos.start_time]);
 
-  const handleRegister = async () => {
-    setIsRegistering(true);
-    // try {
-    //   await fetch("/auctions-register", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify({ auction_id: autionInfos.auction_id })
-    //   });
-    //   // Handle success locally
-    // } catch (error) {
-    //   console.error("Registration failed", error);
-    // } finally {
-    //   setIsRegistering(false);
-    // }
+  // Check registration status on mount
+  useEffect(() => {
+    const checkUserRegistration = async () => {
+      try {
+        const userId = await getIdFromToken();
+        if (!userId) {
+          setIsLoggedIn(false);
+          return;
+        }
+        setIsLoggedIn(true);
+        const registration = await checkRegistration(userId, autionInfos.auction_id);
+        if (registration) {
+          setIsRegistered(true);
+        }
+        const info = await fetchUserInfo(userId);
+        setUserInfo(info);
+      } catch {
+        // User not logged in or error
+      }
+    };
+    checkUserRegistration();
+  }, [autionInfos.auction_id]);
+
+  const handleRegisterClick = () => {
+    if (!isLoggedIn) {
+      window.location.href = "/sign-in";
+      return;
+    }
+    setShowConfirmDialog(true);
   };
 
   return (
@@ -204,23 +227,25 @@ export default function AuctionInfoSection({
                     href={`/auctions/${autionInfos.category_id}/${autionInfos.auction_id}/live`}
                     className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white text-lg font-bold py-5 px-8 rounded-2xl shadow-lg transition-all duration-200 group"
                   >
-                    View live
+                    Xem đấu giá trực tiếp
+                  </Link>
+                ) : isRegistered ? (
+                  <Link
+                    href={`/auctions/${autionInfos.category_id}/${autionInfos.auction_id}/registration`}
+                    className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white text-lg font-bold py-5 px-8 rounded-2xl shadow-lg transition-all duration-200 group"
+                  >
+                    Xem thông tin đăng ký
                   </Link>
                 ) : (
                   <>
                     <button
-                      onClick={handleRegister}
-                      disabled={isRegistering}
-                      className="w-full flex items-center justify-center gap-3 bg-(--secondary-color)/90 hover:bg-(--secondary-color)/80 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-white text-lg font-bold py-5 px-8 rounded-2xl shadow-lg transition-all duration-200 group"
+                      onClick={handleRegisterClick}
+                      className="w-full flex items-center justify-center gap-3 bg-[#19A7CE] hover:bg-[#1591b3] active:scale-[0.98] text-white text-lg font-bold py-5 px-8 rounded-2xl shadow-lg transition-all duration-200 group"
                     >
-                      {isRegistering ? (
-                        <div className="animate-pulse">Loading...</div>
-                      ) : (
-                        <>Register to Join Auction</>
-                      )}
+                      Đăng ký tham gia đấu giá
                     </button>
                     <p className="text-center text-sm text-gray-400 mt-4">
-                      Registration is required to participate. No charges apply until you win.
+                      Đăng ký là bắt buộc để tham gia. Không mất phí cho đến khi bạn trúng đấu giá.
                     </p>
                   </>
                 )}
@@ -229,6 +254,17 @@ export default function AuctionInfoSection({
           </div>
         </div>
       </div>
+
+      {/* Registration Confirm Dialog */}
+      {showConfirmDialog && userInfo && (
+        <RegistrationConfirmDialog
+          isOpen={showConfirmDialog}
+          onClose={() => setShowConfirmDialog(false)}
+          auction={autionInfos}
+          userInfo={userInfo}
+          categoryId={autionInfos.category_id}
+        />
+      )}
     </div>
   );
 }
