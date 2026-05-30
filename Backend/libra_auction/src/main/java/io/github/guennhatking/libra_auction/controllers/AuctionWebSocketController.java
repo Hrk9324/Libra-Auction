@@ -11,7 +11,6 @@ import io.github.guennhatking.libra_auction.models.auction.AuctionLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.time.OffsetDateTime;
@@ -29,7 +28,6 @@ public class AuctionWebSocketController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuctionWebSocketController.class);
 
-    private final SimpMessagingTemplate messagingTemplate;
     private final AuctionRepository auctionRepository;
     private final AuctionStateRedisService auctionStateRedisService;
     private final AuctionWebSocketNotificationService auctionWebSocketNotificationService;
@@ -41,11 +39,10 @@ public class AuctionWebSocketController {
     private static final int FINAL_MINUTES_WINDOW = 5;
     private static final int EXTENSION_MINUTES = 5;
 
-    public AuctionWebSocketController(SimpMessagingTemplate messagingTemplate,
+    public AuctionWebSocketController(
             AuctionRepository auctionRepository,
             AuctionStateRedisService auctionStateRedisService,
             AuctionWebSocketNotificationService auctionWebSocketNotificationService) {
-        this.messagingTemplate = messagingTemplate;
         this.auctionRepository = auctionRepository;
         this.auctionStateRedisService = auctionStateRedisService;
         this.auctionWebSocketNotificationService = auctionWebSocketNotificationService;
@@ -167,7 +164,7 @@ public class AuctionWebSocketController {
      * Helper: Broadcast bid to all auction participants
      */
     private void broadcastBid(String auctionId, BidResponse bidResponse) {
-        messagingTemplate.convertAndSend("/topic/auction/" + auctionId, bidResponse);
+        auctionWebSocketNotificationService.sendBidUpdate(auctionId, bidResponse);
     }
 
     /**
@@ -194,7 +191,7 @@ public class AuctionWebSocketController {
                 null,
                 OffsetDateTime.now(ZoneOffset.ofHours(7)),
                 "ERROR");
-        messagingTemplate.convertAndSend("/topic/auction/" + auctionId, errorResponse);
+        auctionWebSocketNotificationService.sendBidUpdate(auctionId, errorResponse);
     }
 
     /**

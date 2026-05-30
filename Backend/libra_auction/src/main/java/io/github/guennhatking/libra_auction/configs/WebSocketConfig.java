@@ -28,11 +28,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.setErrorHandler(new CustomStompErrorHandler());
+
         // Native WebSocket endpoint - for wscat and Node.js WebSocket clients
         registry.addEndpoint("/auction-websocket")
                 .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new org.springframework.web.socket.server.support.DefaultHandshakeHandler());
-        
+
         // SockJS fallback endpoint (for browsers without WebSocket support)
         registry.addEndpoint("/auction-websocket-sockjs")
                 .setAllowedOriginPatterns("*")
