@@ -8,6 +8,7 @@ import io.github.guennhatking.libra_auction.services.AuctionWebSocketNotificatio
 import io.github.guennhatking.libra_auction.viewmodels.request.BidMessage;
 import io.github.guennhatking.libra_auction.viewmodels.response.BidResponse;
 import io.github.guennhatking.libra_auction.models.auction.AuctionLog;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -51,6 +52,7 @@ public class AuctionWebSocketController {
     /**
      * Main bid handler - routes to appropriate auction type handler
      */
+    @Transactional
     @MessageMapping("/bid")
     public void handleBid(BidMessage bidMessage) {
         logger.info("Received bid message: auctionId={}, bidAmount={}, bidderId={}, bidderName={}",
@@ -188,7 +190,7 @@ public class AuctionWebSocketController {
                 auctionId,
                 null,
                 null,
-                null,
+                errorMessage,
                 OffsetDateTime.now(ZoneOffset.ofHours(7)),
                 "ERROR");
         auctionWebSocketNotificationService.sendBidUpdate(auctionId, errorResponse);

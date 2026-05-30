@@ -5,6 +5,8 @@ import { useEffect, useState, useCallback } from "react";
 import { Auction } from "@/types/auction/auction";
 import { CurrencyFormat } from "@/utils/currency_format";
 import { auctionSocket } from "@/services/auction_socket";
+import { getIdFromToken } from "@/lib/get_id_from_token";
+import { fetchAuctionBids } from "@/services/fetch_auction_bids";
 import BidHistory, { BidEntry } from "@/components/shared/bid_history";
 import AuctionTimer from "@/components/shared/auction_timer";
 
@@ -74,6 +76,32 @@ export default function LiveAuctionView({
   const [notifications, setNotifications] = useState<string[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user ID on mount
+  useEffect(() => {
+    getIdFromToken().then((id) => setCurrentUserId(id));
+  }, []);
+
+  // Fetch existing bids on mount
+  useEffect(() => {
+    fetchAuctionBids(auction.auction_id).then((fetchedBids) => {
+      if (fetchedBids.length > 0) {
+        const mappedBids: BidEntry[] = fetchedBids.map((b) => ({
+          bidderName: b.bidderName || "Unknown",
+          amount: b.bidAmount,
+          time: new Date(b.bidTime).toLocaleTimeString("vi-VN"),
+          status: (b.status as BidEntry["status"]) || "SUCCESS",
+        }));
+        setBids(mappedBids);
+        setTotalBids(mappedBids.length);
+        if (mappedBids.length > 0) {
+          setHighestBidder(mappedBids[0].bidderName);
+          setCurrentBid(mappedBids[0].amount);
+        }
+      }
+    });
+  }, [auction.auction_id]);
 
   const addNotification = useCallback((msg: string) => {
     setNotifications((prev) => [
@@ -113,9 +141,10 @@ export default function LiveAuctionView({
           ? Number(serverPrice)
           : undefined;
 
-      // Skip error responses
+      // Handle error responses
       if (bid.status === "ERROR") {
-        addNotification(`Lỗi: ${bid.bidderName || "Không thể đặt giá"}`);
+        const errorMsg = bid.bidderName || bid.bidAmount?.toString() || "Không thể đặt giá";
+        addNotification(`Lỗi: ${errorMsg}`);
         return;
       }
 
@@ -128,9 +157,12 @@ export default function LiveAuctionView({
 
       // Add to bid history
       if (typeof bidAmount === "number" && bidAmount > 0) {
+        const isMyBid = currentUserId && bid.bidderId && bid.bidderId === currentUserId;
+        const displayName = isMyBid ? "Bạn" : (bid.bidderName || "Unknown");
+
         setBids((prev) => [
           {
-            bidderName: bid.bidderName || "Unknown",
+            bidderName: displayName,
             amount: bidAmount,
             time: bid.bidTime
               ? new Date(bid.bidTime).toLocaleTimeString("vi-VN")
@@ -140,12 +172,15 @@ export default function LiveAuctionView({
           ...prev,
         ]);
         setTotalBids((prev) => prev + 1);
-        setHighestBidder(bid.bidderName || "--");
-        // Reset highest bidder flag if someone else outbid
-        if (bid.bidderName && bid.bidderName !== "You" && bid.bidderName !== "Bạn") {
+        setHighestBidder(displayName);
+
+        if (isMyBid) {
+          setIsHighestBidder(true);
+        } else {
           setIsHighestBidder(false);
         }
-        addNotification(`${bid.bidderName || "Người chơi"} đã đặt giá ${CurrencyFormat(bidAmount)}`);
+
+        addNotification(`${displayName} đã đặt giá ${CurrencyFormat(bidAmount)}`);
       }
     });
 
@@ -234,6 +269,7 @@ export default function LiveAuctionView({
       auctionSocket.send("/app/bid", {
         auctionId: auction.auction_id,
         bidAmount: value,
+        bidderId: currentUserId || undefined,
         bidderName: "You",
       });
       setBidValue("");
@@ -445,11 +481,11 @@ export default function LiveAuctionView({
               )}
 
               {/* Bid History */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex-1 min-h-0 flex flex-col">
+                <p className="text-lg font-semibold text-gray-800 mb-3 flex-shrink-0">
                   Lịch sử trả giá ({totalBids} bids)
-                </h3>
-                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 flex-1 min-h-0">
+                </p>
+                <div className="flex-1 min-h-0 overflow-auto">
                   <BidHistory bids={bids} maxHeight="100%" />
                 </div>
               </div>
