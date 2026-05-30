@@ -1,0 +1,1421 @@
+databaseChangeLog:
+- changeSet:
+    id: 1780103261350-1
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: customer_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: account_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: status
+            type: VARCHAR(255)
+        tableName: account
+- changeSet:
+    id: 1780103261350-2
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: created_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: deposit_amount
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: duration
+            type: BIGINT
+        - column:
+            constraints:
+              nullable: false
+            name: minimum_bid_increment
+            type: BIGINT
+        - column:
+            name: start_time
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: starting_price
+            type: BIGINT
+        - column:
+            name: approval_status
+            type: VARCHAR(255)
+        - column:
+            name: auction_status
+            type: VARCHAR(255)
+        - column:
+            name: creator_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: auction_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: product_id
+            type: VARCHAR(255)
+        tableName: auction
+- changeSet:
+    id: 1780103261350-3
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: auction_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: create_auction_request_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: rejection_reason
+            type: VARCHAR(255)
+        - column:
+            name: status
+            type: VARCHAR(255)
+        tableName: create_auction_request
+- changeSet:
+    id: 1780103261350-4
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: created_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: account_status
+            type: VARCHAR(255)
+        - column:
+            name: avatar_url
+            type: VARCHAR(255)
+        - column:
+            name: email
+            type: VARCHAR(255)
+        - column:
+            name: email_status
+            type: VARCHAR(255)
+        - column:
+            name: full_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: customer_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: identity_number
+            type: VARCHAR(255)
+        - column:
+            name: phone_number
+            type: VARCHAR(255)
+        - column:
+            name: role_name
+            type: VARCHAR(255)
+        tableName: customer
+- changeSet:
+    id: 1780103261350-5
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: answer_time
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: question_time
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: answer_content
+            type: VARCHAR(255)
+        - column:
+            name: answerer_id
+            type: VARCHAR(255)
+        - column:
+            name: auction_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: question_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: question_content
+            type: VARCHAR(255)
+        - column:
+            name: question_status
+            type: VARCHAR(255)
+        - column:
+            name: questioner_id
+            type: VARCHAR(255)
+        tableName: question
+- changeSet:
+    id: 1780103261350-6
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: activation_expiry
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: usage_expiry
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: customer_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: request_entity_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: notification_id
+            type: VARCHAR(255)
+        - column:
+            name: request_status
+            type: VARCHAR(255)
+        - column:
+            name: request_type
+            type: VARCHAR(255)
+        - column:
+            name: token
+            type: VARCHAR(255)
+        tableName: request_entity
+- changeSet:
+    id: 1780103261350-7
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: amount
+            type: BIGINT
+        - column:
+            name: created_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: transaction_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: partner_transaction_id
+            type: VARCHAR(255)
+        - column:
+            name: transaction_status
+            type: VARCHAR(255)
+        - column:
+            name: transaction_type
+            type: VARCHAR(255)
+        tableName: transaction
+- changeSet:
+    id: 1780103261350-8
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: end_time
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            constraints:
+              nullable: false
+            name: winning_price
+            type: BIGINT
+        - column:
+            name: auction_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: auction_result_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: winner_id
+            type: VARCHAR(255)
+        tableName: auction_result
+- changeSet:
+    id: 1780103261350-9
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: email_verification_request_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: otp_request_id
+            type: VARCHAR(255)
+        tableName: email_verification_request
+- changeSet:
+    id: 1780103261350-10
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: password_reset_request_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: new_password
+            type: VARCHAR(255)
+        - column:
+            name: otp_request_id
+            type: VARCHAR(255)
+        tableName: password_reset_request
+- changeSet:
+    id: 1780103261350-11
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: auction_result_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: payment_transaction_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: receiver_id
+            type: VARCHAR(255)
+        - column:
+            name: sender_id
+            type: VARCHAR(255)
+        tableName: payment_transaction
+- changeSet:
+    id: 1780103261350-12
+    author: nhatking (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: product_id
+        constraintName: auction_product_id_key
+        tableName: auction
+- changeSet:
+    id: 1780103261350-13
+    author: nhatking (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: auction_id
+        constraintName: auction_result_auction_id_key
+        tableName: auction_result
+- changeSet:
+    id: 1780103261350-14
+    author: nhatking (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: otp_request_id
+        constraintName: email_verification_request_otp_request_id_key
+        tableName: email_verification_request
+- changeSet:
+    id: 1780103261350-15
+    author: nhatking (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: otp_request_id
+        constraintName: password_reset_request_otp_request_id_key
+        tableName: password_reset_request
+- changeSet:
+    id: 1780103261350-16
+    author: nhatking (generated)
+    changes:
+    - addUniqueConstraint:
+        columnNames: auction_result_id
+        constraintName: payment_transaction_auction_result_id_key
+        tableName: payment_transaction
+- changeSet:
+    id: 1780103261350-17
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: account_password_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: password_hash
+            type: VARCHAR(255)
+        - column:
+            name: username
+            type: VARCHAR(255)
+        - column:
+            name: salt
+            type: BYTEA
+        tableName: account_password
+- changeSet:
+    id: 1780103261350-18
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: accountoauth_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: provider
+            type: VARCHAR(255)
+        - column:
+            name: provider_id
+            type: VARCHAR(255)
+        tableName: accountoauth
+- changeSet:
+    id: 1780103261350-19
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: app_notification_pkey
+            name: id
+            type: VARCHAR(255)
+        tableName: app_notification
+- changeSet:
+    id: 1780103261350-20
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: attribute_combination_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: product_id
+            type: VARCHAR(255)
+        - column:
+            name: standardized_attribute_id
+            type: VARCHAR(255)
+        tableName: attribute_combination
+- changeSet:
+    id: 1780103261350-21
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: bid_amount
+            type: BIGINT
+        - column:
+            name: timestamp
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: auction_id
+            type: VARCHAR(255)
+        - column:
+            name: bidder_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: auction_log_pkey
+            name: id
+            type: VARCHAR(255)
+        tableName: auction_log
+- changeSet:
+    id: 1780103261350-22
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: registered_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: auction_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: auction_participation_info_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: participant_id
+            type: VARCHAR(255)
+        tableName: auction_participation_info
+- changeSet:
+    id: 1780103261350-23
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: timestamp
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: auction_id
+            type: VARCHAR(255)
+        - column:
+            name: bidder_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: bid_rejection_record_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: reason
+            type: VARCHAR(255)
+        tableName: bid_rejection_record
+- changeSet:
+    id: 1780103261350-24
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: category_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: image_url
+            type: VARCHAR(255)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        tableName: category
+- changeSet:
+    id: 1780103261350-25
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: refund_time
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: depositor_id
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: deposit_transaction_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: participation_info_id
+            type: VARCHAR(255)
+        tableName: deposit_transaction
+- changeSet:
+    id: 1780103261350-26
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: email_notification_pkey
+            name: id
+            type: VARCHAR(255)
+        tableName: email_notification
+- changeSet:
+    id: 1780103261350-27
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: sent_at
+            type: TIMESTAMP WITH TIME ZONE
+        - column:
+            name: content
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: notification_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: recipient_id
+            type: VARCHAR(255)
+        tableName: notification
+- changeSet:
+    id: 1780103261350-28
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: generated_otp_code
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: otp_request_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: user_input_otp_code
+            type: VARCHAR(255)
+        tableName: otp_request
+- changeSet:
+    id: 1780103261350-29
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: description
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: permission_pkey
+            name: name
+            type: VARCHAR(255)
+        tableName: permission
+- changeSet:
+    id: 1780103261350-30
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: quantity
+            type: INTEGER
+        - column:
+            name: category_id
+            type: VARCHAR(255)
+        - column:
+            name: creator_id
+            type: VARCHAR(255)
+        - column:
+            name: description
+            type: TEXT
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: product_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: name
+            type: VARCHAR(255)
+        tableName: product
+- changeSet:
+    id: 1780103261350-31
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: attribute_name
+            type: VARCHAR(255)
+        - column:
+            name: attribute_value
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: product_attribute_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: product_id
+            type: VARCHAR(255)
+        tableName: product_attribute
+- changeSet:
+    id: 1780103261350-32
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+            name: display_order
+            type: INTEGER
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: product_image_pkey
+            name: id
+            type: VARCHAR(255)
+        - column:
+            name: image_url
+            type: VARCHAR(255)
+        - column:
+            name: product_id
+            type: VARCHAR(255)
+        tableName: product_image
+- changeSet:
+    id: 1780103261350-33
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: description
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: role_pkey
+            name: name
+            type: VARCHAR(255)
+        tableName: role
+- changeSet:
+    id: 1780103261350-34
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: role_permissions_pkey
+            name: permissions_name
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: role_permissions_pkey
+            name: role_name
+            type: VARCHAR(255)
+        tableName: role_permissions
+- changeSet:
+    id: 1780103261350-35
+    author: nhatking (generated)
+    changes:
+    - createTable:
+        columns:
+        - column:
+            name: attribute_name
+            type: VARCHAR(255)
+        - column:
+            name: attribute_value
+            type: VARCHAR(255)
+        - column:
+            constraints:
+              nullable: false
+              primaryKey: true
+              primaryKeyName: standardized_attribute_pkey
+            name: id
+            type: VARCHAR(255)
+        tableName: standardized_attribute
+- changeSet:
+    id: 1780103261350-36
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: category_id
+        baseTableName: product
+        constraintName: fk1mtsbur82frn64de7balymq9s
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: category
+        validate: true
+- changeSet:
+    id: 1780103261350-37
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: questioner_id
+        baseTableName: question
+        constraintName: fk21r4um03v3piba9gnys8k4lmc
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-38
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: deposit_transaction
+        constraintName: fk2d3eq3ks07jdubm9inkqwlgtm
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: transaction
+        validate: true
+- changeSet:
+    id: 1780103261350-39
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: creator_id
+        baseTableName: auction
+        constraintName: fk2q4oalecc437xfdl2r4i8khke
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-40
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: participant_id
+        baseTableName: auction_participation_info
+        constraintName: fk5niq7kk9iyw280nf2h69pgr53
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-41
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: participation_info_id
+        baseTableName: deposit_transaction
+        constraintName: fk5vkiofu2fmmwdbxyqs02k8dn3
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction_participation_info
+        validate: true
+- changeSet:
+    id: 1780103261350-42
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: sender_id
+        baseTableName: payment_transaction
+        constraintName: fk66adawjea8daxvmo14hnoe9rc
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-43
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: bidder_id
+        baseTableName: bid_rejection_record
+        constraintName: fk6duhup3lfpoyfew4b0d7t49yr
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-44
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: product_id
+        baseTableName: product_image
+        constraintName: fk6oo0cvcdtb6qmwsga468uuukk
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: product
+        validate: true
+- changeSet:
+    id: 1780103261350-45
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: email_verification_request
+        constraintName: fk8bydu7na2i67ijntk81p3qlg8
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: request_entity
+        validate: true
+- changeSet:
+    id: 1780103261350-46
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: recipient_id
+        baseTableName: notification
+        constraintName: fk9f2ug93x9nt8s8shl4p1f53yf
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-47
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: depositor_id
+        baseTableName: deposit_transaction
+        constraintName: fk9mp0h2v8yf1bnmlc437m3cmmj
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-48
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_result_id
+        baseTableName: payment_transaction
+        constraintName: fka2wx0miklo6dm51yedquun0vt
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction_result
+        validate: true
+- changeSet:
+    id: 1780103261350-49
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_id
+        baseTableName: auction_log
+        constraintName: fkaff4og7354ryod4vefxlmo4ie
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction
+        validate: true
+- changeSet:
+    id: 1780103261350-50
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_id
+        baseTableName: auction_result
+        constraintName: fkb6y5mjfow2l0ye54t94o911qx
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction
+        validate: true
+- changeSet:
+    id: 1780103261350-51
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: role_name
+        baseTableName: role_permissions
+        constraintName: fkcppvu8fk24eqqn6q4hws7ajux
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: name
+        referencedTableName: role
+        validate: true
+- changeSet:
+    id: 1780103261350-52
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: product_id
+        baseTableName: attribute_combination
+        constraintName: fkdjwmjnlg571h16wjdckwfafag
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: product
+        validate: true
+- changeSet:
+    id: 1780103261350-53
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: accountoauth
+        constraintName: fke1elpetq8tf0n3otv9la18nge
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: account
+        validate: true
+- changeSet:
+    id: 1780103261350-54
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: app_notification
+        constraintName: fkefw00vs6lbc61d84a48ai48m4
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: notification
+        validate: true
+- changeSet:
+    id: 1780103261350-55
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: email_notification
+        constraintName: fkeixtslcj6wqbt0129juue7fju
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: notification
+        validate: true
+- changeSet:
+    id: 1780103261350-56
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: customer_id
+        baseTableName: request_entity
+        constraintName: fkemykk33mxm42mx71k6cpbxn87
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-57
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: account_password
+        constraintName: fkey2ca4f34kgqsyplv1m0osxbd
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: account
+        validate: true
+- changeSet:
+    id: 1780103261350-58
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: permissions_name
+        baseTableName: role_permissions
+        constraintName: fkf5aljih4mxtdgalvr7xvngfn1
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: name
+        referencedTableName: permission
+        validate: true
+- changeSet:
+    id: 1780103261350-59
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: creator_id
+        baseTableName: product
+        constraintName: fkfabosw8oc724rldm1ct8vam38
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-60
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_id
+        baseTableName: bid_rejection_record
+        constraintName: fkflgauq3onyrjvyrv62j1s9ine
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction
+        validate: true
+- changeSet:
+    id: 1780103261350-61
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: password_reset_request
+        constraintName: fkg7gg4jwbll2382ywgg276fdun
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: request_entity
+        validate: true
+- changeSet:
+    id: 1780103261350-62
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: otp_request
+        constraintName: fkgvvc45789p53ngkihylfhldac
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: request_entity
+        validate: true
+- changeSet:
+    id: 1780103261350-63
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: receiver_id
+        baseTableName: payment_transaction
+        constraintName: fkgw9mvpogr3t6s64h5ujquc5xa
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-64
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: standardized_attribute_id
+        baseTableName: attribute_combination
+        constraintName: fkhxwnlwfhbf98p0wvp7r2rpp9b
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: standardized_attribute
+        validate: true
+- changeSet:
+    id: 1780103261350-65
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: bidder_id
+        baseTableName: auction_log
+        constraintName: fki3bp3vb7og00osf4xxifvbo7c
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-66
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: product_id
+        baseTableName: auction
+        constraintName: fkik2rw5as7p6r3y92mlu2hbrrj
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: product
+        validate: true
+- changeSet:
+    id: 1780103261350-67
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: notification_id
+        baseTableName: request_entity
+        constraintName: fkjrtqrvuj9i9i83km50bun55ck
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: notification
+        validate: true
+- changeSet:
+    id: 1780103261350-68
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: winner_id
+        baseTableName: auction_result
+        constraintName: fkkhfokrqa2ty7dsm5slbbps0dg
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-69
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_id
+        baseTableName: create_auction_request
+        constraintName: fkl10w2vutkvxhvjlko8a6vcjam
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction
+        validate: true
+- changeSet:
+    id: 1780103261350-70
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: answerer_id
+        baseTableName: question
+        constraintName: fkldmnhvt0ygmpybua8srqmv967
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-71
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: product_id
+        baseTableName: product_attribute
+        constraintName: fklefs59y5kmsbu017n1wp10gf2
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: product
+        validate: true
+- changeSet:
+    id: 1780103261350-72
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: otp_request_id
+        baseTableName: email_verification_request
+        constraintName: fklli1qmuhkcxrsvbd0s4jetspu
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: otp_request
+        validate: true
+- changeSet:
+    id: 1780103261350-73
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: otp_request_id
+        baseTableName: password_reset_request
+        constraintName: fkm21bxv1ph2lt2f5gtnait3woi
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: otp_request
+        validate: true
+- changeSet:
+    id: 1780103261350-74
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_id
+        baseTableName: auction_participation_info
+        constraintName: fkmc0mmlx1ojgc60bl0h9r4e4vo
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction
+        validate: true
+- changeSet:
+    id: 1780103261350-75
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: customer_id
+        baseTableName: account
+        constraintName: fknnwpo0lfq4xai1rs6887sx02k
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: customer
+        validate: true
+- changeSet:
+    id: 1780103261350-76
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: id
+        baseTableName: payment_transaction
+        constraintName: fkoscu7yvp91fjfyat1fudv599r
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: transaction
+        validate: true
+- changeSet:
+    id: 1780103261350-77
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: role_name
+        baseTableName: customer
+        constraintName: fkqx18gu4tj7i423rcqn1fo54hp
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: name
+        referencedTableName: role
+        validate: true
+- changeSet:
+    id: 1780103261350-78
+    author: nhatking (generated)
+    changes:
+    - addForeignKeyConstraint:
+        baseColumnNames: auction_id
+        baseTableName: question
+        constraintName: fksx2rd80gnai0sdw0kh86rkf9x
+        deferrable: false
+        initiallyDeferred: false
+        onDelete: NO ACTION
+        onUpdate: NO ACTION
+        referencedColumnNames: id
+        referencedTableName: auction
+        validate: true
+
