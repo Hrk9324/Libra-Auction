@@ -180,7 +180,10 @@ class AuctionSocket {
 
   private buildFrame(command: string, headers: Record<string, string>, body: string) {
     const headerLines = Object.entries(headers).map(([key, value]) => `${key}:${this.escapeHeader(value)}`);
-    return [command, ...headerLines, '', body, '\u0000'].join('\n');
+    const parts = [command, ...headerLines, ''];
+    if (body) parts.push(body);
+    parts.push('\u0000');
+    return parts.join('\n');
   }
 
   private parseFrame(frame: string): { command: string; headers: Record<string, string>; body: string } | null {

@@ -49,7 +49,7 @@ export default function AuctionCard({ auctionCard }: { auctionCard: Auction }) {
             .join(":");
     };
 
-    const auctionEndTime = new Date(new Date(auctionCard.start_time).getTime() + auctionCard.duration * 60 * 1000);
+    const auctionEndTime = new Date(new Date(auctionCard.start_time).getTime() + auctionCard.duration * 1000);
     const countdownLabel = isLive ? "Ends in" : "Starts in";
     const countdownValue = isLive
         ? formatCountdown(auctionEndTime, now)

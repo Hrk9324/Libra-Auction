@@ -19,7 +19,7 @@ export default function AuctionForm({ products }: { products: Product[] }) {
   const [formData, setFormData] = useState<AuctionFormData>({
     productId: "",
     startTime: "",
-    duration: 60,
+    duration: 3600,
     startingPrice: 0,
     minimumBidIncrement: 0,
     depositAmount: 0
@@ -112,7 +112,7 @@ export default function AuctionForm({ products }: { products: Product[] }) {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium">Duration (minutes)</label>
+                <label className="text-sm font-medium">Duration (seconds)</label>
                 <input
                   type="number"
                   value={formData.duration}

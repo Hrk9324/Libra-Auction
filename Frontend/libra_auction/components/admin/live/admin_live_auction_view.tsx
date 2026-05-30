@@ -46,7 +46,7 @@ export default function AdminLiveAuctionView({
   );
   const [endTimeMs] = useState(() => {
     const end =
-      new Date(auction.start_time).getTime() + auction.duration * 60 * 1000;
+      new Date(auction.start_time).getTime() + auction.duration * 1000;
     return end;
   });
   const [auctionStatus, setAuctionStatus] = useState<string>(

@@ -43,7 +43,7 @@ function formatPrice(price: number) {
 
 function mapAuction(auction: AdminAuction): AuctionRow {
   const startDate = new Date(auction.start_time);
-  const endDate = new Date(startDate.getTime() + auction.duration * 60 * 1000);
+  const endDate = new Date(startDate.getTime() + auction.duration * 1000);
 
   return {
     ...auction,

@@ -33,7 +33,7 @@ export const AuctionDetail = ({ data }: AuctionDetailProps) => {
   const auctionInfoItems = [
     { label: "Auction ID", value: `#${data.auction_id}` },
     { label: "Start time", value: DateFormat(data.start_time) },
-    { label: "Duration", value: `${data.duration} minutes` },
+    { label: "Duration", value: `${Math.floor(data.duration / 60)} minutes` },
     { label: "Starting price", value: CurrencyFormat(data.starting_price) },
     { label: "Deposit", value: CurrencyFormat(data.deposit_amount) },
     { label: "Minimum bid increment", value: CurrencyFormat(data.min_bid_increment) },
