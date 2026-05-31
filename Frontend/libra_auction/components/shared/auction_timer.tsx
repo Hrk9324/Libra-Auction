@@ -18,17 +18,19 @@ export default function AuctionTimer({
   size = "md",
 }: AuctionTimerProps) {
   const [timeLeftMs, setTimeLeftMs] = useState(() =>
-    Math.max(0, endTimeMs - Date.now())
+    isPaused ? 0 : Math.max(0, endTimeMs - Date.now())
   );
 
-  // Reset timer when endTimeMs changes (server sent newEndTime)
+  // Reset timer when endTimeMs changes (server sent newEndTime after resume)
   useEffect(() => {
-    setTimeLeftMs(Math.max(0, endTimeMs - Date.now()));
-  }, [endTimeMs]);
+    if (!isPaused) {
+      setTimeLeftMs(Math.max(0, endTimeMs - Date.now()));
+    }
+  }, [endTimeMs, isPaused]);
 
   useEffect(() => {
     if (isPaused) {
-      setTimeLeftMs(Math.max(0, endTimeMs - Date.now()));
+      // Don't tick when paused - freeze display
       return;
     }
 
@@ -46,40 +48,41 @@ export default function AuctionTimer({
     return () => clearInterval(interval);
   }, [isPaused, endTimeMs, onTick, onEnd]);
 
-  const displayMs = timeLeftMs;
-
-  const hours = Math.floor(displayMs / (1000 * 60 * 60));
-  const minutes = Math.floor((displayMs % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((displayMs % (1000 * 60)) / 1000);
-
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const timeStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-
-  const getColorClass = () => {
-    if (isPaused) return "text-yellow-600";
-    if (displayMs <= 60 * 1000) return "text-red-600";
-    if (displayMs <= 5 * 60 * 1000) return "text-yellow-600";
-    return "text-green-600";
-  };
-
   const sizeClasses = {
     sm: "text-lg font-semibold",
     md: "text-2xl font-bold",
     lg: "text-4xl font-bold tracking-wider",
   };
 
+  if (isPaused) {
+    return (
+      <div className="flex items-center justify-center gap-3">
+        <div className={`${sizeClasses[size]} text-yellow-600 font-mono`}>
+          <span className="flex items-center gap-2">
+            <span className="animate-pulse">⏸</span>
+            <span className="text-yellow-600 font-sans">TẠM DỪNG</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
+  const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const timeStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+  const getColorClass = () => {
+    if (timeLeftMs <= 60 * 1000) return "text-red-600";
+    if (timeLeftMs <= 5 * 60 * 1000) return "text-yellow-600";
+    return "text-green-600";
+  };
+
   return (
     <div className="flex items-center justify-center gap-3">
       <div className={`${sizeClasses[size]} ${getColorClass()} font-mono`} suppressHydrationWarning>
-        {isPaused ? (
-          <span className="flex items-center gap-2">
-            <span className="animate-pulse">⏸</span>
-            <span className="line-through opacity-60">{timeStr}</span>
-            <span className="text-yellow-600 text-sm font-sans ml-2">
-              TẠM DỪNG
-            </span>
-          </span>
-        ) : displayMs <= 0 ? (
+        {timeLeftMs <= 0 ? (
           <span className="text-red-600">ĐÃ KẾT THÚC</span>
         ) : (
           timeStr
