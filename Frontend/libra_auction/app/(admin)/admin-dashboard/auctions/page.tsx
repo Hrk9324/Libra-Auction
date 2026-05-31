@@ -67,14 +67,7 @@ function mapAuction(auction: AdminAuction): AuctionRow {
   };
 }
 
-function getStatusBadge(status: string, auctionStatus?: string) {
-  if (auctionStatus === "COMPLETED") {
-    return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">Completed</span>;
-  }
-  if (auctionStatus === "FAILED") {
-    return <span className="px-3 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">Failed</span>;
-  }
-
+function getStatusBadge(status: string) {
   const statusStyles: Record<string, string> = {
     PENDING: "bg-amber-100 text-amber-800 border border-amber-300",
     APPROVED: "bg-green-100 text-green-800 border border-green-300",
@@ -324,7 +317,7 @@ export default function AuctionsApprovalPage() {
                     <td className="px-6 py-4 text-sm text-[#5A7184]">{row.category}</td>
                     <td className="px-6 py-4 text-sm font-semibold text-[#19A7CE]">{formatPrice(row.startingPrice)}</td>
                     <td className="px-6 py-4 text-sm text-[#5A7184]">{row.startTime}</td>
-                    <td className="px-6 py-4 text-sm">{getStatusBadge(row.status, row.auctionStatus)}</td>
+                    <td className="px-6 py-4 text-sm">{getStatusBadge(row.status)}</td>
                     <td className="px-6 py-4 text-sm">{getAuctionStatusBadge(row.auctionStatus)}</td>
                     <td className="px-6 py-4 text-sm">
                       <div className="flex gap-2 flex-wrap">
