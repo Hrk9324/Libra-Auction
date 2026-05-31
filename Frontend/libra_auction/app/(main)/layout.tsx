@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="fixed w-full z-(--header-z-index)">
+      <header className="fixed h-(--header-height) w-full z-(--header-z-index)">
         <Header />
       </header>
       <div id="page" className="pt-(--header-height) flex-1">

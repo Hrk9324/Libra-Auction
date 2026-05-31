@@ -61,7 +61,12 @@ public class AuctionRegistrationService {
                 Auction auction = auctionRepository.findById(request.auctionId())
                                 .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
 
-                // 3. Kiem tra dang ky trung lap (Logic cu giu nguyen)
+                // 3. Kiem tra nguoi ban khong duoc tu dang ky
+                if (auction.getCreator() != null && auction.getCreator().getId().equals(userId)) {
+                        throw new IllegalArgumentException("Người tạo phiên đấu giá không thể đăng ký tham gia");
+                }
+
+                // 4. Kiem tra dang ky trung lap (Logic cu giu nguyen)
                 boolean alreadyRegistered = Optional.ofNullable(auction.getParticipants())
                                 .orElse(Collections.emptyList())
                                 .stream()

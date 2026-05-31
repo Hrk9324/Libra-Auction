@@ -119,34 +119,21 @@ public class AdminAuctionWebSocketController {
     }
 
     /**
-     * Cancel an auction
+     * Cancel an auction (only NOT_STARTED can be cancelled, reason required)
      */
     @MessageMapping("/admin/auction/{auctionId}/cancel")
-    public void cancelAuction(@DestinationVariable String auctionId) {
-        logger.info("Admin command: CANCEL auction {}", auctionId);
+    public void cancelAuction(@DestinationVariable String auctionId, @Payload Map<String, String> payload) {
+        String reason = payload != null ? payload.getOrDefault("reason", "") : "";
+        logger.info("Admin command: CANCEL auction {}, reason: {}", auctionId, reason);
 
-        Optional<Auction> auctionOpt = auctionRepository.findById(auctionId);
-        if (auctionOpt.isEmpty()) {
-            logger.warn("Auction not found: {}", auctionId);
-            return;
+        try {
+            auctionStateTransitionService.cancelAuction(auctionId, reason);
+            notificationService.sendAdminNotification(auctionId, "AUCTION_CANCELLED",
+                    "Phiên đấu giá đã bị hủy. Lý do: " + (reason.isEmpty() ? "Không có" : reason));
+        } catch (IllegalStateException e) {
+            logger.warn("Cannot cancel auction {}: {}", auctionId, e.getMessage());
+            notificationService.sendAdminNotification(auctionId, "ERROR", e.getMessage());
         }
-
-        Auction auction = auctionOpt.get();
-        if (auction.getAuctionStatus() == AuctionStatus.ENDED
-                || auction.getAuctionStatus() == AuctionStatus.CANCELLED) {
-            logger.warn("Cannot cancel auction {} - current status: {}", auctionId, auction.getAuctionStatus());
-            notificationService.sendAdminNotification(auctionId, "ERROR",
-                    "Không thể hủy phiên đấu giá. Trạng thái hiện tại: " + auction.getAuctionStatus());
-            return;
-        }
-
-        auction.setAuctionStatus(AuctionStatus.CANCELLED);
-        auctionRepository.save(auction);
-
-        logger.info("Auction {} cancelled by admin", auctionId);
-
-        notificationService.sendAdminNotification(auctionId, "AUCTION_CANCELLED",
-                "Phiên đấu giá đã bị hủy bởi quản trị viên");
     }
 
     /**

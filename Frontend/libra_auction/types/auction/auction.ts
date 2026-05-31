@@ -25,5 +25,8 @@ export interface Auction {
         attributes: Attribute[],
 
         total_bids: number,
-        total_participants: number
+        total_participants: number,
+        failure_reason?: string,
+        completed_at?: string,
+        creator_id?: string
 }

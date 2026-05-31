@@ -39,6 +39,9 @@ public interface AuctionMapper {
     @Mapping(source = ".", target = "attributes", qualifiedByName = "resolveAttributes")
     @Mapping(source = ".", target = "total_bids", qualifiedByName = "resolveTotalBids")
     @Mapping(source = ".", target = "total_participants", qualifiedByName = "resolveTotalParticipants")
+    @Mapping(source = "failureReason", target = "failure_reason")
+    @Mapping(source = "completedAt", target = "completed_at")
+    @Mapping(source = "creator.id", target = "creator_id")
     AuctionResponse toAuctionResponse(Auction session);
 
     List<AuctionResponse> toAuctionResponseList(List<Auction> sessions);

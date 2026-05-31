@@ -23,13 +23,13 @@ export default function Button({
 
   const variantClasses = {
     primary:
-      "bg-[--primary-color] text-white hover:opacity-90 focus:ring-[--primary-color]",
+      "bg-[#146C94] text-white hover:bg-[#125e82] focus:ring-[#146C94]",
     secondary:
-      "bg-[--secondary-color] text-white hover:opacity-90 focus:ring-[--secondary-color]",
+      "bg-[#19A7CE] text-white hover:bg-[#1591b3] focus:ring-[#19A7CE]",
     outline:
-      "border-2 border-[--primary-color] text-[--primary-color] hover:bg-[--primary-color]/10 focus:ring-[--primary-color]",
+      "border-2 border-[#146C94] text-[#146C94] hover:bg-[#146C94]/10 focus:ring-[#146C94]",
     ghost:
-      "text-[--primary-color] hover:bg-[--primary-color]/10 focus:ring-[--primary-color]",
+      "text-[#146C94] hover:bg-[#146C94]/10 focus:ring-[#146C94]",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
   };
 

@@ -16,8 +16,11 @@ interface AuctionDetailModalProps {
     currentPrice: number;
     category: string;
     status: string;
+    auctionStatus?: string;
     totalBids: number;
     totalParticipants: number;
+    failureReason?: string;
+    completedAt?: string;
   };
 }
 
@@ -130,6 +133,24 @@ export default function AuctionDetailModal({
             {auctionData.description}
           </p>
         </div>
+
+        {/* Completion/Failure Info */}
+        {auctionData.auctionStatus === "COMPLETED" && auctionData.completedAt && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+            <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-1">
+              Completed At
+            </p>
+            <p className="text-sm text-emerald-800">{auctionData.completedAt}</p>
+          </div>
+        )}
+        {auctionData.auctionStatus === "FAILED" && (
+          <div className="bg-rose-50 border border-rose-200 rounded-lg p-4">
+            <p className="text-xs font-semibold text-rose-700 uppercase tracking-wider mb-1">
+              Failure Reason
+            </p>
+            <p className="text-sm text-rose-800">{auctionData.failureReason || "No reason provided"}</p>
+          </div>
+        )}
 
         {/* Images Gallery */}
         <div>

@@ -54,12 +54,14 @@ public class AuctionSchedulerService {
         try {
             OffsetDateTime now = OffsetDateTime.now(ZoneOffset.ofHours(7));
             Set<String> auctionsToEnd = auctionStateRedisService.getAuctionsToEnd(now);
-            
+
             if (!auctionsToEnd.isEmpty()) {
-                logger.info("Found {} auctions to end", auctionsToEnd.size());
-                
                 for (String auctionId : auctionsToEnd) {
                     try {
+                        // Skip if auction is paused - endTime will be extended when resumed
+                        if (auctionStateRedisService.isPaused(auctionId)) {
+                            continue;
+                        }
                         auctionStateTransitionService.endAuction(auctionId);
                         auctionStateRedisService.removeAuctionEndEvent(auctionId);
                     } catch (Exception e) {

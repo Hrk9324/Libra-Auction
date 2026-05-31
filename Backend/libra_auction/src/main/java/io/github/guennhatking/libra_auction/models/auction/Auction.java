@@ -58,8 +58,10 @@ public class Auction {
     private AuctionStatus auctionStatus;
 
     private OffsetDateTime createdAt;
+    private OffsetDateTime completedAt;
+    private String failureReason;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
     // CONSTRUCTOR
@@ -249,5 +251,21 @@ public class Auction {
 
     public void setMinimumBidIncrement(long minimumBidIncrement) {
         this.minimumBidIncrement = minimumBidIncrement;
+    }
+
+    public OffsetDateTime getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(OffsetDateTime completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
     }
 }

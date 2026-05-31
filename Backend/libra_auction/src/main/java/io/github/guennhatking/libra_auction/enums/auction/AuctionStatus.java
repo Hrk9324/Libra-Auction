@@ -5,5 +5,7 @@ public enum AuctionStatus {
     IN_PROGRESS,
     PAUSED,
     ENDED,
-    CANCELLED
+    CANCELLED,
+    COMPLETED,
+    FAILED
 }

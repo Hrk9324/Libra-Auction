@@ -3,3 +3,7 @@ databaseChangeLog:
     file: db/changelog/001-init-schema.yaml
 - include:
     file: db/changelog/changes/002-add-product-status.yaml
+- include:
+    file: db/changelog/changes/003-add-auction-completion-fields.yaml
+- include:
+    file: db/changelog/changes/004-remove-auction-product-unique.yaml

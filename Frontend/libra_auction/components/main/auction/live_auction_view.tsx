@@ -20,7 +20,7 @@ type StatusUpdate = {
   auctionId?: string;
   status?: string;
   message?: string;
-  newEndTime?: string;
+  newEndTime?: number;
   timestamp?: string;
 };
 
@@ -51,15 +51,19 @@ export default function LiveAuctionView({
   auction,
   backendServerUrl,
   role = "user",
+  isRegistered = false,
+  isCreator = false,
 }: {
   auction: Auction;
   backendServerUrl: string;
   role?: UserRole;
+  isRegistered?: boolean;
+  isCreator?: boolean;
 }) {
   const [currentBid, setCurrentBid] = useState<number>(
     auction.current_price || auction.starting_price || 0
   );
-  const [endTimeMs] = useState(() => {
+  const [endTimeMs, setEndTimeMs] = useState(() => {
     const end =
       new Date(auction.start_time).getTime() + auction.duration * 1000;
     return end;
@@ -184,41 +188,35 @@ export default function LiveAuctionView({
       }
     });
 
-    // Status updates
+    // Status updates - backend sends { status, auctionId, timestamp, newEndTime? }
     auctionSocket.subscribe(statusTopic, (body: unknown) => {
       if (!isRecord(body)) return;
       const update = body as unknown as StatusUpdate;
-      if (update.status) {
-        setAuctionStatus(update.status);
-      }
-      if (update.type) {
-        switch (update.type) {
-          case "AUCTION_PAUSED":
-            setAuctionStatus("PAUSED");
-            setStatusMessage(
-              "Phiên đấu giá đang tạm dừng. Vui lòng chờ admin tiếp tục."
-            );
-            addNotification("Phiên đấu giá đã bị tạm dừng");
-            break;
-          case "AUCTION_RESUMED":
-            setAuctionStatus("IN_PROGRESS");
-            setStatusMessage(null);
-            addNotification("Phiên đấu giá đã tiếp tục");
-            break;
-          case "AUCTION_ENDED":
-            setAuctionStatus("ENDED");
-            setStatusMessage("Phiên đấu giá đã kết thúc.");
-            addNotification("Phiên đấu giá đã kết thúc");
-            break;
-          case "AUCTION_CANCELLED":
-            setAuctionStatus("CANCELLED");
-            setStatusMessage("Phiên đấu giá đã bị hủy.");
-            addNotification("Phiên đấu giá đã bị hủy");
-            break;
-          case "AUCTION_EXTENDED":
-            addNotification("Phiên đấu giá đã được gia hạn");
-            break;
-        }
+      if (!update.status) return;
+
+      setAuctionStatus(update.status);
+
+      switch (update.status) {
+        case "PAUSED":
+          setStatusMessage("Phiên đấu giá đang tạm dừng. Vui lòng chờ admin tiếp tục.");
+          addNotification("Phiên đấu giá đã bị tạm dừng");
+          break;
+        case "IN_PROGRESS":
+          setStatusMessage(null);
+          // Update endTime from server (includes paused duration)
+          if (typeof update.newEndTime === "number" && update.newEndTime > 0) {
+            setEndTimeMs(update.newEndTime);
+          }
+          addNotification("Phiên đấu giá đã tiếp tục");
+          break;
+        case "ENDED":
+          setStatusMessage("Phiên đấu giá đã kết thúc.");
+          addNotification("Phiên đấu giá đã kết thúc");
+          break;
+        case "CANCELLED":
+          setStatusMessage("Phiên đấu giá đã bị hủy.");
+          addNotification("Phiên đấu giá đã bị hủy");
+          break;
       }
     });
 
@@ -284,10 +282,14 @@ export default function LiveAuctionView({
 
   const canBid =
     role === "user" &&
-    (auctionStatus === "IN_PROGRESS" || auctionStatus === "NOT_STARTED");
+    auctionStatus === "IN_PROGRESS" &&
+    !!currentUserId &&
+    isRegistered &&
+    !isCreator;
 
   const isEnded = auctionStatus === "ENDED" || auctionStatus === "CANCELLED";
   const isPaused = auctionStatus === "PAUSED";
+  const isLoggedIn = !!currentUserId;
 
   return (
     <div className="min-h-screen bg-gray-50/50 pt-10 px-16 pb-12">
@@ -433,49 +435,71 @@ export default function LiveAuctionView({
               </div>
 
               {/* Bid Form - Buyer Only */}
-              {role === "user" && (
-                <div className="bg-(--primary-color)/10 border border-(--primary-color)/5 rounded-2xl p-6 relative overflow-hidden">
-                  {canBid ? (
+              {role === "user" && canBid && (
+                <div className="bg-[#146C94]/10 border border-[#146C94]/5 rounded-2xl p-6 relative overflow-hidden">
+                  <label className="block text-lg font-semibold text-gray-900 mb-1">
+                    Đặt giá của bạn
+                  </label>
+                  <p className="text-sm text-gray-500 mb-5">
+                    Giá tối thiểu: <span className="font-semibold text-[#19A7CE]">{CurrencyFormat(minimumBid)}</span>
+                  </p>
+                  <div className="flex gap-3">
+                    <input
+                      type="number"
+                      min={minimumBid}
+                      value={bidValue}
+                      onChange={(e) => setBidValue(e.target.value)}
+                      placeholder={String(minimumBid)}
+                      className="flex-1 bg-white border border-gray-200 rounded-xl px-5 py-4 outline-none focus:ring-2 focus:ring-[#19A7CE]/40 focus:border-[#19A7CE] text-base"
+                    />
+                    <button
+                      onClick={handleBidClick}
+                      disabled={isBidding || !bidValue}
+                      className="bg-[#19A7CE] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#146C94] transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
+                    >
+                      {isBidding ? "Đang đặt..." : "Đặt giá"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Status messages when cannot bid */}
+              {role === "user" && !canBid && (
+                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center">
+                  {!isLoggedIn ? (
                     <>
-                      <label className="block text-lg font-semibold text-gray-900 mb-1">
-                        Đặt giá của bạn
-                      </label>
-                      <p className="text-sm text-gray-500 mb-5">
-                        Giá tối thiểu: <span className="font-semibold text-[#19A7CE]">{CurrencyFormat(minimumBid)}</span>
+                      <p className="text-gray-600 font-semibold text-lg mb-2">
+                        Đăng nhập để đặt giá
                       </p>
-                      <div className="flex gap-3">
-                        <input
-                          type="number"
-                          min={minimumBid}
-                          value={bidValue}
-                          onChange={(e) => setBidValue(e.target.value)}
-                          placeholder={String(minimumBid)}
-                          className="flex-1 bg-white border border-gray-200 rounded-xl px-5 py-4 outline-none focus:ring-2 focus:ring-[#19A7CE]/40 focus:border-[#19A7CE] text-base"
-                        />
-                        <button
-                          onClick={handleBidClick}
-                          disabled={isBidding || !bidValue}
-                          className="bg-[#19A7CE] text-white px-8 py-4 rounded-xl font-bold hover:bg-[#146C94] transition disabled:opacity-50 disabled:cursor-not-allowed text-base"
-                        >
-                          {isBidding ? "Đang đặt..." : "Đặt giá"}
-                        </button>
-                      </div>
+                      <a href="/sign-in" className="text-[#19A7CE] hover:underline text-sm font-medium">
+                        Đăng nhập ngay
+                      </a>
                     </>
+                  ) : isCreator ? (
+                    <p className="text-gray-600 font-semibold text-lg">
+                      Bạn là người tạo phiên đấu giá — không thể đặt giá
+                    </p>
+                  ) : !isRegistered ? (
+                    <p className="text-gray-600 font-semibold text-lg">
+                      Bạn chưa đăng ký tham gia phiên đấu giá này
+                    </p>
                   ) : isPaused ? (
-                    <div className="text-center py-4">
+                    <>
                       <p className="text-yellow-700 font-semibold text-lg">
                         Phiên đấu giá đang tạm dừng
                       </p>
                       <p className="text-sm text-yellow-600/70 mt-1">
                         Không thể đặt giá lúc này
                       </p>
-                    </div>
+                    </>
                   ) : isEnded ? (
-                    <div className="text-center py-4">
-                      <p className="text-gray-600 font-semibold text-lg">
-                        Phiên đấu giá đã kết thúc
-                      </p>
-                    </div>
+                    <p className="text-gray-600 font-semibold text-lg">
+                      Phiên đấu giá đã kết thúc
+                    </p>
+                  ) : auctionStatus === "NOT_STARTED" ? (
+                    <p className="text-gray-600 font-semibold text-lg">
+                      Phiên đấu giá chưa bắt đầu
+                    </p>
                   ) : null}
                 </div>
               )}

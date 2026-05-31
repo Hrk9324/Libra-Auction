@@ -178,6 +178,27 @@ public class EmailNotificationService {
         }
     }
 
+    public void sendAuctionCancelledNotification(Auction auction, String reason) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            String productName = auction.getProduct() != null ? auction.getProduct().getName() : "N/A";
+            String recipientEmail = auction.getCreator() != null ? auction.getCreator().getEmail() : null;
+            if (recipientEmail == null) return;
+            message.setTo(recipientEmail);
+            message.setSubject("[" + auctionName + "] Phien dau gia bi huy");
+            message.setText("Xin chao,\n\n" +
+                    "Phien dau gia '" + productName + "' (ID: " + auction.getId() + ") da bi huy.\n\n" +
+                    "Ly do: " + (reason != null ? reason : "Khong co ly do cu the") + "\n\n" +
+                    "San pham se duoc tro ve trang thai san sang. Ban co the tao phien dau gia moi.\n\n" +
+                    "Tran trong,\n" + auctionName);
+            mailSender.send(message);
+            logger.info("Auction cancelled email sent for auction {}", auction.getId());
+        } catch (Exception e) {
+            logger.error("Error sending auction cancelled email: {}", e.getMessage(), e);
+        }
+    }
+
     // ==================== Email Body Templates ====================
 
     private String buildAuctionStartedEmailBody(String productName, String auctionId, String startTime) {

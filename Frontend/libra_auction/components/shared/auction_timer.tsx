@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 interface AuctionTimerProps {
   endTimeMs: number;
@@ -17,38 +17,23 @@ export default function AuctionTimer({
   onEnd,
   size = "md",
 }: AuctionTimerProps) {
-  // Track accumulated pause duration
-  const pausedStartRef = useRef<number | null>(null);
-  const totalPausedMsRef = useRef(0);
-  const prevIsPausedRef = useRef(isPaused);
-
-  // When isPaused changes from false -> true, record pause start
-  if (isPaused && !prevIsPausedRef.current) {
-    pausedStartRef.current = Date.now();
-  }
-  // When isPaused changes from true -> false, accumulate pause duration
-  if (!isPaused && prevIsPausedRef.current && pausedStartRef.current !== null) {
-    totalPausedMsRef.current += Date.now() - pausedStartRef.current;
-    pausedStartRef.current = null;
-  }
-  prevIsPausedRef.current = isPaused;
-
-  // Adjusted end time = original endTime + total paused duration
-  const adjustedEndTime = endTimeMs + totalPausedMsRef.current;
-
   const [timeLeftMs, setTimeLeftMs] = useState(() =>
-    Math.max(0, adjustedEndTime - Date.now())
+    Math.max(0, endTimeMs - Date.now())
   );
+
+  // Reset timer when endTimeMs changes (server sent newEndTime)
+  useEffect(() => {
+    setTimeLeftMs(Math.max(0, endTimeMs - Date.now()));
+  }, [endTimeMs]);
 
   useEffect(() => {
     if (isPaused) {
-      // While paused, don't tick — but show frozen remaining time
-      setTimeLeftMs(Math.max(0, adjustedEndTime - Date.now()));
+      setTimeLeftMs(Math.max(0, endTimeMs - Date.now()));
       return;
     }
 
     const interval = setInterval(() => {
-      const remaining = Math.max(0, adjustedEndTime - Date.now());
+      const remaining = Math.max(0, endTimeMs - Date.now());
       setTimeLeftMs(remaining);
       onTick?.(remaining);
 
@@ -59,7 +44,7 @@ export default function AuctionTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPaused, adjustedEndTime, onTick, onEnd]);
+  }, [isPaused, endTimeMs, onTick, onEnd]);
 
   const displayMs = timeLeftMs;
 

@@ -8,7 +8,7 @@ interface AdminControlsProps {
   onPause: () => void;
   onResume: () => void;
   onEnd: () => void;
-  onCancel: () => void;
+  onCancel: (reason: string) => void;
   onSendNotification: (message: string) => void;
   isLoading: boolean;
 }
@@ -26,11 +26,13 @@ export default function AdminControls({
   const [showConfirm, setShowConfirm] = useState<"end" | "cancel" | null>(
     null
   );
+  const [cancelReason, setCancelReason] = useState("");
 
   const isEnded =
     currentStatus === "ENDED" || currentStatus === "CANCELLED";
   const isPaused = currentStatus === "PAUSED";
   const isLive = currentStatus === "IN_PROGRESS";
+  const isNotStarted = currentStatus === "NOT_STARTED";
 
   const handleSendNotification = () => {
     if (notificationMessage.trim()) {
@@ -43,7 +45,8 @@ export default function AdminControls({
     if (showConfirm === "end") {
       onEnd();
     } else if (showConfirm === "cancel") {
-      onCancel();
+      onCancel(cancelReason.trim());
+      setCancelReason("");
     }
     setShowConfirm(null);
   };
@@ -56,8 +59,8 @@ export default function AdminControls({
 
       {/* Confirmation Dialog */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-2xl">
             <h4 className="text-lg font-bold text-[#146C94] mb-2">
               {showConfirm === "end"
                 ? "Kết thúc phiên đấu giá?"
@@ -66,22 +69,33 @@ export default function AdminControls({
             <p className="text-sm text-[#5A7184] mb-4">
               {showConfirm === "end"
                 ? "Hành động này sẽ kết thúc phiên đấu giá và xác định người thắng. Không thể hoàn tác."
-                : "Hành động này sẽ hủy phiên đấu giá. Không thể hoàn tác."}
+                : "Phiên đấu giá chưa bắt đầu sẽ bị hủy. Sản phẩm sẽ về trạng thái sẵn sàng."}
             </p>
+            {showConfirm === "cancel" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Lý do hủy <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Nhập lý do hủy phiên đấu giá..."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400 resize-none"
+                />
+              </div>
+            )}
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setShowConfirm(null)}
+                onClick={() => { setShowConfirm(null); setCancelReason(""); }}
                 className="px-4 py-2 text-sm text-[#5A7184] border border-gray-300 rounded-lg hover:bg-gray-50 transition"
               >
                 Hủy
               </button>
               <button
                 onClick={handleConfirmAction}
-                className={`px-4 py-2 text-sm text-white rounded-lg transition ${
-                  showConfirm === "end"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
+                disabled={showConfirm === "cancel" && !cancelReason.trim()}
+                className="px-4 py-2 text-sm text-white rounded-lg transition bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Xác nhận
               </button>
@@ -134,8 +148,8 @@ export default function AdminControls({
           </button>
         )}
 
-        {/* Cancel Auction */}
-        {!isEnded && (
+        {/* Cancel Auction - only when NOT_STARTED */}
+        {isNotStarted && (
           <button
             onClick={() => setShowConfirm("cancel")}
             disabled={isLoading}

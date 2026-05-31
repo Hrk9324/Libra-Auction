@@ -22,4 +22,6 @@ export interface AdminAuction {
     }>;
     total_bids: number;
     total_participants: number;
+    failure_reason?: string;
+    completed_at?: string;
 }

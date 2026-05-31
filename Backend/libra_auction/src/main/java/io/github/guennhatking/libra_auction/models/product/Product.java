@@ -26,8 +26,8 @@ public class Product {
     @ManyToOne
     private Customer creator;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "product")
-    private Auction auction;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
+    private java.util.List<Auction> auctions;
 
     @ManyToOne
     private Category category;
@@ -78,8 +78,8 @@ public class Product {
         return creator;
     }
 
-    public Auction getAuction() {
-        return auction;
+    public java.util.List<Auction> getAuctions() {
+        return auctions;
     }
 
     public Category getCategory() {
@@ -119,8 +119,8 @@ public class Product {
         this.creator = creator;
     }
 
-    public void setAuction(Auction auction) {
-        this.auction = auction;
+    public void setAuctions(java.util.List<Auction> auctions) {
+        this.auctions = auctions;
     }
 
     public void setCategory(Category category) {

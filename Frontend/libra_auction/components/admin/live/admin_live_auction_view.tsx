@@ -180,7 +180,8 @@ export default function AdminLiveAuctionView({
   }, [auction.total_participants]);
 
   const sendAdminCommand = async (
-    command: "pause" | "resume" | "end" | "cancel"
+    command: "pause" | "resume" | "end" | "cancel",
+    reason?: string
   ) => {
     setIsActionLoading(true);
     try {
@@ -189,6 +190,7 @@ export default function AdminLiveAuctionView({
         {
           auctionId: auction.auction_id,
           command,
+          ...(reason ? { reason } : {}),
         }
       );
     } catch (err) {
@@ -359,7 +361,7 @@ export default function AdminLiveAuctionView({
             onPause={() => sendAdminCommand("pause")}
             onResume={() => sendAdminCommand("resume")}
             onEnd={() => sendAdminCommand("end")}
-            onCancel={() => sendAdminCommand("cancel")}
+            onCancel={(reason) => sendAdminCommand("cancel", reason)}
             onSendNotification={handleSendNotification}
             isLoading={isActionLoading}
           />

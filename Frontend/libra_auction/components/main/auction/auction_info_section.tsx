@@ -26,6 +26,7 @@ export default function AuctionInfoSection({
   const [activeImage, setActiveImage] = useState(autionInfos.images[0]);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [isRegistered, setIsRegistered] = useState(false);
+  const [isCreator, setIsCreator] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -77,6 +78,10 @@ export default function AuctionInfoSection({
           return;
         }
         setIsLoggedIn(true);
+        // Check if user is the auction creator
+        if (autionInfos.creator_id && autionInfos.creator_id === userId) {
+          setIsCreator(true);
+        }
         const registration = await checkRegistration(userId, autionInfos.auction_id);
         if (registration) {
           setIsRegistered(true);
@@ -222,13 +227,34 @@ export default function AuctionInfoSection({
                 </div>
               </div>
               <div className="pt-4 mt-4 border-t border-gray-100">
-                {isLive ? (
+                {autionInfos.auction_status === "COMPLETED" ? (
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center">
+                    <p className="text-emerald-700 font-bold text-lg">Phiên đấu giá đã hoàn thành</p>
+                    {autionInfos.completed_at && (
+                      <p className="text-emerald-600 text-sm mt-1">
+                        Hoàn thành lúc: {new Date(autionInfos.completed_at).toLocaleString("vi-VN")}
+                      </p>
+                    )}
+                  </div>
+                ) : autionInfos.auction_status === "FAILED" ? (
+                  <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 text-center">
+                    <p className="text-rose-700 font-bold text-lg">Phiên đấu giá thất bại</p>
+                    {autionInfos.failure_reason && (
+                      <p className="text-rose-600 text-sm mt-1">Lý do: {autionInfos.failure_reason}</p>
+                    )}
+                  </div>
+                ) : isLive ? (
                   <Link
                     href={`/auctions/${autionInfos.category_id}/${autionInfos.auction_id}/live`}
                     className="w-full flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white text-lg font-bold py-5 px-8 rounded-2xl shadow-lg transition-all duration-200 group"
                   >
                     Xem đấu giá trực tiếp
                   </Link>
+                ) : isCreator ? (
+                  <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-center">
+                    <p className="text-blue-700 font-bold text-lg">Bạn là người tạo phiên đấu giá này</p>
+                    <p className="text-blue-600 text-sm mt-1">Không thể đăng ký tham gia</p>
+                  </div>
                 ) : isRegistered ? (
                   <Link
                     href={`/auctions/${autionInfos.category_id}/${autionInfos.auction_id}/registration`}

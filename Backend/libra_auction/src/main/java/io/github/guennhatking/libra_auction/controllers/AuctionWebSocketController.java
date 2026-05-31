@@ -3,11 +3,13 @@ package io.github.guennhatking.libra_auction.controllers;
 import io.github.guennhatking.libra_auction.enums.auction.AuctionStatus;
 import io.github.guennhatking.libra_auction.models.auction.Auction;
 import io.github.guennhatking.libra_auction.repositories.auction.AuctionRepository;
+import io.github.guennhatking.libra_auction.repositories.person.CustomerRepository;
 import io.github.guennhatking.libra_auction.services.AuctionStateRedisService;
 import io.github.guennhatking.libra_auction.services.AuctionWebSocketNotificationService;
 import io.github.guennhatking.libra_auction.viewmodels.request.BidMessage;
 import io.github.guennhatking.libra_auction.viewmodels.response.BidResponse;
 import io.github.guennhatking.libra_auction.models.auction.AuctionLog;
+import io.github.guennhatking.libra_auction.repositories.auction.AuctionParticipationInfoRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,8 @@ public class AuctionWebSocketController {
     private final AuctionRepository auctionRepository;
     private final AuctionStateRedisService auctionStateRedisService;
     private final AuctionWebSocketNotificationService auctionWebSocketNotificationService;
+    private final AuctionParticipationInfoRepository participationInfoRepository;
+    private final CustomerRepository customerRepository;
 
     // In-memory storage for bid history per auction
     private static final Map<String, List<BidResponse>> auctionBids = new ConcurrentHashMap<>();
@@ -43,10 +47,14 @@ public class AuctionWebSocketController {
     public AuctionWebSocketController(
             AuctionRepository auctionRepository,
             AuctionStateRedisService auctionStateRedisService,
-            AuctionWebSocketNotificationService auctionWebSocketNotificationService) {
+            AuctionWebSocketNotificationService auctionWebSocketNotificationService,
+            AuctionParticipationInfoRepository participationInfoRepository,
+            CustomerRepository customerRepository) {
         this.auctionRepository = auctionRepository;
         this.auctionStateRedisService = auctionStateRedisService;
         this.auctionWebSocketNotificationService = auctionWebSocketNotificationService;
+        this.participationInfoRepository = participationInfoRepository;
+        this.customerRepository = customerRepository;
     }
 
     /**
@@ -66,18 +74,35 @@ public class AuctionWebSocketController {
                     auction.getId(), auction.getAuctionStatus(),
                     auction.getCurrentPrice(), auction.getStartingPrice(), auction.getMinimumBidIncrement());
 
+            // Validate bidderId is provided
+            if (bidMessage.bidderId() == null || bidMessage.bidderId().isBlank()) {
+                sendErrorNotification(bidMessage.auctionId(), "Bạn cần đăng nhập để đặt giá.");
+                return;
+            }
+
             // Validate auction is active
             if (auction.getAuctionStatus().equals(AuctionStatus.PAUSED)) {
-                String errorMsg = "Phiên đấu giá đang tạm dừng. Không thể đặt giá lúc này.";
-                logger.error(errorMsg);
-                sendErrorNotification(bidMessage.auctionId(), errorMsg);
+                sendErrorNotification(bidMessage.auctionId(), "Phiên đấu giá đang tạm dừng. Không thể đặt giá lúc này.");
                 return;
             }
 
             if (!auction.getAuctionStatus().equals(AuctionStatus.IN_PROGRESS)) {
-                String errorMsg = "Auction is not active. Current status: " + auction.getAuctionStatus();
-                logger.error(errorMsg);
-                sendErrorNotification(bidMessage.auctionId(), errorMsg);
+                sendErrorNotification(bidMessage.auctionId(), "Phiên đấu giá chưa bắt đầu hoặc đã kết thúc.");
+                return;
+            }
+
+            // Validate bidder is not the auction creator
+            if (auction.getCreator() != null && auction.getCreator().getId().equals(bidMessage.bidderId())) {
+                sendErrorNotification(bidMessage.auctionId(), "Người tạo phiên đấu giá không thể đặt giá.");
+                return;
+            }
+
+            // Validate bidder is registered for this auction
+            boolean isRegistered = participationInfoRepository
+                    .findByParticipantIdAndAuctionId(bidMessage.bidderId(), bidMessage.auctionId())
+                    .isPresent();
+            if (!isRegistered) {
+                sendErrorNotification(bidMessage.auctionId(), "Bạn chưa đăng ký tham gia phiên đấu giá này.");
                 return;
             }
 
@@ -128,6 +153,9 @@ public class AuctionWebSocketController {
         AuctionLog log = new AuctionLog();
         log.setAuction(auction);
         log.setBidAmount(bidMessage.bidAmount());
+        log.setTimestamp(OffsetDateTime.now(ZoneOffset.ofHours(7)));
+        // Set bidder
+        customerRepository.findById(bidMessage.bidderId()).ifPresent(log::setBidder);
 
         if (auction.getBidHistory() == null) {
             auction.setBidHistory(new ArrayList<>());

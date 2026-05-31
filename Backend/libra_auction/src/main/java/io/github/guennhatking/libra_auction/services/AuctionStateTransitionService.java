@@ -1,10 +1,14 @@
 package io.github.guennhatking.libra_auction.services;
 
 import io.github.guennhatking.libra_auction.enums.auction.AuctionStatus;
+import io.github.guennhatking.libra_auction.enums.product.ProductStatus;
 import io.github.guennhatking.libra_auction.models.auction.AuctionResult;
 import io.github.guennhatking.libra_auction.models.auction.Auction;
+import io.github.guennhatking.libra_auction.models.auction.AuctionParticipationInfo;
+import io.github.guennhatking.libra_auction.models.person.Customer;
 import io.github.guennhatking.libra_auction.repositories.auction.AuctionResultRepository;
 import io.github.guennhatking.libra_auction.repositories.auction.AuctionRepository;
+import io.github.guennhatking.libra_auction.repositories.product.ProductRepository;
 import io.github.guennhatking.libra_auction.viewmodels.response.BidResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,18 +34,24 @@ public class AuctionStateTransitionService {
     private final BidHistoryService bidHistoryService;
     private final SimpMessagingTemplate messagingTemplate;
     private final EmailNotificationService emailNotificationService;
+    private final AuctionStateRedisService auctionStateRedisService;
+    private final ProductRepository productRepository;
 
     public AuctionStateTransitionService(
             AuctionRepository auctionRepository,
             AuctionResultRepository auctionResultRepository,
             BidHistoryService bidHistoryService,
             SimpMessagingTemplate messagingTemplate,
-            EmailNotificationService emailNotificationService) {
+            EmailNotificationService emailNotificationService,
+            AuctionStateRedisService auctionStateRedisService,
+            ProductRepository productRepository) {
         this.auctionRepository = auctionRepository;
         this.auctionResultRepository = auctionResultRepository;
         this.bidHistoryService = bidHistoryService;
         this.messagingTemplate = messagingTemplate;
         this.emailNotificationService = emailNotificationService;
+        this.auctionStateRedisService = auctionStateRedisService;
+        this.productRepository = productRepository;
     }
 
     /**
@@ -109,6 +119,9 @@ public class AuctionStateTransitionService {
                 return;
             }
 
+            // Record pause start time in Redis
+            auctionStateRedisService.setPaused(auctionId, OffsetDateTime.now(ZoneOffset.ofHours(7)));
+
             auction.setAuctionStatus(AuctionStatus.PAUSED);
             auctionRepository.save(auction);
 
@@ -139,11 +152,29 @@ public class AuctionStateTransitionService {
                 return;
             }
 
+            // Calculate paused duration and extend end time
+            Long pauseStartMs = auctionStateRedisService.getPauseStartTime(auctionId);
+            if (pauseStartMs != null) {
+                long pausedDurationMs = System.currentTimeMillis() - pauseStartMs;
+                Long currentEndTimeMs = auctionStateRedisService.getAuctionEndTime(auctionId);
+                if (currentEndTimeMs != null) {
+                    long newEndTimeMs = currentEndTimeMs + pausedDurationMs;
+                    OffsetDateTime newEndTime = OffsetDateTime.ofInstant(
+                        java.time.Instant.ofEpochMilli(newEndTimeMs), ZoneOffset.ofHours(7));
+                    auctionStateRedisService.extendAuctionEnd(auctionId, newEndTime);
+                    logger.info("Auction {} resumed, extended end time by {} ms", auctionId, pausedDurationMs);
+                }
+            }
+            auctionStateRedisService.clearPaused(auctionId);
+
             auction.setAuctionStatus(AuctionStatus.IN_PROGRESS);
             auctionRepository.save(auction);
 
             logger.info("Auction {} resumed", auctionId);
-            sendAuctionStatusUpdate(auctionId, "IN_PROGRESS");
+            // Get new end time and send to frontend
+            Long newEndTimeMs = auctionStateRedisService.getAuctionEndTime(auctionId);
+            String endTimeField = newEndTimeMs != null ? ",\"newEndTime\":" + newEndTimeMs : "";
+            sendAuctionStatusUpdateWithExtra(auctionId, "IN_PROGRESS", endTimeField);
         } catch (Exception e) {
             logger.error("Error resuming auction {}: {}", auctionId, e.getMessage(), e);
         }
@@ -224,15 +255,94 @@ public class AuctionStateTransitionService {
     }
 
     /**
+     * Cancel an auction (only NOT_STARTED can be cancelled)
+     * - Set product back to AVAILABLE
+     * - Notify all registered participants and the seller
+     * @param auctionId The auction ID
+     * @param reason The cancellation reason
+     */
+    @Transactional
+    public void cancelAuction(String auctionId, String reason) {
+        try {
+            Optional<Auction> auctionOpt = auctionRepository.findById(auctionId);
+            if (auctionOpt.isEmpty()) {
+                logger.warn("Auction not found: {}", auctionId);
+                return;
+            }
+
+            Auction auction = auctionOpt.get();
+
+            if (auction.getAuctionStatus() != AuctionStatus.NOT_STARTED) {
+                throw new IllegalStateException("Chỉ có thể hủy phiên đấu giá chưa bắt đầu. Trạng thái hiện tại: " + auction.getAuctionStatus());
+            }
+
+            // Set product back to AVAILABLE
+            if (auction.getProduct() != null) {
+                auction.getProduct().setStatus(ProductStatus.AVAILABLE);
+                productRepository.save(auction.getProduct());
+            }
+
+            auction.setAuctionStatus(AuctionStatus.CANCELLED);
+            auction.setFailureReason(reason);
+            auctionRepository.save(auction);
+
+            // Clean up Redis scheduling
+            auctionStateRedisService.cleanupAuction(auctionId);
+
+            // Notify seller
+            if (auction.getCreator() != null && auction.getCreator().getEmail() != null) {
+                try {
+                    emailNotificationService.sendAuctionCancelledNotification(auction, reason);
+                } catch (Exception e) {
+                    logger.error("Failed to send cancel email to seller", e);
+                }
+            }
+
+            // Notify all registered participants
+            if (auction.getParticipants() != null) {
+                for (AuctionParticipationInfo participant : auction.getParticipants()) {
+                    Customer bidder = participant.getParticipant();
+                    if (bidder != null && bidder.getEmail() != null) {
+                        try {
+                            emailNotificationService.sendAuctionCancelledNotification(auction, reason);
+                        } catch (Exception e) {
+                            logger.error("Failed to send cancel email to participant {}", bidder.getId(), e);
+                        }
+                    }
+                }
+            }
+
+            // Send WebSocket notification
+            sendAuctionStatusUpdate(auctionId, "CANCELLED");
+
+            logger.info("Auction {} cancelled. Reason: {}", auctionId, reason);
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error cancelling auction {}: {}", auctionId, e.getMessage(), e);
+        }
+    }
+
+    /**
      * Send auction status update via WebSocket
      * @param auctionId The auction ID
      * @param status The new status
      */
     private void sendAuctionStatusUpdate(String auctionId, String status) {
+        sendAuctionStatusUpdateWithExtra(auctionId, status, "");
+    }
+
+    /**
+     * Send auction status update via WebSocket with extra JSON fields
+     * @param auctionId The auction ID
+     * @param status The new status
+     * @param extraFields Additional JSON fields (e.g., ",\"newEndTime\":12345")
+     */
+    private void sendAuctionStatusUpdateWithExtra(String auctionId, String status, String extraFields) {
         try {
             messagingTemplate.convertAndSend(
                 "/topic/auction/" + auctionId + "/status",
-                "{\"auctionId\":\"" + auctionId + "\",\"status\":\"" + status + "\",\"timestamp\":\"" + OffsetDateTime.now(ZoneOffset.ofHours(7)) + "\"}"
+                "{\"auctionId\":\"" + auctionId + "\",\"status\":\"" + status + "\",\"timestamp\":\"" + OffsetDateTime.now(ZoneOffset.ofHours(7)) + "\"" + extraFields + "}"
             );
         } catch (Exception e) {
             logger.error("Failed to send WebSocket notification for auction {}", auctionId, e);

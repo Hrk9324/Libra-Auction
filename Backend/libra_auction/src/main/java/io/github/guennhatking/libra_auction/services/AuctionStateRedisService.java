@@ -16,6 +16,7 @@ public class AuctionStateRedisService {
     private static final String AUCTION_START_KEY = "auction:start:queue";
     private static final String AUCTION_END_KEY = "auction:end:queue";
     private static final String AUCTION_END_TIME_KEY = "auction:end:time";
+    private static final String AUCTION_PAUSED_KEY = "auction:paused";
 
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -138,13 +139,58 @@ public class AuctionStateRedisService {
     }
 
     /**
+     * Mark an auction as paused and record the pause start time
+     *
+     * @param auctionId The auction ID
+     * @param pauseTime The time when pause started
+     */
+    public void setPaused(String auctionId, OffsetDateTime pauseTime) {
+        long timestamp = convertToMillis(pauseTime);
+        redisTemplate.opsForHash().put(AUCTION_PAUSED_KEY, auctionId, String.valueOf(timestamp));
+    }
+
+    /**
+     * Check if an auction is currently paused
+     *
+     * @param auctionId The auction ID
+     * @return true if paused, false otherwise
+     */
+    public boolean isPaused(String auctionId) {
+        return redisTemplate.opsForHash().hasKey(AUCTION_PAUSED_KEY, auctionId);
+    }
+
+    /**
+     * Get the pause start time for an auction
+     *
+     * @param auctionId The auction ID
+     * @return The pause start time in milliseconds, or null if not paused
+     */
+    public Long getPauseStartTime(String auctionId) {
+        Object val = redisTemplate.opsForHash().get(AUCTION_PAUSED_KEY, auctionId);
+        if (val != null) {
+            return Long.parseLong(val.toString());
+        }
+        return null;
+    }
+
+    /**
+     * Clear the paused state for an auction
+     *
+     * @param auctionId The auction ID
+     */
+    public void clearPaused(String auctionId) {
+        redisTemplate.opsForHash().delete(AUCTION_PAUSED_KEY, auctionId);
+    }
+
+    /**
      * Clean up an auction from all Redis tracking structures
-     * 
+     *
      * @param auctionId The auction ID
      */
     public void cleanupAuction(String auctionId) {
         removeAuctionStartEvent(auctionId);
         removeAuctionEndEvent(auctionId);
+        clearPaused(auctionId);
     }
 
     /**

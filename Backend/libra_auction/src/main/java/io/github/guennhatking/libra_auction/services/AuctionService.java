@@ -94,8 +94,8 @@ public class AuctionService {
                 Product product = productRepository.findById(request.productId())
                                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-                if (product.getStatus() == ProductStatus.SOLD) {
-                        throw new IllegalArgumentException("Sản phẩm đã được bán, không thể tạo phiên đấu giá mới");
+                if (product.getStatus() != ProductStatus.AVAILABLE) {
+                        throw new IllegalArgumentException("Sản phẩm không ở trạng thái sẵn sàng. Trạng thái hiện tại: " + product.getStatus());
                 }
 
                 Customer creator = customerRepository.findById(userId)
@@ -211,6 +211,60 @@ public class AuctionService {
                 Auction saved = auctionRepository.save(session);
 
                 // Clean up Redis scheduling when rejecting
+                auctionStateRedisService.removeAuctionStartEvent(id);
+                auctionStateRedisService.removeAuctionEndEvent(id);
+
+                return auctionMapper.toAuctionResponse(saved);
+        }
+
+        @Transactional
+        public AuctionResponse completeAuction(String id, String adminId) {
+                Auction auction = auctionRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
+
+                if (auction.getAuctionStatus() != AuctionStatus.ENDED) {
+                        throw new IllegalStateException("Auction must be ENDED to complete");
+                }
+
+                // Mark product as SOLD
+                Product product = auction.getProduct();
+                if (product != null) {
+                        product.setStatus(ProductStatus.SOLD);
+                        productRepository.save(product);
+                }
+
+                auction.setAuctionStatus(AuctionStatus.COMPLETED);
+                auction.setCompletedAt(OffsetDateTime.now(ZoneOffset.ofHours(7)));
+                Auction saved = auctionRepository.save(auction);
+
+                // Clean up Redis
+                auctionStateRedisService.removeAuctionStartEvent(id);
+                auctionStateRedisService.removeAuctionEndEvent(id);
+
+                return auctionMapper.toAuctionResponse(saved);
+        }
+
+        @Transactional
+        public AuctionResponse failAuction(String id, String adminId, String reason) {
+                Auction auction = auctionRepository.findById(id)
+                                .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
+
+                if (auction.getAuctionStatus() != AuctionStatus.ENDED) {
+                        throw new IllegalStateException("Auction must be ENDED to mark as failed");
+                }
+
+                // Keep product as AVAILABLE
+                Product product = auction.getProduct();
+                if (product != null) {
+                        product.setStatus(ProductStatus.AVAILABLE);
+                        productRepository.save(product);
+                }
+
+                auction.setAuctionStatus(AuctionStatus.FAILED);
+                auction.setFailureReason(reason);
+                Auction saved = auctionRepository.save(auction);
+
+                // Clean up Redis
                 auctionStateRedisService.removeAuctionStartEvent(id);
                 auctionStateRedisService.removeAuctionEndEvent(id);
 

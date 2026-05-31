@@ -408,6 +408,49 @@ public class AuctionController {
                 null);
     }
 
+    @PostMapping("/admin/auctions/{id}/complete")
+    public ResponseEntity<ServerAPIResponse<AuctionResponse>> completeAuction(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @PathVariable String id) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Authentication required"));
+        }
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
+        AuctionResponse response = auctionService.completeAuction(id, userDetails.getUserId());
+        return ResponseEntity.ok(ServerAPIResponse.success(response));
+    }
+
+    @PostMapping("/admin/auctions/{id}/fail")
+    public ResponseEntity<ServerAPIResponse<AuctionResponse>> failAuction(
+            @AuthenticationPrincipal JwtUserDetails userDetails,
+            @PathVariable String id,
+            @RequestBody java.util.Map<String, String> request) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ServerAPIResponse.error("Authentication required"));
+        }
+        if (!isAdminUser(userDetails.getUserId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ServerAPIResponse.error("Admin role required"));
+        }
+
+        String reason = request != null ? request.get("reason") : null;
+        if (reason == null || reason.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ServerAPIResponse.error("Failure reason is required"));
+        }
+
+        AuctionResponse response = auctionService.failAuction(id, userDetails.getUserId(), reason);
+        return ResponseEntity.ok(ServerAPIResponse.success(response));
+    }
+
     @PostMapping("/admin/auctions/register-to-scheduler")
     public ResponseEntity<ServerAPIResponse<java.util.Map<String, Integer>>> registerAuctionsToScheduler(
             @AuthenticationPrincipal JwtUserDetails userDetails) {

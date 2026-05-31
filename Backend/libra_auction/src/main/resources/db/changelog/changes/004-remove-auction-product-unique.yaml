@@ -1,0 +1,8 @@
+databaseChangeLog:
+- changeSet:
+    id: 004-remove-auction-product-unique
+    author: nhatking
+    changes:
+    - dropUniqueConstraint:
+        constraintName: auction_product_id_key
+        tableName: auction

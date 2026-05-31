@@ -17,6 +17,8 @@ const statusConfig: Record<AuctionStatus, { label: string, classes: string }> = 
     "PAUSED": { label: 'Paused', classes: 'bg-yellow-50 text-yellow-600 border-yellow-100' },
     "ENDED": { label: 'Ended', classes: 'bg-gray-50 text-gray-500 border-gray-100' },
     "CANCELLED": { label: 'Cancelled', classes: 'bg-red-50 text-red-600 border-red-100' },
+    "COMPLETED": { label: 'Completed', classes: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+    "FAILED": { label: 'Failed', classes: 'bg-rose-50 text-rose-600 border-rose-100' },
 };
 
 const approvalStatusConfig: Record<ApprovalStatus, { label: string; classes: string }> = {

@@ -11,6 +11,8 @@ const auctionStatusConfig: Record<AuctionStatus, { label: string; classes: strin
     PAUSED: { label: "Paused", classes: "bg-yellow-500/90 text-white" },
     ENDED: { label: "Ended", classes: "bg-gray-600/90 text-white" },
     CANCELLED: { label: "Cancelled", classes: "bg-red-500/90 text-white" },
+    COMPLETED: { label: "Completed", classes: "bg-emerald-600/90 text-white" },
+    FAILED: { label: "Failed", classes: "bg-rose-500/90 text-white" },
 };
 
 export default function AuctionCard({ auctionCard }: { auctionCard: Auction }) {

@@ -29,5 +29,10 @@ public record AuctionResponse(
         List<AttributeResponse> attributes,
 
         Integer total_bids,
-        Integer total_participants) {
+        Integer total_participants,
+
+        String failure_reason,
+        OffsetDateTime completed_at,
+
+        String creator_id) {
 }
