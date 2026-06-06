@@ -5,6 +5,11 @@ import { getRole } from './lib/get_roles';
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith('/api/');
+  if (isApiRoute) {
+    return NextResponse.next();
+  }
+  
   if (pathname == '/sign-in' || pathname == '/sign-up') {
     if (await isAuthenticated()) {
       return NextResponse.redirect(new URL('/', request.url))
@@ -13,7 +18,7 @@ export async function proxy(request: NextRequest) {
 
   const isPersonalRoute = pathname.startsWith('/profile') || pathname.startsWith('/seller-dashboard');
   const isAdminRoute = pathname.startsWith('/admin-dashboard');
-
+  
   if (isPersonalRoute || isAdminRoute) {
     const role = await getRole();
 

@@ -23,6 +23,9 @@ export async function isAuthenticated() {
             if (error instanceof JWSSignatureVerificationFailed) {
                 console.log("Invalid token");
             }
+            else {
+                console.log("Can't verify token: " + error);
+            }
             return false;
         }
         return true;

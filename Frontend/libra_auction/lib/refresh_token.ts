@@ -2,6 +2,7 @@
 import { getJWTPublicKey } from "./get_cert";
 import * as jose from "jose";
 import { getJWTTokenInfo } from "./get_jwt_token_info";
+import { JWSSignatureVerificationFailed, JWTExpired } from "jose/errors";
 
 export async function refreshToken() {
     const jwtTokenInfo = await getJWTTokenInfo();
@@ -11,7 +12,7 @@ export async function refreshToken() {
         const publicKey = await jose.importSPKI(spki, alg);
         try {
             await jose.jwtVerify(jwtTokenInfo.refresh, publicKey);
-            await fetch('api/refresh', {
+            await fetch('http://localhost:3000/api/refresh', {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -22,7 +23,15 @@ export async function refreshToken() {
             });
             return true;
         } catch (error) {
-            console.error("Can't refresh token: " + error)
+            if (error instanceof JWTExpired) {
+                console.log("Token expired");
+            }
+            else if (error instanceof JWSSignatureVerificationFailed) {
+                console.log("Invalid token");
+            }
+            else {
+                console.error("Can't refresh token: " + error)
+            }
             return false;
         }
     }

@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { refreshToken } = body;
+        console.log("RefreshToken: " + refreshToken);
 
         const req: RequestInit = {
             method: "POST",
@@ -26,8 +27,16 @@ export async function POST(request: NextRequest) {
                 value: jwtToken,
                 httpOnly: true,
                 secure: true,
+                maxAge: res.data.accessTokenExpiration
+            });
+            cookieStore.set({
+                name: 'refreshToken',
+                value: res.data.refreshToken,
+                httpOnly: true,
+                secure: true,
                 maxAge: res.data.refreshTokenExpiration
             });
+            console.log("Success");
             return NextResponse.json({ message: "Refresh successful" }, { status: 200 })
         }
         throw new Error(res.errorMessage || "Failed to refresh token");
