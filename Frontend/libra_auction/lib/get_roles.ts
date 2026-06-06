@@ -33,10 +33,13 @@ export async function getRole(): Promise<Role | null> {
 		} catch (error) {
 			if (error instanceof JWTExpired) {
 				console.log("Token expired");
-				if (await refreshToken() == false) {
+				const refreshed = await refreshToken();
+				if (!refreshed) {
 					return null;
 				}
-				return await getRole();
+				const { payload } = await jose.jwtVerify(refreshed.token, publicKey);
+				const roleValue = payload.role ?? payload.roles;
+				return toRole(roleValue);
 			}
 
 			if (error instanceof JWSSignatureVerificationFailed) {

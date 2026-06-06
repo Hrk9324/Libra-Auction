@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
                 maxAge: Math.floor(res.data.refreshTokenExpiration / 1000)
             });
             console.log("Success");
-            return NextResponse.json({ message: "Refresh successful" }, { status: 200 })
+            return NextResponse.json({ message: "Refresh successful", tokenInfo: res.data }, { status: 200 })
         }
         throw new Error(res.errorMessage || "Failed to refresh token");
     }

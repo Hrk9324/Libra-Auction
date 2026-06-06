@@ -17,7 +17,7 @@ export async function isAuthenticated() {
         catch (error) {
             if (error instanceof JWTExpired) {
                 console.log("Token expired");
-                return await refreshToken();
+                return await refreshToken() !== null;
             }
 
             if (error instanceof JWSSignatureVerificationFailed) {

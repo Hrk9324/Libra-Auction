@@ -18,10 +18,12 @@ export async function getIdFromToken(): Promise<string | null> {
         catch (error) {
             if (error instanceof JWTExpired) {
                 console.log("Token expired");
-                if(await refreshToken() == false) {
+                const refreshed = await refreshToken();
+                if (!refreshed) {
                     return null;
                 }
-                return await getIdFromToken();
+                const { payload } = await jose.jwtVerify(refreshed.token, publicKey);
+                return payload.sub as string;
             }
 
             if (error instanceof JWSSignatureVerificationFailed) {

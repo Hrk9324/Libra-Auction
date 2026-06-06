@@ -3,8 +3,14 @@ import { getJWTPublicKey } from "./get_cert";
 import * as jose from "jose";
 import { getJWTTokenInfo } from "./get_jwt_token_info";
 import { JWSSignatureVerificationFailed, JWTExpired } from "jose/errors";
+import { JWTResponse } from "@/types/jwt_response";
 
-export async function refreshToken() {
+interface RefreshRouteResponse {
+    message: string;
+    tokenInfo: JWTResponse;
+}
+
+export async function refreshToken(): Promise<JWTResponse | null> {
     const jwtTokenInfo = await getJWTTokenInfo();
     const alg = 'RS256';
     const spki = await getJWTPublicKey();
@@ -21,19 +27,23 @@ export async function refreshToken() {
                     'refreshToken': jwtTokenInfo.refresh
                 })
             });
-            return response.ok;
+            if (!response.ok) {
+                return null;
+            }
+            const data = await response.json() as RefreshRouteResponse;
+            return data.tokenInfo;
         } catch (error) {
             if (error instanceof JWTExpired) {
-                console.log("Token expired");
+                console.log("Refresh token expired");
             }
             else if (error instanceof JWSSignatureVerificationFailed) {
-                console.log("Invalid token");
+                console.log("Invalid refresh token");
             }
             else {
                 console.error("Can't refresh token: " + error)
             }
-            return false;
+            return null;
         }
     }
-    return false;
+    return null;
 }
