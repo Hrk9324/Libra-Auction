@@ -38,7 +38,7 @@ public class TokenService {
         );
     }
 
-    public String refreshAccessToken(String refreshToken) throws Exception {
+    public JwtResponse refreshTokens(String refreshToken) throws Exception {
         if (!jwtRSA.verifyToken(refreshToken, jwtUtils.getPublicKey())) {
             throw new IllegalArgumentException("Invalid refresh token");
         }
@@ -55,7 +55,9 @@ public class TokenService {
 
         String userId = jwtRSA.extractClaim(refreshToken, "sub");
         String role = jwtRSA.extractClaim(refreshToken, "role");
-        return jwtRSA.createToken(userId, role, TokenType.ACCESS, accessTokenExpiration);
+        String newAccessToken = jwtRSA.createToken(userId, role, TokenType.ACCESS, accessTokenExpiration);
+        String newRefreshToken = jwtRSA.createToken(userId, role, TokenType.REFRESH, refreshTokenExpiration);
+        return new JwtResponse(newAccessToken, newRefreshToken, accessTokenExpiration, refreshTokenExpiration);
     }
 
     public boolean validateToken(String token) throws Exception {

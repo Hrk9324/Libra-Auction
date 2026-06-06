@@ -27,14 +27,14 @@ export async function POST(request: NextRequest) {
                 value: jwtToken,
                 httpOnly: true,
                 secure: true,
-                maxAge: res.data.accessTokenExpiration
+                maxAge: Math.floor(res.data.accessTokenExpiration / 1000)
             });
             cookieStore.set({
                 name: 'refreshToken',
                 value: res.data.refreshToken,
                 httpOnly: true,
                 secure: true,
-                maxAge: res.data.refreshTokenExpiration
+                maxAge: Math.floor(res.data.refreshTokenExpiration / 1000)
             });
             console.log("Success");
             return NextResponse.json({ message: "Refresh successful" }, { status: 200 })

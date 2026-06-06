@@ -12,7 +12,7 @@ export async function refreshToken() {
         const publicKey = await jose.importSPKI(spki, alg);
         try {
             await jose.jwtVerify(jwtTokenInfo.refresh, publicKey);
-            await fetch('http://localhost:3000/api/refresh', {
+            const response = await fetch('http://localhost:3000/api/refresh', {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
@@ -21,7 +21,7 @@ export async function refreshToken() {
                     'refreshToken': jwtTokenInfo.refresh
                 })
             });
-            return true;
+            return response.ok;
         } catch (error) {
             if (error instanceof JWTExpired) {
                 console.log("Token expired");

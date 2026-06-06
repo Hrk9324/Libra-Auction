@@ -80,7 +80,7 @@ public class AuthenticationService {
         return tokenService.generateTokens(user);
     }
 
-    public String refreshToken(RefreshTokenRequest request) throws Exception {
-        return tokenService.refreshAccessToken(request.refreshToken());
+    public JwtResponse refreshToken(RefreshTokenRequest request) throws Exception {
+        return tokenService.refreshTokens(request.refreshToken());
     }
 }

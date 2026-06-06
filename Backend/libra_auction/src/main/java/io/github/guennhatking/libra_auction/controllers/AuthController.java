@@ -14,7 +14,6 @@ import io.github.guennhatking.libra_auction.viewmodels.request.SignupRequest;
 import io.github.guennhatking.libra_auction.viewmodels.request.VerifyEmailOtpRequest;
 import io.github.guennhatking.libra_auction.viewmodels.response.JwtResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIResponse;
-import io.github.guennhatking.libra_auction.viewmodels.response.TokenResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,9 +59,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ServerAPIResponse<TokenResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) throws Exception {
-        String newAccessToken = authenticationService.refreshToken(request);
-        return ResponseEntity.ok(ServerAPIResponse.success(new TokenResponse(newAccessToken, System.currentTimeMillis() / 1000 + 86400)));
+    public ResponseEntity<ServerAPIResponse<JwtResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) throws Exception {
+        JwtResponse response = authenticationService.refreshToken(request);
+        return ResponseEntity.ok(ServerAPIResponse.success(response));
     }
 
     @PostMapping("/email/send-verification")
