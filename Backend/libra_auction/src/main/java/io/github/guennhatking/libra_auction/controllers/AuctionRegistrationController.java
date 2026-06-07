@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.guennhatking.libra_auction.security.JwtUserDetails;
@@ -31,20 +30,24 @@ public class AuctionRegistrationController {
     }
 
     @GetMapping
-    public List<AuctionRegistrationResponse> getAllRegistrations() {
-        return auctionRegistrationService.getAllRegistrations();
+    public ResponseEntity<ServerAPIResponse<List<AuctionRegistrationResponse>>> getAllRegistrations() {
+        return ResponseEntity.ok(ServerAPIResponse.success(auctionRegistrationService.getAllRegistrations()));
     }
 
     @GetMapping("/{id}")
-    public AuctionRegistrationResponse getRegistrationById(@PathVariable String id) {
-        return auctionRegistrationService.getRegistrationById(id);
+    public ResponseEntity<ServerAPIResponse<AuctionRegistrationResponse>> getRegistrationById(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(ServerAPIResponse.success(auctionRegistrationService.getRegistrationById(id)));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ServerAPIResponse.error(e.getMessage()));
+        }
     }
 
     /**
      * Đăng kí phiên đấu giá (auto-extract userId từ JWT)
      */
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ServerAPIResponse<AuctionRegistrationResponse>> registerForAuction(
             @AuthenticationPrincipal JwtUserDetails userDetails,
             @Valid @RequestBody AuctionRegistrationCreateRequest request) {
@@ -66,19 +69,19 @@ public class AuctionRegistrationController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRegistration(@PathVariable String id) {
+    public ResponseEntity<ServerAPIResponse<Void>> deleteRegistration(@PathVariable String id) {
         auctionRegistrationService.deleteRegistration(id);
+        return ResponseEntity.ok(ServerAPIResponse.success(null));
     }
 
     @GetMapping("/user/{userId}")
-    public List<AuctionRegistrationResponse> getRegistrationsByUserId(@PathVariable String userId) {
-        return auctionRegistrationService.getRegistrationsByUserId(userId);
+    public ResponseEntity<ServerAPIResponse<List<AuctionRegistrationResponse>>> getRegistrationsByUserId(@PathVariable String userId) {
+        return ResponseEntity.ok(ServerAPIResponse.success(auctionRegistrationService.getRegistrationsByUserId(userId)));
     }
 
     @GetMapping("/auction/{auctionId}")
-    public List<AuctionRegistrationResponse> getRegistrationsByAuctionId(@PathVariable String auctionId) {
-        return auctionRegistrationService.getRegistrationsByAuctionId(auctionId);
+    public ResponseEntity<ServerAPIResponse<List<AuctionRegistrationResponse>>> getRegistrationsByAuctionId(@PathVariable String auctionId) {
+        return ResponseEntity.ok(ServerAPIResponse.success(auctionRegistrationService.getRegistrationsByAuctionId(auctionId)));
     }
 
     @GetMapping("/user/{userId}/auction/{auctionId}")
