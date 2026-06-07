@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { NewProduct } from "@/types/product/new-product";
 import { Product } from "@/types/product/product";
@@ -19,5 +20,5 @@ export async function createProduct(product: NewProduct): Promise<Product> {
         console.log(res.data);
         return res.data;
     }
-    throw new Error(res.errorMessage || "Failed to create products");
+    throw createAppErrorFromResponse(res, "Failed to create products");
 }

@@ -1,3 +1,4 @@
+import { getErrorStatus } from "@/lib/app_error";
 import { UserDashboard } from "@/components/main/profile/UserDashboard";
 import { getIdFromToken } from "@/lib/get_id_from_token";
 import { fetchUserInfo } from "@/services/fetch_user_info";
@@ -25,8 +26,8 @@ export default async function ProfilePage() {
   try {
     user = await fetchUserInfo(user_id);
   } catch (error) {
-    console.error("Error fetching user info:", error);
-    redirect("/sign-in");
+    if (getErrorStatus(error) === 401) redirect("/sign-in");
+    throw error;
   }
 
   return (

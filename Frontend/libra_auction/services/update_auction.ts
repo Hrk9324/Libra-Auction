@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { NewAuction } from "@/types/auction/new-auction";
 import { Auction } from "@/types/auction/auction";
@@ -19,5 +20,5 @@ export async function updateAuction(auction_id: string, auction: NewAuction): Pr
         console.log(res.data);
         return res.data;
     }
-    throw new Error(res.errorMessage || "Failed to update auctions");
+    throw createAppErrorFromResponse(res, "Failed to update auctions");
 }

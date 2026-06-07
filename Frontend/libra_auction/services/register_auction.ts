@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { getJWTTokenInfo } from "@/lib/get_jwt_token_info";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { AuctionRegistration } from "@/types/auction/auction_registration";
@@ -16,7 +17,7 @@ export async function registerForAuction(auctionId: string): Promise<AuctionRegi
     if (res.isSuccess && res.data) {
         return res.data;
     }
-    throw new Error(res.errorMessage || "Registration failed");
+    throw createAppErrorFromResponse(res, "Registration failed");
 }
 
 export async function checkRegistration(userId: string, auctionId: string): Promise<AuctionRegistration | null> {

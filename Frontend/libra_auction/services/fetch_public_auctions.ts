@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPICall } from "@/lib/server_API_call";
 import { Auction } from "@/types/auction/auction";
 import { PageResponse } from "@/types/page_response";
@@ -40,5 +41,5 @@ export async function fetchPublicAuctions(
         return res.data.content;
     }
     else if(res.isSuccess) return [];
-    throw new Error(res.errorMessage || "Failed to fetch live auctions");
+    throw createAppErrorFromResponse(res, "Failed to fetch live auctions");
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import ErrorView from "@/components/error/error_view";
+import { getErrorMessage, getErrorStatus, getErrorTitle } from "@/lib/app_error";
 import ProductDeleteConfirm from "@/components/seller/product_delete_confirm";
 import { Product } from "@/types/product/product";
 import { fetchProduct } from "@/services/fetch_product";
@@ -11,6 +13,8 @@ export default function DeleteProductPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // 1. Fetch product
   useEffect(() => {
@@ -24,8 +28,7 @@ export default function DeleteProductPage() {
         const data = await fetchProduct(params.product_id);
         setProduct(data);
       } catch (err) {
-        console.error("Error fetching product:", err);
-        window.location.replace("/seller-dashboard/products");
+        setError(err);
       } finally {
         setIsLoading(false);
       }
@@ -39,16 +42,11 @@ export default function DeleteProductPage() {
     if (!params.product_id || Array.isArray(params.product_id)) return;
 
     try {
-      console.log("Deleting product:", params.product_id);
-
+      setDeleteError(null);
       await deleteProduct(params.product_id);
-
-      alert("Deleted successfully!");
-
       window.location.replace("/seller-dashboard/products")
     } catch (err) {
-      console.error("Delete API error:", err);
-      alert("Failed to delete product!");
+      setDeleteError(getErrorMessage(err, "Failed to delete product!"));
     }
   };
 
@@ -63,18 +61,28 @@ export default function DeleteProductPage() {
     );
   }
 
+  if (error) {
+    const status = getErrorStatus(error);
+    return <ErrorView status={status} title={getErrorTitle(status)} message={getErrorMessage(error)} />;
+  }
+
   // không có data
-  if (!product) return null;
+  if (!product) return <ErrorView status={404} title="Product not found" />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F6F1F1] p-6">
-      <ProductDeleteConfirm
-        product={product}
-        onDelete={handleDelete}
-        onCancel={() => {
-          window.location.replace("/seller-dashboard/products");
-        }}
-      />
+      <div className="w-full max-w-2xl space-y-4">
+        {deleteError ? (
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{deleteError}</p>
+        ) : null}
+        <ProductDeleteConfirm
+          product={product}
+          onDelete={handleDelete}
+          onCancel={() => {
+            window.location.replace("/seller-dashboard/products");
+          }}
+        />
+      </div>
     </div>
   );
 }

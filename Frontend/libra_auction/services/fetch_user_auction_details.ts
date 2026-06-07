@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPICall } from "@/lib/server_API_call";
 import { Auction } from "@/types/auction/auction";
 
@@ -14,5 +15,5 @@ export async function fetchAuctionDetails(auctionId: string): Promise<Auction> {
   );
 
   if (res.isSuccess && res.data) return res.data;
-  throw new Error(res.errorMessage || "Failed to fetch auction details");
+  throw createAppErrorFromResponse(res, "Failed to fetch auction details");
 }

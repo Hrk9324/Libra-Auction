@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import ErrorView from "@/components/error/error_view";
+import { getErrorMessage, getErrorStatus, getErrorTitle } from "@/lib/app_error";
 import { AuctionDetail } from "@/components/seller/auction/auction_detail";
 import { Auction } from "@/types/auction/auction";
 import { fetchAuction } from "@/services/fetch_auction";
@@ -11,6 +13,7 @@ export default function Page() {
     const router = useRouter();
     const [data, setData] = useState<Auction | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<unknown>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,7 +26,7 @@ export default function Page() {
                     setData(data);
                 }
             } catch (err) {
-                console.error("Fetch error:", err);
+                setError(err);
                 setData(null);
             } finally {
                 setLoading(false);
@@ -36,6 +39,11 @@ export default function Page() {
     }, [params.auction_id]);
 
     if (loading) return <div className="p-10 text-center text-gray-400 italic">Loading auction...</div>;
+
+    if (error) {
+        const status = getErrorStatus(error);
+        return <ErrorView status={status} title={getErrorTitle(status)} message={getErrorMessage(error)} />;
+    }
 
     return (
         <main className="p-6 md:p-10 bg-(--background-color) min-h-screen">

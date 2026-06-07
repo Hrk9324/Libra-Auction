@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 
 export interface AuctionRegistrationResponse {
@@ -24,5 +25,5 @@ export async function fetchUserAuctionHistory(userId: string): Promise<AuctionRe
     return res.data;
   }
 
-  throw new Error(res.errorMessage || "Failed to fetch auction history");
+  throw createAppErrorFromResponse(res, "Failed to fetch auction history");
 }

@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPICall } from "@/lib/server_API_call";
 import { ImageUploadConfig } from "@/types/image_upload_config";
 
@@ -15,5 +16,5 @@ export async function fetchImageUploadConfig(folder: string, fileName: string): 
     }
     const res = await ServerAPICall<ImageUploadConfig>("/api/public/images/generate-upload-url", request);
     if (res.isSuccess && res.data) return res.data;
-    throw new Error(res.errorMessage || "Failed to fetch image upload config");
+    throw createAppErrorFromResponse(res, "Failed to fetch image upload config");
 }

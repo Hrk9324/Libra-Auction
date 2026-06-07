@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 
 export interface UserTransactionResponse {
@@ -29,7 +30,7 @@ export async function fetchTransactionHistory(
   );
 
   if (res.isSuccess && res.data) return res.data;
-  throw new Error(res.errorMessage || "Failed to fetch transaction history");
+  throw createAppErrorFromResponse(res, "Failed to fetch transaction history");
 }
 
 export async function fetchWalletBalance(userId: string): Promise<number> {
@@ -46,5 +47,5 @@ export async function fetchWalletBalance(userId: string): Promise<number> {
   );
 
   if (res.isSuccess && res.data) return res.data.balance;
-  throw new Error(res.errorMessage || "Failed to fetch wallet balance");
+  throw createAppErrorFromResponse(res, "Failed to fetch wallet balance");
 }

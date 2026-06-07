@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { PageResponse } from "@/types/page_response";
 import { Product } from "@/types/product/product";
@@ -15,5 +16,5 @@ export async function fetchProducts(): Promise<Product[]> {
         return res.data.content;
     }
     else if (res.isSuccess) return [];
-    throw new Error(res.errorMessage || "Failed to fetch products");
+    throw createAppErrorFromResponse(res, "Failed to fetch products");
 }

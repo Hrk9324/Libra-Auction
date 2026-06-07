@@ -1,3 +1,4 @@
+import { getErrorStatus } from "@/lib/app_error";
 import { fetchPublicAuction } from "@/services/fetch_public_auction";
 import { notFound } from "next/navigation";
 import AdminLiveAuctionView from "@/components/admin/live/admin_live_auction_view";
@@ -9,8 +10,13 @@ export default async function AdminLivePage({
   params: Promise<{ auction_id: string }>;
 }) {
   const { auction_id: auctionId } = await params;
-  const auction = await fetchPublicAuction(auctionId);
-  if (!auction) notFound();
+  let auction;
+  try {
+    auction = await fetchPublicAuction(auctionId);
+  } catch (error) {
+    if (getErrorStatus(error) === 404) notFound();
+    throw error;
+  }
 
   const backendServerUrl =
     process.env.PUBLIC_BACKEND_SERVER_URL ||

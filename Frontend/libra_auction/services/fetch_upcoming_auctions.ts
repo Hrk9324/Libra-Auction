@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPICall } from "@/lib/server_API_call";
 import { mapAuctionToUpcoming } from "@/mappers/map_auction_to_upcoming_auction";
 import { Auction } from "@/types/auction/auction";
@@ -14,5 +15,5 @@ export async function fetchUpcomingAuctions(): Promise<UpcomingAuction[]> {
         return res.data.content.map((i) => mapAuctionToUpcoming(i));
     }
     else if(res.isSuccess) return [];
-    throw new Error(res.errorMessage || "Failed to fetch upcoming auctions");
+    throw createAppErrorFromResponse(res, "Failed to fetch upcoming auctions");
 }

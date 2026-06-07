@@ -1,5 +1,6 @@
 'use server';
 
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { AdminAuction } from "@/types/admin/admin_auction";
 
@@ -18,5 +19,5 @@ export async function rejectAuction(auctionId: string, reason?: string): Promise
         return res.data;
     }
 
-    throw new Error(res.errorMessage || "Failed to reject auction");
+    throw createAppErrorFromResponse(res, "Failed to reject auction");
 }

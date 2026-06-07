@@ -3,6 +3,7 @@ import AuctionQuestionsSection from "@/components/main/auction/auction_questions
 import BreadCrumb from "@/components/main/auction/breadcrumb";
 import { fetchPublicAuction } from "@/services/fetch_public_auction";
 import { Auction } from "@/types/auction/auction";
+import { getErrorStatus } from "@/lib/app_error";
 import { notFound } from "next/navigation";
 import AuctionInfoSection from "@/components/main/auction/auction_info_section";
 
@@ -11,9 +12,12 @@ export default async function page(props: {
 }) {
   const params = await props.params;
   const id = params.auction_id;
-  const auction_info: Auction = await fetchPublicAuction(id);
-  if (auction_info == null) {
-    notFound();
+  let auction_info: Auction;
+  try {
+    auction_info = await fetchPublicAuction(id);
+  } catch (error) {
+    if (getErrorStatus(error) === 404) notFound();
+    throw error;
   }
   const breadcrumb_items = [];
   breadcrumb_items.push({

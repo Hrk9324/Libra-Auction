@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 
 export async function completeAuction(auctionId: string): Promise<boolean> {
@@ -11,5 +12,5 @@ export async function completeAuction(auctionId: string): Promise<boolean> {
     if (res.isSuccess) {
         return true;
     }
-    throw new Error(res.errorMessage || "Failed to complete auction");
+    throw createAppErrorFromResponse(res, "Failed to complete auction");
 }

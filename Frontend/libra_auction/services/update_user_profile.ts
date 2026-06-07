@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { UserInfo } from "@/types/user_info";
 
@@ -24,5 +25,5 @@ export async function updateUserProfile(
 
   const res = await ServerAPIAuthedCall<UserInfo>("/api/users/" + userId, request);
   if (res.isSuccess && res.data) return res.data;
-  throw new Error(res.errorMessage || "Failed to update user profile");
+  throw createAppErrorFromResponse(res, "Failed to update user profile");
 }

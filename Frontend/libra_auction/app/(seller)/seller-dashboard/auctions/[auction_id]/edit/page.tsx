@@ -6,6 +6,8 @@ import { AuctionEditForm } from "@/components/seller/auction/auction_edit_form";
 import { NewAuction } from "@/types/auction/new-auction";
 import { fetchAuction } from "@/services/fetch_auction";
 import { updateAuction } from "@/services/update_auction";
+import ErrorView from "@/components/error/error_view";
+import { getErrorMessage, getErrorStatus, getErrorTitle } from "@/lib/app_error";
 
 export default function EditAuctionPage() {
     const params = useParams();
@@ -13,6 +15,8 @@ export default function EditAuctionPage() {
 
     const [auctionData, setAuctionData] = useState<NewAuction | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<unknown>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     useEffect(() => {
         const loadAuction = async () => {
@@ -35,7 +39,7 @@ export default function EditAuctionPage() {
                 }
                 setAuctionData(newAuction);
             } catch (e) {
-                console.error("Fetch error:", e);
+                setError(e);
             } finally {
                 setLoading(false);
             }
@@ -48,8 +52,13 @@ export default function EditAuctionPage() {
         return <div className="p-10 text-center">Loading data...</div>;
     }
 
+    if (error) {
+        const status = getErrorStatus(error);
+        return <ErrorView status={status} title={getErrorTitle(status)} message={getErrorMessage(error)} />;
+    }
+
     if (!auctionData) {
-        return <div className="p-10 text-center text-red-500">Auction not found</div>;
+        return <ErrorView status={404} title="Auction not found" />;
     }
 
     return (
@@ -63,6 +72,10 @@ export default function EditAuctionPage() {
                 Back to list
             </button>
 
+            {submitError ? (
+                <p className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{submitError}</p>
+            ) : null}
+
             <AuctionEditForm
                 initialData={auctionData}
                 onSubmit={async (formData) => {
@@ -70,6 +83,7 @@ export default function EditAuctionPage() {
                         return;
                     }
 
+                    setSubmitError(null);
                     const newAuction: NewAuction = {
                         productId: formData.productId,
                         minimumBidIncrement: formData.minimumBidIncrement,
@@ -78,12 +92,12 @@ export default function EditAuctionPage() {
                         duration: formData.duration,
                         depositAmount: formData.depositAmount
                     };
-                    const res = await updateAuction(params.auction_id, newAuction);
-                    if (res) {
-                        alert("Success! The auction was updated successfully.");
+
+                    try {
+                        await updateAuction(params.auction_id, newAuction);
                         window.location.replace("/seller-dashboard/auctions/" + params.auction_id);
-                    } else {
-                        throw new Error("Backend returned an error");
+                    } catch (updateError) {
+                        setSubmitError(getErrorMessage(updateError, "Failed to update auction."));
                     }
                 }}
                 isUpdating={true}

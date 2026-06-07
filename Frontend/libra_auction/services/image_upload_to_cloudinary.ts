@@ -1,4 +1,5 @@
 'use client';
+import { AppError, getErrorMessage } from "@/lib/app_error";
 import { ImageUploadConfig } from "@/types/image_upload_config";
 
 export async function uploadImageToCloudinary(file: File, config: ImageUploadConfig): Promise<string | undefined> {
@@ -25,13 +26,13 @@ export async function uploadImageToCloudinary(file: File, config: ImageUploadCon
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error.message || "Upload failed");
+            throw new AppError(response.status, errorData.error?.message || "Upload failed");
         }
 
         const result = await response.json();
-        console.log("Upload successful! Image URL:", result.secure_url);
         return result.secure_url;
     } catch (error) {
-        console.error("Upload error:", error);
+        if (error instanceof AppError) throw error;
+        throw new AppError(503, getErrorMessage(error, "Upload failed"));
     }
 }

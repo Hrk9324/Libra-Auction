@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import ErrorView from "@/components/error/error_view";
+import { getErrorMessage, getErrorStatus, getErrorTitle } from "@/lib/app_error";
 import ProductEditForm from "@/components/seller/product/product_edit_form";
 import { Product } from "@/types/product/product";
 import { fetchProduct } from "@/services/fetch_product";
@@ -11,6 +13,7 @@ export default function EditProductPage() {
     const router = useRouter();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<unknown>(null);
 
     useEffect(() => {
         const timer = setTimeout(async () => {
@@ -23,10 +26,9 @@ export default function EditProductPage() {
                 setLoading(true);
 
                 const data = await fetchProduct(params.product_id);
-                console.log("Fetched product detail for editing:", data);
                 setProduct(data);
             } catch (e) {
-                console.error("Fetch error:", e);
+                setError(e);
             } finally {
                 setLoading(false);
             }
@@ -39,9 +41,14 @@ export default function EditProductPage() {
         return <div className="p-10 text-center">Loading data...</div>;
     }
 
+    if (error) {
+        const status = getErrorStatus(error);
+        return <ErrorView status={status} title={getErrorTitle(status)} message={getErrorMessage(error)} />;
+    }
+
     // not found
     if (!product) {
-        return <div className="p-10 text-center text-red-500">Product not found</div>;
+        return <ErrorView status={404} title="Product not found" />;
     }
 
     return (

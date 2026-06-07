@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import ErrorView from "@/components/error/error_view";
+import { getErrorMessage, getErrorStatus, getErrorTitle } from "@/lib/app_error";
 import { AuctionDeleteConfirm } from "@/components/seller/auction/auction_delete_confirm";
 import { Auction } from "@/types/auction/auction";
 import { fetchAuction } from "@/services/fetch_auction";
@@ -15,6 +17,8 @@ export default function DeleteAuctionPage() {
 
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // =========================
   // FETCH DETAIL AUCTION
@@ -33,8 +37,7 @@ export default function DeleteAuctionPage() {
 
         setAuction(data);
       } catch (error) {
-        console.error("Fetch auction error:", error);
-        router.push("/seller-dashboard/auctions");
+        setError(error);
       } finally {
         setLoading(false);
       }
@@ -57,8 +60,7 @@ export default function DeleteAuctionPage() {
       router.push("/seller-dashboard/auctions");
       router.refresh();
     } catch (error) {
-      console.error("Delete error:", error);
-      alert("An error occurred while deleting the auction.");
+      setDeleteError(getErrorMessage(error, "An error occurred while deleting the auction."));
     }
   };
 
@@ -73,12 +75,13 @@ export default function DeleteAuctionPage() {
     );
   }
 
+  if (error) {
+    const status = getErrorStatus(error);
+    return <ErrorView status={status} title={getErrorTitle(status)} message={getErrorMessage(error)} />;
+  }
+
   if (!auction) {
-    return (
-      <div className="p-10 text-center text-red-500">
-        Auction not found
-      </div>
-    );
+    return <ErrorView status={404} title="Auction not found" />;
   }
 
   // =========================
@@ -86,11 +89,16 @@ export default function DeleteAuctionPage() {
   // =========================
   return (
     <div className="min-h-screen bg-(--background-color) flex items-center justify-center p-6">
-      <AuctionDeleteConfirm
-        auction={auction}
-        onDelete={handleDelete}
-        onCancel={() => router.back()}
-      />
+      <div className="w-full max-w-2xl space-y-4">
+        {deleteError ? (
+          <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{deleteError}</p>
+        ) : null}
+        <AuctionDeleteConfirm
+          auction={auction}
+          onDelete={handleDelete}
+          onCancel={() => router.back()}
+        />
+      </div>
     </div>
   );
 }

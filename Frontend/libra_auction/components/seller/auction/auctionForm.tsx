@@ -1,5 +1,6 @@
 "use client";
 import { createAuction } from "@/services/create_auction";
+import { getErrorMessage } from "@/lib/app_error";
 import { NewAuction } from "@/types/auction/new-auction";
 import { Product } from "@/types/product/product";
 import { useState } from "react";
@@ -15,6 +16,8 @@ type AuctionFormData = {
 
 export default function AuctionForm({ products }: { products: Product[] }) {
   const [step, setStep] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<AuctionFormData>({
     productId: "",
@@ -33,6 +36,9 @@ export default function AuctionForm({ products }: { products: Product[] }) {
   };
 
   const handleSubmit = async () => {
+    setError(null);
+    setSuccess(null);
+
     try {
       const auction: NewAuction = {
         productId: formData.productId,
@@ -43,19 +49,22 @@ export default function AuctionForm({ products }: { products: Product[] }) {
         depositAmount: Number(formData.depositAmount)
       };
 
-      const res = await createAuction(auction);
-      if (res) {
-        alert("Auction created successfully!");
-        window.location.href = "/seller-dashboard/auctions";
-      }
+      await createAuction(auction);
+      setSuccess("Auction created successfully!");
+      window.location.href = "/seller-dashboard/auctions";
     } catch (err) {
-      console.error(err);
-      alert("Failed to create auction!");
+      setError(getErrorMessage(err, "Failed to create auction!"));
     }
   };
 
   return (
     <div className="bg-white p-8 rounded-2xl border border-[#AFD3E2] space-y-8 shadow-sm">
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>
+      ) : null}
+      {success ? (
+        <p className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">{success}</p>
+      ) : null}
       {/* STEP HEADER */}
       <div className="flex border-b border-[#AFD3E2]">
         <div className={`flex-1 p-4 text-center font-bold ${step === 1 ? 'bg-[#19A7CE] text-white' : 'bg-gray-50'}`}>

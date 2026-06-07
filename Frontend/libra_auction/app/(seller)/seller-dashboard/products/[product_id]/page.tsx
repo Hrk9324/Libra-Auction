@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import ErrorView from "@/components/error/error_view";
+import { getErrorMessage, getErrorStatus, getErrorTitle } from "@/lib/app_error";
 import { ProductDetail } from "@/components/seller/product/product_detail";
 import { Product } from "@/types/product/product";
 import { fetchProduct } from "@/services/fetch_product";
@@ -11,23 +13,33 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
     const timer = setTimeout(async () => {
-      console.log("Fetching product detail for ID:", params.product_id);
       if (!params.product_id || Array.isArray(params.product_id)) {
         setLoading(false);
         return;
       }
-      const product = await fetchProduct(params.product_id);
-      setProduct(product);
-      setLoading(false);
+
+      try {
+        const product = await fetchProduct(params.product_id);
+        setProduct(product);
+      } catch (fetchError) {
+        setError(fetchError);
+      } finally {
+        setLoading(false);
+      }
     }, 300);
     return () => clearTimeout(timer);
   }, [params.product_id]);
 
   if (loading) return <div className="p-10 text-center text-gray-400 italic">Loading product...</div>;
-  if (!product) return <div className="p-10 text-center text-red-500 font-bold">Product not found!</div>;
+  if (error) {
+    const status = getErrorStatus(error);
+    return <ErrorView status={status} title={getErrorTitle(status)} message={getErrorMessage(error)} />;
+  }
+  if (!product) return <ErrorView status={404} title="Product not found" />;
 
   return (
     <main className="p-6 md:p-10 bg-(--background-color) min-h-screen">

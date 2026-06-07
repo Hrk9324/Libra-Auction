@@ -1,3 +1,4 @@
+import { getErrorStatus } from "@/lib/app_error";
 import { redirect, notFound } from "next/navigation";
 import { fetchPublicAuction } from "@/services/fetch_public_auction";
 import { checkRegistration } from "@/services/register_auction";
@@ -28,8 +29,9 @@ export default async function RegistrationPage(props: {
     let auction: Auction;
     try {
         auction = await fetchPublicAuction(auctionId);
-    } catch {
-        notFound();
+    } catch (error) {
+        if (getErrorStatus(error) === 404) notFound();
+        throw error;
     }
 
     // Check registration status

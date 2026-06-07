@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getErrorMessage } from "@/lib/app_error";
 import { fetchPendingUsers } from "@/services/fetch_pending_users";
 import { fetchPendingAuctions } from "@/services/fetch_pending_auctions";
 
@@ -14,6 +15,7 @@ export default function AdminDashboardPage() {
     pendingUsers: 0,
     pendingAuctions: 0,
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPendingData = async () => {
@@ -28,7 +30,7 @@ export default function AdminDashboardPage() {
           pendingAuctions: auctionsResponse.totalElements,
         });
       } catch (error) {
-        console.error('Error fetching pending data:', error);
+        setError(getErrorMessage(error, "Failed to fetch pending dashboard data."));
       }
     };
 
@@ -37,6 +39,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>
+      ) : null}
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Revenue Card */}

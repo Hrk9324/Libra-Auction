@@ -1,3 +1,4 @@
+import { getErrorStatus } from "@/lib/app_error";
 import BreadCrumb from "@/components/main/auction/breadcrumb";
 import { fetchPublicAuction } from "@/services/fetch_public_auction";
 import { checkRegistration } from "@/services/register_auction";
@@ -10,8 +11,13 @@ export default async function LivePage(props: {
 }) {
   const params = await props.params;
   const auctionId = params.auction_id;
-  const auction = await fetchPublicAuction(auctionId);
-  if (!auction) notFound();
+  let auction;
+  try {
+    auction = await fetchPublicAuction(auctionId);
+  } catch (error) {
+    if (getErrorStatus(error) === 404) notFound();
+    throw error;
+  }
 
   const backendServerUrl = process.env.PUBLIC_BACKEND_SERVER_URL || process.env.BACKEND_SERVER_URL || '';
 

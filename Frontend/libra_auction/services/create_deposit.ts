@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { getJWTTokenInfo } from "@/lib/get_jwt_token_info";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 
@@ -19,7 +20,7 @@ export async function createDeposit(auctionId: string): Promise<string> {
     if (res.isSuccess && res.data) {
         return res.data.paymentUrl;
     }
-    throw new Error(res.errorMessage || "Failed to create deposit payment");
+    throw createAppErrorFromResponse(res, "Failed to create deposit payment");
 }
 
 export async function isDepositPaid(auctionId: string): Promise<boolean> {

@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 
 export async function deleteAuction(auction_id: string): Promise<void> {
@@ -13,5 +14,5 @@ export async function deleteAuction(auction_id: string): Promise<void> {
     if (res.isSuccess) {
         return;
     }
-    throw new Error(res.errorMessage || "Failed to delete auctions");
+    throw createAppErrorFromResponse(res, "Failed to delete auctions");
 }

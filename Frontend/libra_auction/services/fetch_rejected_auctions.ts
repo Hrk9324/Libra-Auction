@@ -1,5 +1,6 @@
 'use server';
 
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { AdminAuction } from "@/types/admin/admin_auction";
 import { PageResponse } from "@/types/page_response";
@@ -32,5 +33,5 @@ export async function fetchRejectedAuctions(page: number = 0, pageSize: number =
         };
     }
 
-    throw new Error(res.errorMessage || "Failed to fetch rejected auctions");
+    throw createAppErrorFromResponse(res, "Failed to fetch rejected auctions");
 }

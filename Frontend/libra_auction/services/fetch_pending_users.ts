@@ -1,5 +1,6 @@
 'use server';
 
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 import { PageResponse } from "@/types/page_response";
 import { PendingUser } from "@/types/admin/pending_user";
@@ -55,7 +56,7 @@ async function fetchUsersByPath(path: string, request: RequestInit, page: number
         };
     }
 
-    throw new Error(res.errorMessage || "Failed to fetch users");
+    throw createAppErrorFromResponse(res, "Failed to fetch users");
 }
 
 export async function fetchAdminUsers(
@@ -91,5 +92,5 @@ export async function updateAdminUserAction(userId: string, action: "approve" | 
         return res.data;
     }
 
-    throw new Error(res.errorMessage || `Failed to ${action} user (status ${res.status})`);
+    throw createAppErrorFromResponse(res, `Failed to ${action} user`);
 }

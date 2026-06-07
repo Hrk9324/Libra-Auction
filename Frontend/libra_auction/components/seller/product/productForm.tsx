@@ -9,12 +9,15 @@ import { fetchImageUploadConfig } from "@/services/fetch_image_upload_config";
 import { NewProduct } from "@/types/product/new-product";
 import { createProduct } from "@/services/create_product";
 import { fetchAttributeNames, fetchAttributeValues } from "@/services/fetch_standardized_attributes";
+import { getErrorMessage } from "@/lib/app_error";
 
 export default function ProductForm() {
   const [attributes, setAttributes] = useState<Attribute[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // System attribute picker state
@@ -93,34 +96,37 @@ export default function ProductForm() {
 
   const handleSubmit: React.ComponentProps<"form">["onSubmit"] = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newProduct: NewProduct = {
-      name: formData.get("name") as string,
-      quantity: Number(formData.get("quantity")),
-      categoryId: formData.get("categoryId") as string,
-      description: formData.get("description") as string,
-      attributes: attributes,
-      imageUrls: []
-    }
-    const uploadPromises = images.map(async (img) => {
-      const imgUploadConfig = await fetchImageUploadConfig("products", img.name);
-      return await uploadImageToCloudinary(img, imgUploadConfig);
-    });
+    setError(null);
+    setSuccess(null);
 
-    const uploadedUrls = await Promise.all(uploadPromises);
-    newProduct.imageUrls = uploadedUrls.filter((url): url is string => !!url);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const newProduct: NewProduct = {
+        name: formData.get("name") as string,
+        quantity: Number(formData.get("quantity")),
+        categoryId: formData.get("categoryId") as string,
+        description: formData.get("description") as string,
+        attributes: attributes,
+        imageUrls: []
+      }
+      const uploadPromises = images.map(async (img) => {
+        const imgUploadConfig = await fetchImageUploadConfig("products", img.name);
+        return await uploadImageToCloudinary(img, imgUploadConfig);
+      });
 
-    if (newProduct.imageUrls.length === 0 && images.length > 0) {
-      alert("Unable to upload images. Please try again.");
-      return;
-    }
+      const uploadedUrls = await Promise.all(uploadPromises);
+      newProduct.imageUrls = uploadedUrls.filter((url): url is string => !!url);
 
-    const res = await createProduct(newProduct);
-    if (res) {
-      alert("Success! The product was created successfully.");
+      if (newProduct.imageUrls.length === 0 && images.length > 0) {
+        setError("Unable to upload images. Please try again.");
+        return;
+      }
+
+      await createProduct(newProduct);
+      setSuccess("Success! The product was created successfully.");
       window.location.replace("/seller-dashboard/products");
-    } else {
-      throw new Error("Backend returned an error");
+    } catch (submitError) {
+      setError(getErrorMessage(submitError, "Failed to create product."));
     }
   };
 
@@ -140,6 +146,12 @@ export default function ProductForm() {
       className="bg-white p-8 rounded-2xl border border-[#AFD3E2] space-y-8 shadow-sm"
     >
       <h2 className="text-2xl font-bold text-[#146C94]">Add New Product</h2>
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>
+      ) : null}
+      {success ? (
+        <p className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">{success}</p>
+      ) : null}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-bold text-[#146C94]">Product name</label>

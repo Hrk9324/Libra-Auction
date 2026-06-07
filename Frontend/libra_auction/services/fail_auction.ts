@@ -1,4 +1,5 @@
 'use server';
+import { createAppErrorFromResponse } from "@/lib/app_error";
 import { ServerAPIAuthedCall } from "@/lib/server_API_authed_call";
 
 export async function failAuction(auctionId: string, reason: string): Promise<boolean> {
@@ -14,5 +15,5 @@ export async function failAuction(auctionId: string, reason: string): Promise<bo
     if (res.isSuccess) {
         return true;
     }
-    throw new Error(res.errorMessage || "Failed to mark auction as failed");
+    throw createAppErrorFromResponse(res, "Failed to mark auction as failed");
 }

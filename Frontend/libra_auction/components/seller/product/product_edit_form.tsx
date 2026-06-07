@@ -10,6 +10,7 @@ import { NewProduct } from "@/types/product/new-product";
 import { fetchImageUploadConfig } from "@/services/fetch_image_upload_config";
 import { uploadImageToCloudinary } from "@/services/image_upload_to_cloudinary";
 import { fetchAttributeNames, fetchAttributeValues } from "@/services/fetch_standardized_attributes";
+import { getErrorMessage } from "@/lib/app_error";
 
 export default function ProductEditForm({ initialData }: { initialData: Product }) {
   const [attributes, setAttributes] = useState<Attribute[]>(initialData.attributes || []);
@@ -18,6 +19,8 @@ export default function ProductEditForm({ initialData }: { initialData: Product 
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState(initialData.category_id || "");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // System attribute picker state
   const [showSystemPicker, setShowSystemPicker] = useState(false);
@@ -102,34 +105,37 @@ export default function ProductEditForm({ initialData }: { initialData: Product 
 
   const handleSubmit: React.ComponentProps<"form">["onSubmit"] = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newProduct: NewProduct = {
-      name: formData.get("name") as string,
-      quantity: Number(formData.get("quantity")),
-      categoryId: formData.get("categoryId") as string,
-      description: formData.get("description") as string,
-      attributes: attributes,
-      imageUrls: []
-    }
-    const uploadPromises = newImageFiles.map(async (img) => {
-      const imgUploadConfig = await fetchImageUploadConfig("products", img.name);
-      return await uploadImageToCloudinary(img, imgUploadConfig);
-    });
+    setError(null);
+    setSuccess(null);
 
-    const uploadedUrls = await Promise.all(uploadPromises);
-    newProduct.imageUrls = existingImages.filter((url): url is string => !!url).concat(uploadedUrls.filter((url): url is string => !!url));
+    try {
+      const formData = new FormData(e.currentTarget);
+      const newProduct: NewProduct = {
+        name: formData.get("name") as string,
+        quantity: Number(formData.get("quantity")),
+        categoryId: formData.get("categoryId") as string,
+        description: formData.get("description") as string,
+        attributes: attributes,
+        imageUrls: []
+      }
+      const uploadPromises = newImageFiles.map(async (img) => {
+        const imgUploadConfig = await fetchImageUploadConfig("products", img.name);
+        return await uploadImageToCloudinary(img, imgUploadConfig);
+      });
 
-    if (newProduct.imageUrls.length === 0 && newImageFiles.length + existingImages.length > 0) {
-      alert("Unable to upload images. Please try again.");
-      return;
-    }
+      const uploadedUrls = await Promise.all(uploadPromises);
+      newProduct.imageUrls = existingImages.filter((url): url is string => !!url).concat(uploadedUrls.filter((url): url is string => !!url));
 
-    const res = await updateProduct(initialData.product_id, newProduct);
-    if (res) {
-      alert("Success! The product was updated successfully.");
+      if (newProduct.imageUrls.length === 0 && newImageFiles.length + existingImages.length > 0) {
+        setError("Unable to upload images. Please try again.");
+        return;
+      }
+
+      await updateProduct(initialData.product_id, newProduct);
+      setSuccess("Success! The product was updated successfully.");
       window.location.replace("/seller-dashboard/products/" + initialData.product_id);
-    } else {
-      throw new Error("Backend returned an error");
+    } catch (submitError) {
+      setError(getErrorMessage(submitError, "Failed to update product."));
     }
   };
 
@@ -150,6 +156,13 @@ export default function ProductEditForm({ initialData }: { initialData: Product 
         <h2 className="text-2xl font-bold text-[#146C94]">Edit Product</h2>
         <p className="text-sm text-gray-400 mt-1">Update the product details and attributes.</p>
       </header>
+
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>
+      ) : null}
+      {success ? (
+        <p className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-700">{success}</p>
+      ) : null}
 
       {/* Thông tin chính */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
