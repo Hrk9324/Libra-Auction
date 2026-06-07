@@ -28,6 +28,9 @@ export default async function Header() {
 
   const authedUserActionItems = [
     { value: "Profile", href: "/profile" },
+    ...(userInfo?.role?.name === "ADMIN"
+      ? [{ value: "Admin Dashboard", href: "/admin-dashboard" }]
+      : []),
     { value: "Seller Dashboard", href: "/seller-dashboard" },
   ];
 
