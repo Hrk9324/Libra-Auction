@@ -169,13 +169,6 @@ public class AuctionWebSocketController {
         broadcastBid(bidMessage.auctionId(), bidResponse);
     }
 
-    /**
-     * Helper: Create standard bid response
-     */
-    private BidResponse createBidResponse(BidMessage message, String status) {
-        return createBidResponse(message, status, OffsetDateTime.now(ZoneOffset.ofHours(7)));
-    }
-
     private BidResponse createBidResponse(BidMessage message, String status, OffsetDateTime bidTime) {
         return new BidResponse(
                 message.auctionId(),
@@ -192,19 +185,6 @@ public class AuctionWebSocketController {
      */
     private void broadcastBid(String auctionId, BidResponse bidResponse) {
         auctionWebSocketNotificationService.sendBidUpdate(auctionId, bidResponse);
-    }
-
-    /**
-     * Helper: Create winner message
-     */
-    private BidResponse createWinnerMessage(BidResponse bidResponse, String message) {
-        return new BidResponse(
-                bidResponse.auctionId(),
-                bidResponse.bidAmount(),
-                bidResponse.bidderId(),
-                bidResponse.bidderName(),
-                OffsetDateTime.now(ZoneOffset.ofHours(7)),
-                "WINNER");
     }
 
     /**

@@ -9,7 +9,6 @@ import io.github.guennhatking.libra_auction.viewmodels.response.ServerAPIRespons
 import io.github.guennhatking.libra_auction.viewmodels.response.UserTransactionResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.VNPayPaymentResponse;
 import io.github.guennhatking.libra_auction.viewmodels.response.VNPayTransactionResponse;
-import io.github.guennhatking.libra_auction.viewmodels.response.WalletBalanceResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
