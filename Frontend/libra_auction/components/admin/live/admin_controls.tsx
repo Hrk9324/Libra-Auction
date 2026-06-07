@@ -34,6 +34,9 @@ export default function AdminControls({
   const isLive = currentStatus === "IN_PROGRESS";
   const isNotStarted = currentStatus === "NOT_STARTED";
 
+  const primaryButtonClass =
+    "w-full rounded-xl px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50";
+
   const handleSendNotification = () => {
     if (notificationMessage.trim()) {
       onSendNotification(notificationMessage.trim());
@@ -52,28 +55,28 @@ export default function AdminControls({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm">
-      <h3 className="text-lg font-bold text-[#146C94] mb-4">
+    <div className="rounded-2xl border border-[#AFD3E2] bg-white p-6 shadow-sm shadow-[#AFD3E2]/20">
+      <h3 className="mb-4 text-lg font-bold text-[#146C94]">
         Điều khiển phiên đấu giá
       </h3>
 
       {/* Confirmation Dialog */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md mx-4 shadow-2xl">
-            <h4 className="text-lg font-bold text-[#146C94] mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 backdrop-blur-sm">
+          <div className="mx-4 max-w-md rounded-2xl border border-[#AFD3E2] bg-white p-6 shadow-2xl">
+            <h4 className="mb-2 text-lg font-bold text-[#146C94]">
               {showConfirm === "end"
                 ? "Kết thúc phiên đấu giá?"
                 : "Hủy phiên đấu giá?"}
             </h4>
-            <p className="text-sm text-[#5A7184] mb-4">
+            <p className="mb-4 text-sm text-[#5A7184]">
               {showConfirm === "end"
                 ? "Hành động này sẽ kết thúc phiên đấu giá và xác định người thắng. Không thể hoàn tác."
                 : "Phiên đấu giá chưa bắt đầu sẽ bị hủy. Sản phẩm sẽ về trạng thái sẵn sàng."}
             </p>
             {showConfirm === "cancel" && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="mb-1 block text-sm font-medium text-[#146C94]">
                   Lý do hủy <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -81,21 +84,24 @@ export default function AdminControls({
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Nhập lý do hủy phiên đấu giá..."
                   rows={3}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400 resize-none"
+                  className="w-full resize-none rounded-xl border border-[#AFD3E2] px-3 py-2 text-sm outline-none focus:border-[#19A7CE] focus:ring-2 focus:ring-[#19A7CE]/20"
                 />
               </div>
             )}
-            <div className="flex gap-3 justify-end">
+            <div className="flex justify-end gap-3">
               <button
-                onClick={() => { setShowConfirm(null); setCancelReason(""); }}
-                className="px-4 py-2 text-sm text-[#5A7184] border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                onClick={() => {
+                  setShowConfirm(null);
+                  setCancelReason("");
+                }}
+                className="rounded-xl border border-[#AFD3E2] px-4 py-2 text-sm font-semibold text-[#5A7184] transition hover:bg-[#F6FBFC]"
               >
                 Hủy
               </button>
               <button
                 onClick={handleConfirmAction}
                 disabled={showConfirm === "cancel" && !cancelReason.trim()}
-                className="px-4 py-2 text-sm text-white rounded-lg transition bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-xl bg-[#146C94] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d5a7a] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Xác nhận
               </button>
@@ -111,13 +117,8 @@ export default function AdminControls({
           <button
             onClick={onPause}
             disabled={isLoading}
-            className="w-full px-4 py-3 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className={`${primaryButtonClass} bg-amber-500 text-white hover:bg-amber-600`}
           >
-            {isLoading ? (
-              <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-            ) : (
-              "⏸"
-            )}
             Tạm dừng phiên
           </button>
         )}
@@ -126,13 +127,8 @@ export default function AdminControls({
           <button
             onClick={onResume}
             disabled={isLoading}
-            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className={`${primaryButtonClass} bg-emerald-600 text-white hover:bg-emerald-700`}
           >
-            {isLoading ? (
-              <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-            ) : (
-              "▶"
-            )}
             Tiếp tục phiên
           </button>
         )}
@@ -142,9 +138,9 @@ export default function AdminControls({
           <button
             onClick={() => setShowConfirm("end")}
             disabled={isLoading}
-            className="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className={`${primaryButtonClass} bg-rose-600 text-white hover:bg-rose-700`}
           >
-            ⏹ Kết thúc phiên
+            Kết thúc phiên
           </button>
         )}
 
@@ -153,14 +149,14 @@ export default function AdminControls({
           <button
             onClick={() => setShowConfirm("cancel")}
             disabled={isLoading}
-            className="w-full px-4 py-3 border-2 border-red-500 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            className={`${primaryButtonClass} border border-rose-300 bg-white text-rose-700 hover:bg-rose-50`}
           >
-            ✕ Hủy phiên
+            Hủy phiên
           </button>
         )}
 
         {isEnded && (
-          <div className="bg-gray-50 rounded-lg p-4 text-center">
+          <div className="rounded-xl border border-[#EAF3F6] bg-[#F8FCFD] p-4 text-center">
             <p className="text-sm text-[#5A7184]">
               Phiên đấu giá đã{" "}
               {currentStatus === "ENDED" ? "kết thúc" : "bị hủy"}
@@ -171,7 +167,7 @@ export default function AdminControls({
 
       {/* Send Notification */}
       <div className="border-t border-[#AFD3E2] pt-4">
-        <h4 className="text-sm font-semibold text-[#146C94] mb-2">
+        <h4 className="mb-2 text-sm font-semibold text-[#146C94]">
           Gửi thông báo
         </h4>
         <div className="flex gap-2">
@@ -180,7 +176,7 @@ export default function AdminControls({
             value={notificationMessage}
             onChange={(e) => setNotificationMessage(e.target.value)}
             placeholder="Nhập thông báo..."
-            className="flex-1 px-3 py-2 text-sm border border-[#AFD3E2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#19A7CE]"
+            className="flex-1 rounded-xl border border-[#AFD3E2] px-3 py-2 text-sm outline-none focus:border-[#19A7CE] focus:ring-2 focus:ring-[#19A7CE]/20"
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSendNotification();
             }}
@@ -188,7 +184,7 @@ export default function AdminControls({
           <button
             onClick={handleSendNotification}
             disabled={!notificationMessage.trim()}
-            className="px-4 py-2 bg-[#146C94] text-white rounded-lg text-sm hover:bg-[#0d5a7a] transition disabled:opacity-50"
+            className="rounded-xl bg-[#146C94] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d5a7a] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Gửi
           </button>

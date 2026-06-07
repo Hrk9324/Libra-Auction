@@ -24,21 +24,28 @@ export default async function AdminLivePage({
     "";
 
   return (
-    <>
-      {/* Breadcrumb */}
-      <nav className="mb-4 text-sm text-[#5A7184]">
-        <Link href="/admin-dashboard/auctions" className="hover:text-[#146C94]">
-          Auctions
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-[#146C94]">{auction.product_name}</span>
-        <span className="mx-2">/</span>
-        <span className="text-[#19A7CE] font-semibold">Live Monitor</span>
+    <div className="space-y-4">
+      <nav className="flex flex-col gap-3 rounded-2xl border border-[#AFD3E2] bg-white px-5 py-4 shadow-sm shadow-[#AFD3E2]/20 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2 text-sm text-[#5A7184]">
+          <Link
+            href="/admin-dashboard/auctions"
+            className="rounded-full bg-[#EAF7FB] px-3 py-1.5 font-semibold text-[#146C94] transition hover:bg-[#D7EFF7]"
+          >
+            Auctions
+          </Link>
+          <span className="text-[#AFD3E2]">/</span>
+          <span className="font-semibold text-[#146C94]">{auction.product_name}</span>
+          <span className="text-[#AFD3E2]">/</span>
+          <span className="font-semibold text-[#19A7CE]">Live Monitor</span>
+        </div>
+        <div className="text-xs font-medium uppercase tracking-[0.22em] text-[#5A7184]">
+          Real-time admin monitor
+        </div>
       </nav>
       <AdminLiveAuctionView
         auction={auction}
         backendServerUrl={backendServerUrl}
       />
-    </>
+    </div>
   );
 }

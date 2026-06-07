@@ -216,47 +216,43 @@ export default function AdminLiveAuctionView({
     auctionStatus === "ENDED" || auctionStatus === "CANCELLED";
   const isPaused = auctionStatus === "PAUSED";
 
+  const statusLabel =
+    auctionStatus === "IN_PROGRESS"
+      ? "LIVE"
+      : auctionStatus === "PAUSED"
+      ? "PAUSED"
+      : auctionStatus === "ENDED"
+      ? "ENDED"
+      : auctionStatus === "CANCELLED"
+      ? "CANCELLED"
+      : auctionStatus;
+
+  const statusClassName =
+    auctionStatus === "IN_PROGRESS"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+      : auctionStatus === "PAUSED"
+      ? "bg-amber-50 text-amber-700 border-amber-200"
+      : auctionStatus === "ENDED"
+      ? "bg-slate-100 text-slate-700 border-slate-200"
+      : "bg-rose-50 text-rose-700 border-rose-200";
+
   return (
-    <div className="min-h-screen bg-[#F6F1F1] p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#146C94]">
-            Live Auction Monitor
-          </h1>
-          <p className="text-sm text-[#5A7184]">
-            {auction.product_name} • #{auction.auction_id}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${
-              auctionStatus === "IN_PROGRESS"
-                ? "bg-green-100 text-green-800"
-                : auctionStatus === "PAUSED"
-                ? "bg-yellow-100 text-yellow-800"
-                : auctionStatus === "ENDED"
-                ? "bg-gray-100 text-gray-800"
-                : "bg-red-100 text-red-800"
-            }`}
-          >
-            {auctionStatus === "IN_PROGRESS" && (
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-              </span>
-            )}
-            {auctionStatus === "PAUSED" && "⏸"}
-            {auctionStatus === "ENDED" && "⏹"}
-            {auctionStatus === "CANCELLED" && "✕"}
-            {auctionStatus === "IN_PROGRESS"
-              ? "LIVE"
-              : auctionStatus === "PAUSED"
-              ? "PAUSED"
-              : auctionStatus === "ENDED"
-              ? "ENDED"
-              : "CANCELLED"}
-          </span>
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-[#AFD3E2] bg-white p-6 shadow-sm shadow-[#AFD3E2]/20">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-[#146C94]">
+              {auction.product_name}
+            </h1>
+            <p className="text-sm text-[#5A7184]">
+              Auction ID {auction.auction_id} • {auction.category_name} • SL {auction.quantity}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={`inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-semibold ${statusClassName}`}>
+              {statusLabel}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -264,36 +260,36 @@ export default function AdminLiveAuctionView({
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Product Info */}
-          <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm">
-            <div className="flex gap-6">
-              <div className="relative w-48 h-36 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
+          <div className="bg-white rounded-2xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-start">
+              <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-[#F6FBFC] xl:w-64 xl:flex-none">
                 <Image
                   src={auction.images?.[0] || "/placeholder-image.jpg"}
                   alt={auction.product_name}
                   fill
-                  className="object-contain p-2"
+                  className="object-cover"
                 />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 space-y-4">
                 <h2 className="text-xl font-bold text-[#146C94]">
                   {auction.product_name}
                 </h2>
-                <p className="text-sm text-[#5A7184] mt-1">
+                <p className="text-sm text-[#5A7184]">
                   {auction.category_name} • SL: {auction.quantity}
                 </p>
-                <p className="text-sm text-[#5A7184] mt-2 line-clamp-2">
+                <p className="text-sm leading-relaxed text-[#5A7184] line-clamp-3">
                   {auction.description}
                 </p>
-                <div className="mt-3 grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-[#5A7184]">Giá khởi điểm</p>
-                    <p className="text-lg font-bold text-[#19A7CE]">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-[#EAF3F6] bg-[#F8FCFD] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5A7184]">Giá khởi điểm</p>
+                    <p className="mt-2 text-lg font-bold text-[#19A7CE]">
                       {CurrencyFormat(auction.starting_price)}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-xs text-[#5A7184]">Bước giá tối thiểu</p>
-                    <p className="text-lg font-bold text-[#19A7CE]">
+                  <div className="rounded-xl border border-[#EAF3F6] bg-[#F8FCFD] p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#5A7184]">Bước giá tối thiểu</p>
+                    <p className="mt-2 text-lg font-bold text-[#19A7CE]">
                       {CurrencyFormat(auction.min_bid_increment)}
                     </p>
                   </div>
@@ -302,8 +298,17 @@ export default function AdminLiveAuctionView({
             </div>
           </div>
 
-          {/* Timer */}
-          <div className="bg-white rounded-xl border border-[#AFD3E2] p-4 shadow-sm">
+          <div className="bg-white rounded-2xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
+            <div className="mb-4 flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#5A7184]">
+                  Thời gian còn lại
+                </p>
+                <p className="mt-1 text-sm text-[#5A7184]">
+                  Cập nhật theo trạng thái phiên đấu giá
+                </p>
+              </div>
+            </div>
             <AuctionTimer
               endTimeMs={endTimeMs}
               isPaused={isPaused}
@@ -312,7 +317,7 @@ export default function AdminLiveAuctionView({
           </div>
 
           {/* Bid History */}
-          <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
             <h3 className="text-lg font-bold text-[#146C94] mb-4">
               Lịch sử trả giá ({totalBids} bids)
             </h3>
@@ -320,7 +325,7 @@ export default function AdminLiveAuctionView({
           </div>
 
           {/* Notifications Log */}
-          <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
             <h3 className="text-lg font-bold text-[#146C94] mb-4">
               Nhật ký thông báo
             </h3>
@@ -342,7 +347,7 @@ export default function AdminLiveAuctionView({
         </div>
 
         {/* Right Column - Stats & Controls */}
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-6 self-start">
           {/* Stats Panel */}
           <AdminStatsPanel
             currentPrice={currentPrice}
@@ -367,47 +372,45 @@ export default function AdminLiveAuctionView({
           />
 
           {/* Anomaly Alerts */}
-          <div className="bg-white rounded-xl border border-[#AFD3E2] p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
             <h3 className="text-lg font-bold text-[#146C94] mb-4">
               Cảnh báo bất thường
             </h3>
             <div className="space-y-2">
               {totalBids > 50 && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-yellow-800">
-                    ⚠ Số lượng bid cao bất thường
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-amber-800 uppercase tracking-[0.16em]">
+                    Số lượng bid cao bất thường
                   </p>
-                  <p className="text-xs text-yellow-600">
+                  <p className="text-xs text-amber-700">
                     {totalBids} bids - kiểm tra spam
                   </p>
                 </div>
               )}
               {isPaused && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-blue-800">
-                    ℹ Phiên đang tạm dừng
+                <div className="bg-sky-50 border border-sky-200 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-sky-800 uppercase tracking-[0.16em]">
+                    Phiên đang tạm dừng
                   </p>
-                  <p className="text-xs text-blue-600">
+                  <p className="text-xs text-sky-700">
                     Admin đã tạm dừng phiên đấu giá
                   </p>
                 </div>
               )}
               {totalBids === 0 && auctionStatus === "IN_PROGRESS" && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <p className="text-xs font-semibold text-gray-600">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-[0.16em]">
                     Chưa có bid nào
                   </p>
                 </div>
               )}
-              {totalBids <= 50 &&
-                !isPaused &&
-                totalBids > 0 && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-green-800">
-                      ✓ Hoạt động bình thường
-                    </p>
-                  </div>
-                )}
+              {totalBids <= 50 && !isPaused && totalBids > 0 && (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                  <p className="text-xs font-semibold text-emerald-800 uppercase tracking-[0.16em]">
+                    Hoạt động bình thường
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -53,18 +53,16 @@ export default function AuctionTimer({
   const sizeClasses = {
     sm: "text-lg font-semibold",
     md: "text-2xl font-bold",
-    lg: "text-4xl font-bold tracking-wider",
+    lg: "text-5xl font-bold tracking-[0.18em]",
   };
 
   if (isPaused) {
     return (
-      <div className="flex items-center justify-center gap-3">
-        <div className={`${sizeClasses[size]} text-yellow-600 font-mono`}>
-          <span className="flex items-center gap-2">
-            <span className="animate-pulse">⏸</span>
-            <span className="text-yellow-600 font-sans">TẠM DỪNG</span>
-          </span>
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-5 text-center">
+        <div className={`${sizeClasses[size]} text-amber-700 font-mono`}>
+          <span className="font-sans tracking-[0.22em]">TẠM DỪNG</span>
         </div>
+        <p className="mt-2 text-sm text-amber-700">Phiên đấu giá đang giữ thời gian hiện tại</p>
       </div>
     );
   }
@@ -78,18 +76,23 @@ export default function AuctionTimer({
   const getColorClass = () => {
     if (timeLeftMs <= 60 * 1000) return "text-red-600";
     if (timeLeftMs <= 5 * 60 * 1000) return "text-yellow-600";
-    return "text-green-600";
+    return "text-emerald-600";
   };
 
   return (
-    <div className="flex items-center justify-center gap-3">
+    <div className="rounded-2xl border border-[#EAF3F6] bg-[#F8FCFD] px-6 py-5 text-center shadow-inner shadow-white/60">
       <div className={`${sizeClasses[size]} ${getColorClass()} font-mono`} suppressHydrationWarning>
         {timeLeftMs <= 0 ? (
-          <span className="text-red-600">ĐÃ KẾT THÚC</span>
+          <span className="text-rose-600">ĐÃ KẾT THÚC</span>
         ) : (
           timeStr
         )}
       </div>
+      <p className="mt-2 text-sm text-[#5A7184]">
+        {timeLeftMs <= 0
+          ? "Phiên đấu giá đã kết thúc"
+          : "Đếm ngược theo thời gian thực"}
+      </p>
     </div>
   );
 }
