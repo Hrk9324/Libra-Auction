@@ -179,36 +179,73 @@ public class CustomerService {
         accountPasswordRepository.save(account);
     }
 
-        // Search pending users (accounts awaiting confirmation)
-        public io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse>
+    public io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse>
             searchPendingUsers(Integer page, Integer pageSize) {
+        return searchAdminUsers(page, pageSize, null, null, null, null, null, AccountStatus.PENDING);
+    }
 
-        java.util.List<Customer> all = customerRepository.findAll();
+    public io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse>
+            searchAdminUsers(
+                    Integer page,
+                    Integer pageSize,
+                    String name,
+                    String email,
+                    String phone,
+                    String identityNumber,
+                    EmailStatus emailStatus,
+                    AccountStatus accountStatus) {
 
-        java.util.List<Customer> filtered = all.stream()
-            .filter(u -> u.getAccountStatus() != null
-                && u.getAccountStatus() == AccountStatus.PENDING)
+        java.util.List<Customer> filtered = customerRepository.findAll().stream()
+            .filter(user -> containsIgnoreCase(user.getFullName(), name))
+            .filter(user -> containsIgnoreCase(user.getEmail(), email))
+            .filter(user -> containsIgnoreCase(user.getPhoneNumber(), phone))
+            .filter(user -> containsIgnoreCase(user.getIdentityNumber(), identityNumber))
+            .filter(user -> emailStatus == null || user.getEmailStatus() == emailStatus)
+            .filter(user -> accountStatus == null || user.getAccountStatus() == accountStatus)
             .collect(java.util.stream.Collectors.toList());
 
-        // Simple pagination logic
+        return buildAdminUserPage(filtered, page, pageSize);
+    }
+
+    @Transactional
+    public io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse updateAdminUserStatus(
+            String userId,
+            AccountStatus status) {
+        Customer customer = customerRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        customer.setAccountStatus(status);
+        customerRepository.save(customer);
+
+        accountPasswordRepository.findByCustomerId(userId).ifPresent(account -> {
+            account.setStatus(status);
+            accountPasswordRepository.save(account);
+        });
+
+        return toAdminUserResponse(customer);
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        if (query == null || query.isBlank()) {
+            return true;
+        }
+
+        return value != null && value.toLowerCase().contains(query.trim().toLowerCase());
+    }
+
+    private io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse> buildAdminUserPage(
+            java.util.List<Customer> filtered,
+            Integer page,
+            Integer pageSize) {
         int p = page != null ? page : 0;
         int ps = pageSize != null ? pageSize : 20;
         int totalElements = filtered.size();
         int totalPages = (totalElements + ps - 1) / ps;
         int start = Math.min(p * ps, totalElements);
         int end = Math.min(start + ps, totalElements);
-        java.util.List<Customer> pageContent = filtered.subList(start, end);
 
-        java.util.List<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse> content = pageContent.stream()
-            .map(user -> new io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse(
-                user.getId(),
-                user.getFullName(),
-                user.getPhoneNumber(),
-                user.getIdentityNumber(),
-                user.getEmail(),
-                user.getAvatarUrl(),
-                user.getEmailStatus(),
-                user.getAccountStatus()))
+        java.util.List<io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse> content = filtered.subList(start, end).stream()
+            .map(this::toAdminUserResponse)
             .collect(java.util.stream.Collectors.toList());
 
         return new io.github.guennhatking.libra_auction.viewmodels.response.PageResponse<>(
@@ -220,8 +257,19 @@ public class CustomerService {
             p == 0,
             p == Math.max(0, totalPages - 1)
         );
-        }
+    }
 
+    private io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse toAdminUserResponse(Customer user) {
+        return new io.github.guennhatking.libra_auction.viewmodels.response.AdminPendingUserResponse(
+            user.getId(),
+            user.getFullName(),
+            user.getPhoneNumber(),
+            user.getIdentityNumber(),
+            user.getEmail(),
+            user.getAvatarUrl(),
+            user.getEmailStatus(),
+            user.getAccountStatus());
+    }
     private Customer assignDefaultRole(Customer user) {
         Role defaultRole = roleRepository.findById("USER")
                 .orElseGet(() -> roleRepository.save(new Role("USER", "User")));
