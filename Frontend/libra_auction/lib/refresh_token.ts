@@ -1,4 +1,5 @@
 'use server';
+import { clearAuthCookies } from "./clear_auth_cookies";
 import { getJWTPublicKey } from "./get_cert";
 import * as jose from "jose";
 import { getJWTTokenInfo } from "./get_jwt_token_info";
@@ -28,6 +29,7 @@ export async function refreshToken(): Promise<JWTResponse | null> {
                 })
             });
             if (!response.ok) {
+                await clearAuthCookies();
                 return null;
             }
             const data = await response.json() as RefreshRouteResponse;
@@ -42,8 +44,11 @@ export async function refreshToken(): Promise<JWTResponse | null> {
             else {
                 console.error("Can't refresh token: " + error)
             }
+            await clearAuthCookies();
             return null;
         }
     }
+
+    await clearAuthCookies();
     return null;
 }

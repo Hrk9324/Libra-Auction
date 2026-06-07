@@ -1,21 +1,23 @@
- 'use server';
+'use server';
 
 import * as jose from "jose";
 import { JWSSignatureVerificationFailed, JWTExpired } from "jose/errors";
-import { getJWTPublicKey } from "./get_cert";
-import { refreshToken } from "./refresh_token";
-import { getJWTTokenInfo } from "./get_jwt_token_info";
 import { Role } from "@/types/user_info";
+import { clearAuthCookies } from "./clear_auth_cookies";
+import { getJWTPublicKey } from "./get_cert";
+import { getJWTTokenInfo } from "./get_jwt_token_info";
+import { refreshToken } from "./refresh_token";
 
 function toRole(rawRoleValue: unknown): Role | null {
 	if (typeof rawRoleValue === "string" && rawRoleValue.length > 0) {
 		return { name: rawRoleValue, description: "", permissions: [] };
 	}
-	// Backward compat: handle array from old tokens
+
 	if (Array.isArray(rawRoleValue)) {
-		const first = rawRoleValue.find((r): r is string => typeof r === "string" && r.length > 0);
+		const first = rawRoleValue.find((role): role is string => typeof role === "string" && role.length > 0);
 		return first ? { name: first, description: "", permissions: [] } : null;
 	}
+
 	return null;
 }
 
@@ -45,6 +47,7 @@ export async function getRole(): Promise<Role | null> {
 			if (error instanceof JWSSignatureVerificationFailed) {
 				console.log("Invalid token");
 			}
+			await clearAuthCookies();
 		}
 	}
 

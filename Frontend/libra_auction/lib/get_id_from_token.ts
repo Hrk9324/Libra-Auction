@@ -1,4 +1,5 @@
 'use server';
+import { clearAuthCookies } from "./clear_auth_cookies";
 import { getJWTPublicKey } from "./get_cert";
 import * as jose from "jose";
 import { JWSSignatureVerificationFailed, JWTExpired } from "jose/errors";
@@ -13,7 +14,7 @@ export async function getIdFromToken(): Promise<string | null> {
         const publicKey = await jose.importSPKI(spki, alg);
         try {
             const { payload } = await jose.jwtVerify(jwtTokenInfo.token, publicKey);
-            return payload.sub as string; 
+            return payload.sub as string;
         }
         catch (error) {
             if (error instanceof JWTExpired) {
@@ -29,6 +30,7 @@ export async function getIdFromToken(): Promise<string | null> {
             if (error instanceof JWSSignatureVerificationFailed) {
                 console.log("Invalid token");
             }
+            await clearAuthCookies();
             return null;
         }
     }

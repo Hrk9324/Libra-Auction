@@ -1,5 +1,6 @@
 package io.github.guennhatking.libra_auction.services;
 
+import io.github.guennhatking.libra_auction.enums.account.AccountStatus;
 import io.github.guennhatking.libra_auction.enums.auth.TokenType;
 import io.github.guennhatking.libra_auction.models.person.Customer;
 import io.github.guennhatking.libra_auction.security.JwtRSA;
@@ -18,13 +19,16 @@ public class TokenService {
 
     private final JwtRSA jwtRSA;
     private final JwtUtils jwtUtils;
+    private final CustomerService customerService;
 
-    public TokenService(JwtRSA jwtRSA, JwtUtils jwtUtils) {
+    public TokenService(JwtRSA jwtRSA, JwtUtils jwtUtils, CustomerService customerService) {
         this.jwtRSA = jwtRSA;
         this.jwtUtils = jwtUtils;
+        this.customerService = customerService;
     }
 
     public JwtResponse generateTokens(Customer user) throws Exception {
+        ensureAccountCanReceiveToken(user);
         String roleName = user.getRole() != null ? user.getRole().getName() : null;
 
         String accessToken = jwtRSA.createToken(user.getId(), roleName, TokenType.ACCESS, accessTokenExpiration);
@@ -32,7 +36,7 @@ public class TokenService {
 
         return new JwtResponse(
             accessToken,
-            refreshToken, 
+            refreshToken,
             accessTokenExpiration,
             refreshTokenExpiration
         );
@@ -54,6 +58,10 @@ public class TokenService {
         }
 
         String userId = jwtRSA.extractClaim(refreshToken, "sub");
+        Customer user = customerService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        ensureAccountCanReceiveToken(user);
+
         String role = jwtRSA.extractClaim(refreshToken, "role");
         String newAccessToken = jwtRSA.createToken(userId, role, TokenType.ACCESS, accessTokenExpiration);
         String newRefreshToken = jwtRSA.createToken(userId, role, TokenType.REFRESH, refreshTokenExpiration);
@@ -66,5 +74,11 @@ public class TokenService {
 
     public String extractUserId(String token) throws Exception {
         return jwtRSA.extractClaim(token, "sub");
+    }
+
+    private void ensureAccountCanReceiveToken(Customer user) {
+        if (user.getAccountStatus() == AccountStatus.LOCKED) {
+            throw new IllegalArgumentException("Account is locked");
+        }
     }
 }

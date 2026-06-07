@@ -1,3 +1,4 @@
+import { clearAuthCookies } from "@/lib/clear_auth_cookies";
 import { ServerAPICall } from "@/lib/server_API_call";
 import { JWTResponse } from "@/types/jwt_response";
 import { cookies } from "next/headers";
@@ -7,7 +8,6 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { refreshToken } = body;
-        console.log("RefreshToken: " + refreshToken);
 
         const req: RequestInit = {
             method: "POST",
@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
             body: JSON.stringify({
                 'refreshToken': refreshToken
             })
-        }
+        };
+
         const res = await ServerAPICall<JWTResponse>("/auth/refresh", req);
         if (res.isSuccess && res.data) {
             const jwtToken = res.data.token;
@@ -36,13 +37,15 @@ export async function POST(request: NextRequest) {
                 secure: true,
                 maxAge: Math.floor(res.data.refreshTokenExpiration / 1000)
             });
-            console.log("Success");
-            return NextResponse.json({ message: "Refresh successful", tokenInfo: res.data }, { status: 200 })
+            return NextResponse.json({ message: "Refresh successful", tokenInfo: res.data }, { status: 200 });
         }
-        throw new Error(res.errorMessage || "Failed to refresh token");
+
+        await clearAuthCookies();
+        return NextResponse.json({ message: res.errorMessage || "Failed to refresh token" }, { status: 401 });
     }
     catch (error) {
         console.error(error);
-        return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+        await clearAuthCookies();
+        return NextResponse.json({ message: "Failed to refresh token" }, { status: 401 });
     }
 }
