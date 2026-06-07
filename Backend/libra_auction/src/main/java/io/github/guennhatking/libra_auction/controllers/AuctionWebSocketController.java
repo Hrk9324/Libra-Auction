@@ -6,7 +6,6 @@ import io.github.guennhatking.libra_auction.repositories.auction.AuctionReposito
 import io.github.guennhatking.libra_auction.repositories.person.CustomerRepository;
 import io.github.guennhatking.libra_auction.services.AuctionStateRedisService;
 import io.github.guennhatking.libra_auction.services.AuctionWebSocketNotificationService;
-import io.github.guennhatking.libra_auction.services.BidHistoryService;
 import io.github.guennhatking.libra_auction.viewmodels.request.BidMessage;
 import io.github.guennhatking.libra_auction.viewmodels.response.BidResponse;
 import io.github.guennhatking.libra_auction.models.auction.AuctionLog;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Controller;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * WebSocket Controller for handling auction bids
@@ -36,7 +33,6 @@ public class AuctionWebSocketController {
     private final AuctionWebSocketNotificationService auctionWebSocketNotificationService;
     private final AuctionParticipationInfoRepository participationInfoRepository;
     private final CustomerRepository customerRepository;
-    private final BidHistoryService bidHistoryService;
 
     // Configuration
     private static final int FINAL_MINUTES_WINDOW = 5;
@@ -47,14 +43,12 @@ public class AuctionWebSocketController {
             AuctionStateRedisService auctionStateRedisService,
             AuctionWebSocketNotificationService auctionWebSocketNotificationService,
             AuctionParticipationInfoRepository participationInfoRepository,
-            CustomerRepository customerRepository,
-            BidHistoryService bidHistoryService) {
+            CustomerRepository customerRepository) {
         this.auctionRepository = auctionRepository;
         this.auctionStateRedisService = auctionStateRedisService;
         this.auctionWebSocketNotificationService = auctionWebSocketNotificationService;
         this.participationInfoRepository = participationInfoRepository;
         this.customerRepository = customerRepository;
-        this.bidHistoryService = bidHistoryService;
     }
 
     /**
@@ -94,6 +88,14 @@ public class AuctionWebSocketController {
             // Validate bidder is not the auction creator
             if (auction.getCreator() != null && auction.getCreator().getId().equals(bidMessage.bidderId())) {
                 sendErrorNotification(bidMessage.auctionId(), "Người tạo phiên đấu giá không thể đặt giá.");
+                return;
+            }
+
+            // Validate bidder is not the administrator
+            if (customerRepository.findById(bidMessage.bidderId())
+                    .map(customer -> customer.getRole().getName().equalsIgnoreCase("ADMIN"))
+                    .orElse(false)) {
+                sendErrorNotification(bidMessage.auctionId(), "Quản trị viên không thể đặt giá.");
                 return;
             }
 
@@ -146,14 +148,11 @@ public class AuctionWebSocketController {
             return;
         }
 
-        // Create and store bid response
-        BidResponse bidResponse = createBidResponse(bidMessage, "SUCCESS");
-        bidHistoryService.recordBid(bidResponse);
-
+        OffsetDateTime bidTime = OffsetDateTime.now(ZoneOffset.ofHours(7));
         AuctionLog log = new AuctionLog();
         log.setAuction(auction);
         log.setBidAmount(bidMessage.bidAmount());
-        log.setTimestamp(OffsetDateTime.now(ZoneOffset.ofHours(7)));
+        log.setTimestamp(bidTime);
         // Set bidder
         customerRepository.findById(bidMessage.bidderId()).ifPresent(log::setBidder);
 
@@ -166,6 +165,7 @@ public class AuctionWebSocketController {
         logger.info("Bid accepted and saved to log: auctionId={}, bidAmount={}", bidMessage.auctionId(), bidMessage.bidAmount());
 
         // Broadcast to all participants (bids are visible)
+        BidResponse bidResponse = createBidResponse(bidMessage, "SUCCESS", bidTime);
         broadcastBid(bidMessage.auctionId(), bidResponse);
     }
 
@@ -173,12 +173,16 @@ public class AuctionWebSocketController {
      * Helper: Create standard bid response
      */
     private BidResponse createBidResponse(BidMessage message, String status) {
+        return createBidResponse(message, status, OffsetDateTime.now(ZoneOffset.ofHours(7)));
+    }
+
+    private BidResponse createBidResponse(BidMessage message, String status, OffsetDateTime bidTime) {
         return new BidResponse(
                 message.auctionId(),
                 message.bidAmount(),
                 message.bidderId(),
                 message.bidderName(),
-                OffsetDateTime.now(ZoneOffset.ofHours(7)),
+                bidTime,
                 status);
     }
 
