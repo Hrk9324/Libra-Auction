@@ -9,6 +9,7 @@ import { getIdFromToken } from "@/lib/get_id_from_token";
 import { fetchAuctionBids } from "@/services/fetch_auction_bids";
 import BidHistory, { BidEntry } from "@/components/shared/bid_history";
 import AuctionTimer from "@/components/shared/auction_timer";
+import type { LiveNotification } from "@/types/notification/live_notification";
 
 type AuctionSocketUpdate = {
   currentPrice?: number;
@@ -53,12 +54,14 @@ export default function LiveAuctionView({
   role = "user",
   isRegistered = false,
   isCreator = false,
+  initialNotifications = [],
 }: {
   auction: Auction;
   backendServerUrl: string;
   role?: UserRole;
   isRegistered?: boolean;
   isCreator?: boolean;
+  initialNotifications?: LiveNotification[];
 }) {
   const [currentBid, setCurrentBid] = useState<number>(
     auction.current_price || auction.starting_price || 0
@@ -77,7 +80,9 @@ export default function LiveAuctionView({
   const [totalBids, setTotalBids] = useState(auction.total_bids || 0);
   const [highestBidder, setHighestBidder] = useState("--");
   const [isHighestBidder, setIsHighestBidder] = useState(false);
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<LiveNotification[]>(
+    initialNotifications
+  );
   const [showConfirm, setShowConfirm] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -107,12 +112,27 @@ export default function LiveAuctionView({
     });
   }, [auction.auction_id]);
 
-  const addNotification = useCallback((msg: string) => {
+  const addNotification = useCallback((content: string, sentAt?: string) => {
     setNotifications((prev) => [
-      `${new Date().toLocaleTimeString("vi-VN")} - ${msg}`,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        auctionId: auction.auction_id,
+        content,
+        sentAt: sentAt || new Date().toISOString(),
+      },
       ...prev.slice(0, 29),
     ]);
-  }, []);
+  }, [auction.auction_id]);
+
+  const formatNotificationTime = (value: string) =>
+    new Date(value).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
 
   const minimumBid = currentBid + (auction.min_bid_increment || 0);
 
@@ -235,7 +255,7 @@ export default function LiveAuctionView({
       if (!isRecord(body)) return;
       const msg = body as AdminNotification;
       if (msg.message) {
-        addNotification(`[Admin] ${msg.message}`);
+        addNotification(`[Admin] ${msg.message}`, msg.timestamp);
       }
     });
 
@@ -407,18 +427,21 @@ export default function LiveAuctionView({
               {/* Notifications */}
               <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                 <p className="text-lg font-semibold text-gray-800 mb-3">
-                  Thông báo
+                  Notifications
                 </p>
                 <div className="max-h-60 overflow-auto space-y-2">
                   {notifications.length === 0 ? (
-                    <p className="text-sm text-gray-400">Chưa có thông báo</p>
+                    <p className="text-sm text-gray-400">No notifications yet</p>
                   ) : (
                     notifications.map((note, idx) => (
                       <p
                         key={idx}
                         className="text-sm text-gray-500 border-b border-gray-100 py-2"
                       >
-                        {note}
+                        <span className="font-semibold text-gray-700">
+                          {formatNotificationTime(note.sentAt)}
+                        </span>{" "}
+                        - {note.content}
                       </p>
                     ))
                   )}

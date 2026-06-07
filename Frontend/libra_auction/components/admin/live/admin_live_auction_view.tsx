@@ -9,6 +9,7 @@ import AdminStatsPanel from "./admin_stats_panel";
 import AdminControls from "./admin_controls";
 import BidHistory, { BidEntry } from "@/components/shared/bid_history";
 import AuctionTimer from "@/components/shared/auction_timer";
+import type { LiveNotification } from "@/types/notification/live_notification";
 
 type StatusUpdate = {
   type?: string;
@@ -30,6 +31,8 @@ type BidUpdate = {
   current_price?: number;
 };
 
+type LiveNotificationItem = LiveNotification;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -37,9 +40,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export default function AdminLiveAuctionView({
   auction,
   backendServerUrl,
+  initialNotifications = [],
 }: {
   auction: Auction;
   backendServerUrl: string;
+  initialNotifications?: LiveNotificationItem[];
 }) {
   const [currentPrice, setCurrentPrice] = useState(
     auction.current_price || auction.starting_price || 0
@@ -56,15 +61,32 @@ export default function AdminLiveAuctionView({
   const [totalBids, setTotalBids] = useState(auction.total_bids || 0);
   const [participantCount] = useState(auction.total_participants || 0);
   const [highestBidder, setHighestBidder] = useState("--");
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const [notifications, setNotifications] = useState<LiveNotificationItem[]>(
+    initialNotifications
+  );
   const [isActionLoading, setIsActionLoading] = useState(false);
 
-  const addNotification = useCallback((msg: string) => {
+  const addNotification = useCallback((content: string, sentAt?: string) => {
     setNotifications((prev) => [
-      `${new Date().toLocaleTimeString("en-US")} - ${msg}`,
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        auctionId: auction.auction_id,
+        content,
+        sentAt: sentAt || new Date().toISOString(),
+      },
       ...prev.slice(0, 49),
     ]);
-  }, []);
+  }, [auction.auction_id]);
+
+  const formatNotificationTime = (value: string) =>
+    new Date(value).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
 
   useEffect(() => {
     const bidsTopic = `/topic/auction/${auction.auction_id}/bids`;
@@ -104,30 +126,7 @@ export default function AdminLiveAuctionView({
         setAuctionStatus(update.status);
       }
       if (update.message) {
-        addNotification(update.message);
-      }
-      if (update.type) {
-        switch (update.type) {
-          case "AUCTION_PAUSED":
-            setAuctionStatus("PAUSED");
-            addNotification("The auction has been paused");
-            break;
-          case "AUCTION_RESUMED":
-            setAuctionStatus("IN_PROGRESS");
-            addNotification("The auction has resumed");
-            break;
-          case "AUCTION_ENDED":
-            setAuctionStatus("ENDED");
-            addNotification("The auction has ended");
-            break;
-          case "AUCTION_CANCELLED":
-            setAuctionStatus("CANCELLED");
-            addNotification("The auction has been cancelled");
-            break;
-          case "AUCTION_EXTENDED":
-            addNotification("The auction has been extended");
-            break;
-        }
+        addNotification(update.message, update.timestamp);
       }
     });
 
@@ -144,7 +143,7 @@ export default function AdminLiveAuctionView({
       if (!isRecord(body)) return;
       const msg = body as { type?: string; message?: string };
       if (msg.message) {
-        addNotification(`[Admin] ${msg.message}`);
+        addNotification(msg.message);
       }
     });
 
@@ -172,7 +171,6 @@ export default function AdminLiveAuctionView({
       );
     } catch (err) {
       console.error(`Admin command ${command} failed:`, err);
-      addNotification(`Failed to send ${command} command`);
     } finally {
       setTimeout(() => setIsActionLoading(false), 1000);
     }
@@ -186,7 +184,6 @@ export default function AdminLiveAuctionView({
         message,
       }
     );
-    addNotification(`Notification sent: ${message}`);
   };
 
   const isPaused = auctionStatus === "PAUSED";
@@ -309,7 +306,11 @@ export default function AdminLiveAuctionView({
                     key={idx}
                     className="text-xs text-[#5A7184] border-b border-gray-100 py-1"
                   >
-                    {note}
+                    <span className="font-semibold text-[#146C94]">
+                      {formatNotificationTime(note.sentAt)}
+                    </span>
+                    <span className="mx-2 text-[#AFD3E2]">•</span>
+                    {note.content}
                   </p>
                 ))
               )}
@@ -341,48 +342,6 @@ export default function AdminLiveAuctionView({
             isLoading={isActionLoading}
           />
 
-          {/* Anomaly Alerts */}
-          <div className="bg-white rounded-2xl border border-[#AFD3E2] p-6 shadow-sm shadow-[#AFD3E2]/20">
-            <h3 className="text-lg font-bold text-[#146C94] mb-4">
-              Alerts
-            </h3>
-            <div className="space-y-2">
-              {totalBids > 50 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-amber-800 uppercase tracking-[0.16em]">
-                    Unusually high bid volume
-                  </p>
-                  <p className="text-xs text-amber-700">
-                    {totalBids} bids - check for spam
-                  </p>
-                </div>
-              )}
-              {isPaused && (
-                <div className="bg-sky-50 border border-sky-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-sky-800 uppercase tracking-[0.16em]">
-                    Auction is paused
-                  </p>
-                  <p className="text-xs text-sky-700">
-                    The admin has paused the auction
-                  </p>
-                </div>
-              )}
-              {totalBids === 0 && auctionStatus === "IN_PROGRESS" && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-[0.16em]">
-                    No bids yet
-                  </p>
-                </div>
-              )}
-              {totalBids <= 50 && !isPaused && totalBids > 0 && (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-                  <p className="text-xs font-semibold text-emerald-800 uppercase tracking-[0.16em]">
-                    Operating normally
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>

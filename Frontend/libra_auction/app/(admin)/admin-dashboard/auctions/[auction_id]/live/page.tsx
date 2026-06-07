@@ -1,5 +1,6 @@
 import { getErrorStatus } from "@/lib/app_error";
 import { fetchPublicAuction } from "@/services/fetch_public_auction";
+import { fetchLiveNotifications } from "@/services/fetch_live_notifications";
 import { notFound } from "next/navigation";
 import AdminLiveAuctionView from "@/components/admin/live/admin_live_auction_view";
 import Link from "next/link";
@@ -17,6 +18,8 @@ export default async function AdminLivePage({
     if (getErrorStatus(error) === 404) notFound();
     throw error;
   }
+
+  const liveNotifications = await fetchLiveNotifications(auctionId).catch(() => []);
 
   const backendServerUrl =
     process.env.PUBLIC_BACKEND_SERVER_URL ||
@@ -45,6 +48,7 @@ export default async function AdminLivePage({
       <AdminLiveAuctionView
         auction={auction}
         backendServerUrl={backendServerUrl}
+        initialNotifications={liveNotifications}
       />
     </div>
   );

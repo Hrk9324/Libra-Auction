@@ -1,6 +1,9 @@
 package io.github.guennhatking.libra_auction.services;
 
 import io.github.guennhatking.libra_auction.viewmodels.response.BidResponse;
+import io.github.guennhatking.libra_auction.models.notification.LiveNotification;
+import io.github.guennhatking.libra_auction.repositories.auction.AuctionRepository;
+import io.github.guennhatking.libra_auction.repositories.notification.LiveNotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -20,9 +23,26 @@ public class AuctionWebSocketNotificationService {
     private static final Logger logger = LoggerFactory.getLogger(AuctionWebSocketNotificationService.class);
     
     private final SimpMessagingTemplate messagingTemplate;
+    private final AuctionRepository auctionRepository;
+    private final LiveNotificationRepository liveNotificationRepository;
     
-    public AuctionWebSocketNotificationService(SimpMessagingTemplate messagingTemplate) {
+    public AuctionWebSocketNotificationService(
+            SimpMessagingTemplate messagingTemplate,
+            AuctionRepository auctionRepository,
+            LiveNotificationRepository liveNotificationRepository) {
         this.messagingTemplate = messagingTemplate;
+        this.auctionRepository = auctionRepository;
+        this.liveNotificationRepository = liveNotificationRepository;
+    }
+
+    private void persistLiveNotification(String auctionId, String content) {
+        if (content == null || content.isBlank()) {
+            return;
+        }
+
+        auctionRepository.findById(auctionId).ifPresent(auction -> {
+            liveNotificationRepository.save(new LiveNotification(auction, content));
+        });
     }
     
     /**
@@ -49,11 +69,14 @@ public class AuctionWebSocketNotificationService {
      */
     public void sendAuctionExtensionNotification(String auctionId, OffsetDateTime newEndTime) {
         try {
+            String message = "The auction has been extended by 5 minutes";
+            persistLiveNotification(auctionId, message);
+
             Map<String, Object> notification = new HashMap<>();
             notification.put("type", "AUCTION_EXTENDED");
             notification.put("auctionId", auctionId);
             notification.put("newEndTime", newEndTime);
-            notification.put("message", "Phiên đấu giá đã được gia hạn thêm 5 phút");
+            notification.put("message", message);
             
             messagingTemplate.convertAndSend(
                 (Object) ("/topic/auction/" + auctionId + "/status"),
@@ -72,11 +95,15 @@ public class AuctionWebSocketNotificationService {
      */
     public void sendStatusChangeNotification(String auctionId, String status) {
         try {
+            String message = "Auction status changed to " + status;
+            persistLiveNotification(auctionId, message);
+
             Map<String, Object> notification = new HashMap<>();
             notification.put("type", "STATUS_CHANGE");
             notification.put("auctionId", auctionId);
             notification.put("status", status);
             notification.put("timestamp", OffsetDateTime.now(ZoneOffset.ofHours(7)));
+            notification.put("message", message);
             
             messagingTemplate.convertAndSend(
                 (Object) ("/topic/auction/" + auctionId + "/status"),
@@ -95,11 +122,14 @@ public class AuctionWebSocketNotificationService {
      */
     public void sendFinalMinutesWarning(String auctionId, long minutesRemaining) {
         try {
+            String message = "The auction is ending soon! " + minutesRemaining + " minutes remaining.";
+            persistLiveNotification(auctionId, message);
+
             Map<String, Object> notification = new HashMap<>();
             notification.put("type", "FINAL_MINUTES_WARNING");
             notification.put("auctionId", auctionId);
             notification.put("minutesRemaining", minutesRemaining);
-            notification.put("message", "Phiên đấu giá sắp kết thúc! Bạn còn " + minutesRemaining + " phút.");
+            notification.put("message", message);
             
             messagingTemplate.convertAndSend(
                 (Object) ("/topic/auction/" + auctionId + "/warning"),
@@ -119,6 +149,8 @@ public class AuctionWebSocketNotificationService {
      */
     public void sendAdminNotification(String auctionId, String type, String message) {
         try {
+            persistLiveNotification(auctionId, message);
+
             Map<String, Object> notification = new HashMap<>();
             notification.put("type", type);
             notification.put("auctionId", auctionId);
@@ -141,10 +173,13 @@ public class AuctionWebSocketNotificationService {
      */
     public void sendAuctionEndingNotification(String auctionId) {
         try {
+            String message = "The auction is ending soon!";
+            persistLiveNotification(auctionId, message);
+
             Map<String, Object> notification = new HashMap<>();
             notification.put("type", "AUCTION_ENDING");
             notification.put("auctionId", auctionId);
-            notification.put("message", "Phiên đấu giá sắp kết thúc!");
+            notification.put("message", message);
             
             messagingTemplate.convertAndSend(
                 (Object) ("/topic/auction/" + auctionId + "/status"),

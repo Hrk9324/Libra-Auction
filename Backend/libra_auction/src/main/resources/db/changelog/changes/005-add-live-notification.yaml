@@ -1,0 +1,44 @@
+databaseChangeLog:
+- changeSet:
+    id: 005-add-live-notification
+    author: nhatking
+    changes:
+    - createTable:
+        tableName: live_notification
+        columns:
+        - column:
+            name: id
+            type: VARCHAR(36)
+            constraints:
+              primaryKey: true
+              primaryKeyName: live_notification_pkey
+              nullable: false
+        - column:
+            name: auction_id
+            type: VARCHAR(36)
+            constraints:
+              nullable: false
+        - column:
+            name: content
+            type: TEXT
+            constraints:
+              nullable: false
+        - column:
+            name: sent_at
+            type: TIMESTAMP WITH TIME ZONE
+            constraints:
+              nullable: false
+    - addForeignKeyConstraint:
+        baseTableName: live_notification
+        baseColumnNames: auction_id
+        referencedTableName: auction
+        referencedColumnNames: id
+        constraintName: fk_live_notification_auction
+    - createIndex:
+        tableName: live_notification
+        indexName: idx_live_notification_auction_sent_at
+        columns:
+        - column:
+            name: auction_id
+        - column:
+            name: sent_at

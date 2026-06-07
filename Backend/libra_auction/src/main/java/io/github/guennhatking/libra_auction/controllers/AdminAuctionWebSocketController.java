@@ -53,14 +53,14 @@ public class AdminAuctionWebSocketController {
         if (auction.getAuctionStatus() != AuctionStatus.IN_PROGRESS) {
             logger.warn("Cannot pause auction {} - current status: {}", auctionId, auction.getAuctionStatus());
             notificationService.sendAdminNotification(auctionId, "ERROR",
-                    "Không thể tạm dừng phiên đấu giá. Trạng thái hiện tại: " + auction.getAuctionStatus());
+                    "Cannot pause the auction. Current status: " + auction.getAuctionStatus());
             return;
         }
 
         auctionStateTransitionService.pauseAuction(auctionId);
 
         notificationService.sendAdminNotification(auctionId, "AUCTION_PAUSED",
-                "Phiên đấu giá đã được tạm dừng bởi quản trị viên");
+            "The auction has been paused by the admin");
     }
 
     /**
@@ -80,14 +80,14 @@ public class AdminAuctionWebSocketController {
         if (auction.getAuctionStatus() != AuctionStatus.PAUSED) {
             logger.warn("Cannot resume auction {} - current status: {}", auctionId, auction.getAuctionStatus());
             notificationService.sendAdminNotification(auctionId, "ERROR",
-                    "Không thể tiếp tục phiên đấu giá. Trạng thái hiện tại: " + auction.getAuctionStatus());
+                    "Cannot resume the auction. Current status: " + auction.getAuctionStatus());
             return;
         }
 
         auctionStateTransitionService.resumeAuction(auctionId);
 
         notificationService.sendAdminNotification(auctionId, "AUCTION_RESUMED",
-                "Phiên đấu giá đã được tiếp tục bởi quản trị viên");
+            "The auction has been resumed by the admin");
     }
 
     /**
@@ -108,14 +108,14 @@ public class AdminAuctionWebSocketController {
                 && auction.getAuctionStatus() != AuctionStatus.PAUSED) {
             logger.warn("Cannot end auction {} - current status: {}", auctionId, auction.getAuctionStatus());
             notificationService.sendAdminNotification(auctionId, "ERROR",
-                    "Không thể kết thúc phiên đấu giá. Trạng thái hiện tại: " + auction.getAuctionStatus());
+                "Cannot end the auction. Current status: " + auction.getAuctionStatus());
             return;
         }
 
         auctionStateTransitionService.endAuction(auctionId);
 
         notificationService.sendAdminNotification(auctionId, "AUCTION_ENDED",
-                "Phiên đấu giá đã được kết thúc bởi quản trị viên");
+            "The auction has been ended by the admin");
     }
 
     /**
@@ -129,7 +129,7 @@ public class AdminAuctionWebSocketController {
         try {
             auctionStateTransitionService.cancelAuction(auctionId, reason);
             notificationService.sendAdminNotification(auctionId, "AUCTION_CANCELLED",
-                    "Phiên đấu giá đã bị hủy. Lý do: " + (reason.isEmpty() ? "Không có" : reason));
+                    "The auction has been cancelled. Reason: " + (reason.isEmpty() ? "None" : reason));
         } catch (IllegalStateException e) {
             logger.warn("Cannot cancel auction {}: {}", auctionId, e.getMessage());
             notificationService.sendAdminNotification(auctionId, "ERROR", e.getMessage());
