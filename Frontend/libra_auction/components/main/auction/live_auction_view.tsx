@@ -16,6 +16,7 @@ type StatusUpdate = {
   status?: string;
   message?: string;
   newEndTime?: string | number;
+  remainingTime?: string | number;
   timestamp?: string;
   winnerId?: string;
   winnerName?: string;
@@ -57,6 +58,15 @@ function formatTime(value?: string) {
     : new Date(timestamp).toLocaleTimeString("vi-VN");
 }
 
+function toNumber(value: string | number | undefined) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? undefined : parsed;
+  }
+  return undefined;
+}
+
 export default function LiveAuctionView({
   auction,
   backendServerUrl,
@@ -78,9 +88,15 @@ export default function LiveAuctionView({
     auction.current_price || auction.starting_price || 0
   );
   const [endTimeMs, setEndTimeMs] = useState(() => {
+    const explicitEndTimeMs = toTimestamp(auction.end_time);
+    if (!Number.isNaN(explicitEndTimeMs)) return explicitEndTimeMs;
+
     const startTimeMs = toTimestamp(auction.start_time);
     return startTimeMs + auction.duration * 1000;
   });
+  const [remainingTimeMs, setRemainingTimeMs] = useState<number | null>(
+    auction.auction_status === "PAUSED" ? auction.remaining_time ?? null : null
+  );
   const [auctionStatus, setAuctionStatus] = useState<string>(
     auction.auction_status || "IN_PROGRESS"
   );
@@ -206,11 +222,17 @@ export default function LiveAuctionView({
       if (update.status) {
         setAuctionStatus(update.status);
         switch (update.status) {
-          case "PAUSED":
+          case "PAUSED": {
+            const parsedRemainingTime = toNumber(update.remainingTime);
+            if (parsedRemainingTime !== undefined) {
+              setRemainingTimeMs(parsedRemainingTime);
+            }
             setStatusMessage("Phiên đấu giá đang tạm dừng. Vui lòng chờ admin tiếp tục.");
             addNotification("Phiên đấu giá đã bị tạm dừng");
             break;
+          }
           case "IN_PROGRESS":
+            setRemainingTimeMs(null);
             setStatusMessage(null);
             addNotification("Phiên đấu giá đã tiếp tục");
             break;
@@ -265,7 +287,6 @@ export default function LiveAuctionView({
         auctionId: auction.auction_id,
         bidAmount: value,
         bidderId: currentUserId || undefined,
-        bidderName: "You",
       });
       setBidValue("");
       addNotification(`Đã gửi yêu cầu đặt giá ${CurrencyFormat(value)}, đang chờ xác nhận...`);
@@ -384,7 +405,7 @@ export default function LiveAuctionView({
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
                   <p className="text-sm text-gray-500 mb-2">Thời gian còn lại</p>
-                  <AuctionTimer endTimeMs={endTimeMs} isPaused={isPaused} size="sm" />
+                  <AuctionTimer endTimeMs={endTimeMs} remainingTimeMs={remainingTimeMs} isPaused={isPaused} size="sm" />
                 </div>
               </div>
 

@@ -9,3 +9,5 @@ databaseChangeLog:
     file: db/changelog/changes/004-remove-auction-product-unique.yaml
 - include:
     file: db/changelog/changes/005-add-live-notification.yaml
+- include:
+    file: db/changelog/changes/006-add-auction-end-time.yaml

@@ -9,6 +9,7 @@ import io.github.guennhatking.libra_auction.services.AuctionWebSocketNotificatio
 import io.github.guennhatking.libra_auction.viewmodels.request.BidMessage;
 import io.github.guennhatking.libra_auction.viewmodels.response.BidResponse;
 import io.github.guennhatking.libra_auction.models.auction.AuctionLog;
+import io.github.guennhatking.libra_auction.models.person.Customer;
 import io.github.guennhatking.libra_auction.repositories.auction.AuctionParticipationInfoRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -91,10 +92,14 @@ public class AuctionWebSocketController {
                 return;
             }
 
+            Customer bidder = customerRepository.findById(bidMessage.bidderId()).orElse(null);
+            if (bidder == null) {
+                sendErrorNotification(bidMessage.auctionId(), "Không tìm thấy người đặt giá.");
+                return;
+            }
+
             // Validate bidder is not the administrator
-            if (customerRepository.findById(bidMessage.bidderId())
-                    .map(customer -> customer.getRole().getName().equalsIgnoreCase("ADMIN"))
-                    .orElse(false)) {
+            if (bidder.getRole() != null && bidder.getRole().getName().equalsIgnoreCase("ADMIN")) {
                 sendErrorNotification(bidMessage.auctionId(), "Quản trị viên không thể đặt giá.");
                 return;
             }
@@ -108,7 +113,7 @@ public class AuctionWebSocketController {
                 return;
             }
 
-            handleAscendingAuction(bidMessage, auction);
+            handleAscendingAuction(bidMessage, auction, bidder);
 
             // After processing bid, check if auction should be extended
             // If a bid is placed within 5 minutes of end time, extend by 5 minutes
@@ -132,7 +137,7 @@ public class AuctionWebSocketController {
      * - Highest bidder at the end wins
      * - All bids are visible to participants
      */
-    private void handleAscendingAuction(BidMessage bidMessage, Auction auction) {
+    private void handleAscendingAuction(BidMessage bidMessage, Auction auction, Customer bidder) {
         long minimumBid = auction.getCurrentPrice() > 0
                 ? auction.getCurrentPrice() + auction.getMinimumBidIncrement()
                 : auction.getStartingPrice();
@@ -153,8 +158,7 @@ public class AuctionWebSocketController {
         log.setAuction(auction);
         log.setBidAmount(bidMessage.bidAmount());
         log.setTimestamp(bidTime);
-        // Set bidder
-        customerRepository.findById(bidMessage.bidderId()).ifPresent(log::setBidder);
+        log.setBidder(bidder);
 
         if (auction.getBidHistory() == null) {
             auction.setBidHistory(new ArrayList<>());
@@ -165,16 +169,16 @@ public class AuctionWebSocketController {
         logger.info("Bid accepted and saved to log: auctionId={}, bidAmount={}", bidMessage.auctionId(), bidMessage.bidAmount());
 
         // Broadcast to all participants (bids are visible)
-        BidResponse bidResponse = createBidResponse(bidMessage, "SUCCESS", bidTime);
+        BidResponse bidResponse = createBidResponse(bidMessage, bidder, "SUCCESS", bidTime);
         broadcastBid(bidMessage.auctionId(), bidResponse);
     }
 
-    private BidResponse createBidResponse(BidMessage message, String status, OffsetDateTime bidTime) {
+    private BidResponse createBidResponse(BidMessage message, Customer bidder, String status, OffsetDateTime bidTime) {
         return new BidResponse(
                 message.auctionId(),
                 message.bidAmount(),
                 message.bidderId(),
-                message.bidderName(),
+                bidder.getFullName(),
                 bidTime,
                 status);
     }
@@ -206,7 +210,7 @@ public class AuctionWebSocketController {
      * Check if auction is within the final minutes and extend if needed
      * If a bid is placed within FINAL_MINUTES_WINDOW (5 minutes), extend by
      * EXTENSION_MINUTES (5 minutes)
-     * 
+     *
      * @param auctionId The auction ID
      */
     private void checkAndExtendAuctionIfNeeded(String auctionId) {
@@ -221,8 +225,12 @@ public class AuctionWebSocketController {
                             .atZone(java.time.ZoneId.systemDefault()).toOffsetDateTime();
                     OffsetDateTime newEndTime = currentEndTime.plusMinutes(EXTENSION_MINUTES);
 
-                    // Update Redis with new end time
+                    // Update Redis and DB with new end time
                     auctionStateRedisService.extendAuctionEnd(auctionId, newEndTime);
+                    auctionRepository.findById(auctionId).ifPresent(auction -> {
+                        auction.setEndTime(newEndTime);
+                        auctionRepository.save(auction);
+                    });
 
                     // Notify all participants about the extension
                     auctionWebSocketNotificationService.sendAuctionExtensionNotification(auctionId, newEndTime);

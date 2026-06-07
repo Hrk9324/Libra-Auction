@@ -4,7 +4,10 @@ import { LiveAuction } from "@/types/auction/live_auction";
 export const mapAuctionToLiveAuction = (auction: Auction): LiveAuction => {
   // 1. Tính toán thời gian còn lại (ms)
   // duration tính bằng giây (theo backend)
-  const endTime = new Date(auction.start_time).getTime() + (auction.duration * 1000);
+  const explicitEndTime = auction.end_time ? new Date(auction.end_time).getTime() : NaN;
+  const endTime = Number.isNaN(explicitEndTime)
+    ? new Date(auction.start_time).getTime() + (auction.duration * 1000)
+    : explicitEndTime;
   const now = Date.now();
   const timeLeft = Math.max(0, endTime - now);
 

@@ -65,7 +65,7 @@ public class AuctionService {
                 if (session.getApprovalStatus() != ApprovalStatus.APPROVED) {
                         throw new IllegalArgumentException("Auction session not found");
                 }
-                return withRemainingTime(auctionMapper.toAuctionResponse(session));
+                return withRuntimeTiming(auctionMapper.toAuctionResponse(session));
         }
 
         @Transactional(readOnly = true)
@@ -73,7 +73,7 @@ public class AuctionService {
                 Auction session = auctionRepository.findByIdAndCreator_Id(id, userId)
                                 .orElseThrow(() -> new IllegalArgumentException("Auction session not found"));
 
-                return withRemainingTime(auctionMapper.toAuctionResponse(session));
+                return withRuntimeTiming(auctionMapper.toAuctionResponse(session));
         }
 
         @Transactional(readOnly = true)
@@ -86,7 +86,7 @@ public class AuctionService {
                 if (session.getApprovalStatus() != ApprovalStatus.APPROVED) {
                         throw new IllegalArgumentException("Auction not found in this category");
                 }
-                return withRemainingTime(auctionMapper.toAuctionResponse(session));
+                return withRuntimeTiming(auctionMapper.toAuctionResponse(session));
         }
 
         @Transactional
@@ -107,6 +107,9 @@ public class AuctionService {
                 session.setProduct(product);
                 session.setDuration(request.duration());
                 session.setStartTime(request.startTime());
+                if (request.startTime() != null) {
+                        session.setEndTime(request.startTime().plusSeconds(request.duration()));
+                }
                 session.setStartingPrice(request.startingPrice());
                 session.setMinimumBidIncrement(request.minimumBidIncrement());
                 session.setDepositAmount(request.depositAmount());
@@ -133,6 +136,7 @@ public class AuctionService {
 
                 session.setStartTime(request.startTime());
                 session.setDuration(request.duration());
+                session.setEndTime(request.startTime() != null ? request.startTime().plusSeconds(request.duration()) : null);
                 session.setStartingPrice(request.startingPrice());
                 session.setMinimumBidIncrement(request.minimumBidIncrement());
                 session.setDepositAmount(request.depositAmount());
@@ -146,8 +150,10 @@ public class AuctionService {
 
                         if (updatedSession.getStartTime() != null) {
                                 auctionStateRedisService.addAuctionStartEvent(updatedSession.getId(), updatedSession.getStartTime());
-                                auctionStateRedisService.addAuctionEndEvent(updatedSession.getId(),
-                                        updatedSession.getStartTime().plusSeconds(updatedSession.getDuration()));
+                                OffsetDateTime endTime = updatedSession.getEndTime() != null
+                                        ? updatedSession.getEndTime()
+                                        : updatedSession.getStartTime().plusSeconds(updatedSession.getDuration());
+                                auctionStateRedisService.addAuctionEndEvent(updatedSession.getId(), endTime);
                         }
                 }
 
@@ -185,14 +191,18 @@ public class AuctionService {
                 }
 
                 session.setApprovalStatus(ApprovalStatus.APPROVED);
+                if (session.getStartTime() != null && session.getEndTime() == null) {
+                        session.setEndTime(session.getStartTime().plusSeconds(session.getDuration()));
+                }
                 Auction saved = auctionRepository.save(session);
 
                 // Register the auction in Redis for automatic start/end scheduling
                 if (saved.getStartTime() != null) {
                         auctionStateRedisService.addAuctionStartEvent(saved.getId(), saved.getStartTime());
-                        // Calculate end time: start_time + duration
-                        auctionStateRedisService.addAuctionEndEvent(saved.getId(),
-                                saved.getStartTime().plusSeconds(saved.getDuration()));
+                        OffsetDateTime endTime = saved.getEndTime() != null
+                                ? saved.getEndTime()
+                                : saved.getStartTime().plusSeconds(saved.getDuration());
+                        auctionStateRedisService.addAuctionEndEvent(saved.getId(), endTime);
                 }
 
                 return auctionMapper.toAuctionResponse(saved);
@@ -286,8 +296,14 @@ public class AuctionService {
                             auction.getStartTime() != null) {
                                 try {
                                         auctionStateRedisService.addAuctionStartEvent(auction.getId(), auction.getStartTime());
-                                        auctionStateRedisService.addAuctionEndEvent(auction.getId(),
-                                                auction.getStartTime().plusSeconds(auction.getDuration()));
+                                        OffsetDateTime endTime = auction.getEndTime() != null
+                                                ? auction.getEndTime()
+                                                : auction.getStartTime().plusSeconds(auction.getDuration());
+                                        if (auction.getEndTime() == null) {
+                                                auction.setEndTime(endTime);
+                                                auctionRepository.save(auction);
+                                        }
+                                        auctionStateRedisService.addAuctionEndEvent(auction.getId(), endTime);
                                         count++;
                                 } catch (Exception e) {
                                         // Log and continue with next auction
@@ -326,11 +342,19 @@ public class AuctionService {
                 return productResponseMapper.toProductResponse(product);
         }
 
-        private AuctionResponse withRemainingTime(AuctionResponse response) {
-                Long remainingTime = auctionStateRedisService.getRemainingTime(response.auction_id());
-                if (remainingTime == null) {
-                        return response;
+        private AuctionResponse withRuntimeTiming(AuctionResponse response) {
+                Long redisEndTimeMs = auctionStateRedisService.getAuctionEndTime(response.auction_id());
+                OffsetDateTime endTime = redisEndTimeMs != null
+                                ? OffsetDateTime.ofInstant(java.time.Instant.ofEpochMilli(redisEndTimeMs), ZoneOffset.ofHours(7))
+                                : response.end_time();
+
+                if (endTime == null && response.start_time() != null && response.duration() != null) {
+                        endTime = response.start_time().plusSeconds(response.duration());
                 }
+
+                Long remainingTime = response.auction_status() == AuctionStatus.PAUSED
+                                ? auctionStateRedisService.getRemainingTime(response.auction_id())
+                                : null;
 
                 return new AuctionResponse(
                                 response.category_id(),
@@ -340,6 +364,7 @@ public class AuctionService {
                                 response.auction_status(),
                                 response.approval_status(),
                                 response.start_time(),
+                                endTime,
                                 response.duration(),
                                 response.starting_price(),
                                 response.current_price(),

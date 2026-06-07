@@ -86,6 +86,9 @@ public class AuctionStateTransitionService {
 
             // Change status to IN_PROGRESS
             auction.setAuctionStatus(AuctionStatus.IN_PROGRESS);
+            if (auction.getEndTime() == null && auction.getStartTime() != null) {
+                auction.setEndTime(auction.getStartTime().plusSeconds(auction.getDuration()));
+            }
             auctionRepository.save(auction);
 
             logger.info("Auction {} started", auctionId);
@@ -167,6 +170,7 @@ public class AuctionStateTransitionService {
                 OffsetDateTime newEndTime = OffsetDateTime.ofInstant(
                     java.time.Instant.ofEpochMilli(finalEndTimeMs), ZoneOffset.ofHours(7));
                 auctionStateRedisService.extendAuctionEnd(auctionId, newEndTime);
+                auction.setEndTime(newEndTime);
                 logger.info("Auction {} resumed with remainingTimeMs={}, newEndTime={}", auctionId, remainingTimeMs, finalEndTimeMs);
             } else {
                 Long stored = auctionStateRedisService.getAuctionEndTime(auctionId);

@@ -23,6 +23,7 @@ public interface AuctionMapper {
     @Mapping(source = "auctionStatus", target = "auction_status", defaultValue = "NOT_STARTED")
     @Mapping(source = "approvalStatus", target = "approval_status")
     @Mapping(source = "startTime", target = "start_time")
+    @Mapping(source = "endTime", target = "end_time")
     @Mapping(source = "duration", target = "duration")
     @Mapping(source = "startingPrice", target = "starting_price")
     @Mapping(target = "current_price", expression = "java(session.getCurrentPrice() > 0 ? session.getCurrentPrice() : session.getStartingPrice())")

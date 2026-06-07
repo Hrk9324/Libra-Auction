@@ -13,6 +13,7 @@ public record AuctionResponse(
         AuctionStatus auction_status,
         String approval_status,
         OffsetDateTime start_time,
+        OffsetDateTime end_time,
         Long duration,
 
         Long starting_price,

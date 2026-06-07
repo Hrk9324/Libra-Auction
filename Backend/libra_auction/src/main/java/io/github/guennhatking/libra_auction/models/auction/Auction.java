@@ -30,6 +30,7 @@ public class Auction {
     private Customer creator;
 
     private OffsetDateTime startTime;
+    private OffsetDateTime endTime;
     private long duration;
 
     private long depositAmount;
@@ -122,6 +123,10 @@ public class Auction {
         return startTime;
     }
 
+    public OffsetDateTime getEndTime() {
+        return endTime;
+    }
+
     public long getDuration() {
         return duration;
     }
@@ -199,6 +204,10 @@ public class Auction {
 
     public void setStartTime(OffsetDateTime startTime) {
         this.startTime = startTime;
+    }
+
+    public void setEndTime(OffsetDateTime endTime) {
+        this.endTime = endTime;
     }
 
     public void setDuration(long duration) {

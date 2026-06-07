@@ -8,7 +8,8 @@ export interface Auction {
         auction_name: string,
         auction_status: AuctionStatus,
         approval_status: ApprovalStatus,
-        start_time: Date,
+        start_time: Date | string,
+        end_time?: Date | string,
         duration: number,
 
         starting_price: number,

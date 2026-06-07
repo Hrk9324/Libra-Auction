@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Auction } from "@/types/auction/auction";
 import { CurrencyFormat } from "@/utils/currency_format";
 import { auctionSocket } from "@/services/auction_socket";
+import { fetchAuctionBids } from "@/services/fetch_auction_bids";
 import AdminStatsPanel from "./admin_stats_panel";
 import AdminControls from "./admin_controls";
 import BidHistory, { BidEntry } from "@/components/shared/bid_history";
@@ -101,6 +102,9 @@ export default function AdminLiveAuctionView({
     auction.current_price || auction.starting_price || 0
   );
   const [endTimeMs, setEndTimeMs] = useState(() => {
+    const explicitEndTimeMs = toTimestamp(auction.end_time);
+    if (!Number.isNaN(explicitEndTimeMs)) return explicitEndTimeMs;
+
     const startTimeMs = toTimestamp(auction.start_time);
     return startTimeMs + auction.duration * 1000;
   });
@@ -144,6 +148,34 @@ export default function AdminLiveAuctionView({
   };
 
   useEffect(() => {
+    let isMounted = true;
+
+    fetchAuctionBids(auction.auction_id)
+      .then((auctionBids) => {
+        if (!isMounted || auctionBids.length === 0) return;
+
+        const mappedBids: BidEntry[] = auctionBids.map((bid) => ({
+          bidderName: bid.bidderName || "Unknown",
+          amount: bid.bidAmount,
+          time: bid.bidTime ? formatTime(bid.bidTime) : new Date().toLocaleTimeString("en-US"),
+          status: (bid.status as BidEntry["status"]) || "SUCCESS",
+          bidderId: bid.bidderId,
+        }));
+        const latestBid = auctionBids[0];
+
+        setBids(mappedBids);
+        setTotalBids(auctionBids.length);
+        setCurrentPrice(latestBid.bidAmount);
+        setHighestBidder(latestBid.bidderName || "Unknown");
+      })
+      .catch((err) => console.error("Failed to load auction bids:", err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [auction.auction_id]);
+
+  useEffect(() => {
     const bidsTopic = `/topic/auction/${auction.auction_id}/bids`;
     const statusTopic = `/topic/auction/${auction.auction_id}/status`;
     const genericTopic = `/topic/auction/${auction.auction_id}`;
@@ -168,6 +200,7 @@ export default function AdminLiveAuctionView({
             amount: bidAmount,
             time: bid.bidTime ? formatTime(bid.bidTime) : new Date().toLocaleTimeString("en-US"),
             status: (bid.status as BidEntry["status"]) || "SUCCESS",
+            bidderId: bid.bidderId,
           },
           ...prev,
         ]);
