@@ -29,13 +29,16 @@ export const AuctionFilterSidebar = ({
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    
+    // Lưu các lựa chọn vào state tạm thời
     const [selectedCategoryId, setSelectedCategoryId] = useState(activeCategoryId);
     const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
     const [selectedStatus, setSelectedStatus] = useState(initialStatus);
     const [priceFrom, setPriceFrom] = useState(initialPriceFrom);
     const [priceTo, setPriceTo] = useState(initialPriceTo);
 
-    const buildQuery = () => {
+    // Xử lý gom toàn bộ filter và đẩy lên URL khi bấm nút Apply
+    const handleApplyFilters = () => {
         const query = new URLSearchParams(searchParams.toString());
 
         if (searchTerm.trim()) {
@@ -62,131 +65,67 @@ export const AuctionFilterSidebar = ({
             query.delete("priceTo");
         }
 
-        return query;
-    };
-
-    const handleConfirmCategory = () => {
-        const query = buildQuery();
         const queryString = query.toString();
+        
+        // Nếu chọn danh mục cụ thể thì trỏ sang đường dẫn động, ngược lại về /auctions tổng quát
         const targetPath = selectedCategoryId ? `/auctions/${selectedCategoryId}` : "/auctions";
+        
         router.push(queryString ? `${targetPath}?${queryString}` : targetPath);
-    };
-
-    const handleConfirmSearch = () => {
-        const query = new URLSearchParams(searchParams.toString());
-
-        if (searchTerm.trim()) {
-            query.set("name", searchTerm.trim());
-        } else {
-            query.delete("name");
-        }
-
-        const queryString = query.toString();
-        router.push(queryString ? `${pathname}?${queryString}` : pathname);
-    };
-
-    const handleConfirmPrice = () => {
-        const query = new URLSearchParams(searchParams.toString());
-
-        if (priceFrom.trim()) {
-            query.set("priceFrom", priceFrom.trim());
-        } else {
-            query.delete("priceFrom");
-        }
-
-        if (priceTo.trim()) {
-            query.set("priceTo", priceTo.trim());
-        } else {
-            query.delete("priceTo");
-        }
-
-        const queryString = query.toString();
-        router.push(queryString ? `${pathname}?${queryString}` : pathname);
-    };
-
-    const handleApplyFilters = () => {
-        const query = buildQuery();
-        const queryString = query.toString();
-        router.push(queryString ? `${pathname}?${queryString}` : pathname);
     };
 
     return (
         <div className="space-y-8">
+            {/* SEARCH */}
             <div>
                 <h3 className="font-bold text-[#146C94] mb-4 uppercase text-xs tracking-widest">Search</h3>
-                <div className="space-y-3">
-                    <input 
-                        type="text" 
-                        placeholder="Auction or product name..."
-                        value={searchTerm}
-                        onChange={(event) => setSearchTerm(event.target.value)}
-                        className="w-full pl-3 pr-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none focus:border-(--primary-color) transition-all"
-                    />
-                    <button
-                        type="button"
-                        onClick={handleConfirmSearch}
-                        className="w-full rounded-xl bg-(--secondary-color) py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-lg shadow-blue-100 transition-all hover:bg-[#1598bc] active:scale-[0.98] active:bg-[#117f9c]"
-                    >
-                        CONFIRM SEARCH
-                    </button>
-                </div>
+                <input 
+                    type="text" 
+                    placeholder="Auction or product name..."
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    className="w-full pl-3 pr-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none focus:border-(--primary-color) transition-all"
+                />
             </div>
 
+            {/* CATEGORIES */}
             <div>
                 <h3 className="font-bold text-[#146C94] mb-4 uppercase text-xs tracking-widest">Categories</h3>
-                <div className="space-y-3">
-                    <select
-                        value={selectedCategoryId}
-                        onChange={(event) => setSelectedCategoryId(event.target.value)}
-                        className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition-all focus:border-(--primary-color)"
-                    >
-                        <option value="">Tất cả</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.title}
-                            </option>
-                        ))}
-                    </select>
-
-                    <button
-                        type="button"
-                        onClick={handleConfirmCategory}
-                        className="w-full rounded-xl bg-(--secondary-color) py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-lg shadow-blue-100 transition-all hover:bg-[#1598bc] active:scale-[0.98] active:bg-[#117f9c] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        CONFIRM CATEGORY
-                    </button>
-                </div>
+                <select
+                    value={selectedCategoryId}
+                    onChange={(event) => setSelectedCategoryId(event.target.value)}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none transition-all focus:border-(--primary-color)"
+                >
+                    <option value="">All</option>
+                    {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                            {category.title}
+                        </option>
+                    ))}
+                </select>
             </div>
 
+            {/* PRICE RANGE */}
             <div>
                 <h3 className="font-bold text-[#146C94] mb-4 uppercase text-xs tracking-widest">Price range (VND)</h3>
-                <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
-                        <input
-                            type="number"
-                            placeholder="From"
-                            value={priceFrom}
-                            onChange={(event) => setPriceFrom(event.target.value)}
-                            className="w-full rounded-lg border border-gray-100 bg-gray-50 p-2 text-xs outline-none"
-                        />
-                        <input
-                            type="number"
-                            placeholder="To"
-                            value={priceTo}
-                            onChange={(event) => setPriceTo(event.target.value)}
-                            className="w-full rounded-lg border border-gray-100 bg-gray-50 p-2 text-xs outline-none"
-                        />
-                    </div>
-                    <button
-                        type="button"
-                        onClick={handleConfirmPrice}
-                        className="w-full rounded-xl bg-(--secondary-color) py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-lg shadow-blue-100 transition-all hover:bg-[#1598bc] active:scale-[0.98] active:bg-[#117f9c]"
-                    >
-                        CONFIRM PRICE
-                    </button>
+                <div className="grid grid-cols-2 gap-2">
+                    <input
+                        type="number"
+                        placeholder="From"
+                        value={priceFrom}
+                        onChange={(event) => setPriceFrom(event.target.value)}
+                        className="w-full rounded-lg border border-gray-100 bg-gray-50 p-2 text-xs outline-none"
+                    />
+                    <input
+                        type="number"
+                        placeholder="To"
+                        value={priceTo}
+                        onChange={(event) => setPriceTo(event.target.value)}
+                        className="w-full rounded-lg border border-gray-100 bg-gray-50 p-2 text-xs outline-none"
+                    />
                 </div>
             </div>
 
+            {/* STATUS */}
             <div>
                 <h3 className="font-bold text-[#146C94] mb-4 uppercase text-xs tracking-widest">Status</h3>
                 <div className="flex flex-wrap gap-2">
@@ -211,10 +150,11 @@ export const AuctionFilterSidebar = ({
                 </div>
             </div>
 
+            {/* TỔNG HỢP FILTER BUTTON */}
             <button
                 type="button"
                 onClick={handleApplyFilters}
-                className="w-full rounded-xl py-2 bg-(--secondary-color) text-xs font-semibold uppercase tracking-wider text-white shadow-lg shadow-blue-100 transition-all hover:bg-[#1598bc] active:scale-[0.98] active:bg-[#117f9c]"
+                className="w-full rounded-xl py-3 bg-(--secondary-color) text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-blue-100 transition-all hover:bg-[#1598bc] active:scale-[0.98] active:bg-[#117f9c]"
             >
                 APPLY FILTERS
             </button>
