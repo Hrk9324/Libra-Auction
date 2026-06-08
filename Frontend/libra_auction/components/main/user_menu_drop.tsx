@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { signOutAction } from "@/lib/auth_actions";
 import { UserInfo } from "@/types/user_info";
 import { NavItem } from "@/types/nav_item";
 
@@ -54,7 +55,10 @@ export default function UserMenuDropdown({
 
             <button
               className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition"
-              onClick={() => { window.location.href = "/api/sign-out"; }}
+              onClick={() => {
+                setIsOpen(false);
+                signOutAction();
+              }}
             >
               Sign out
             </button>

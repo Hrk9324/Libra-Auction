@@ -5,8 +5,8 @@ import { getRole } from './lib/get_roles';
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const isApiRoute = pathname.startsWith('/api/');
-  if (isApiRoute) {
+  const isBffRoute = pathname.startsWith('/bff/');
+  if (isBffRoute) {
     return NextResponse.next();
   }
   
@@ -39,5 +39,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/((?!api/auth|_next/static|_next_image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  matcher: '/((?!bff|_next/static|_next_image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
 }

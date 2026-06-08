@@ -1,7 +1,6 @@
 'use client';
 
-// Import hàm Server Action bạn đã tạo trong libs
-import { signUpAction } from "@/libs/auth_actions";
+import { signUpAction } from "@/lib/auth_actions";
 
 export async function signUp(
     fullName: string, 

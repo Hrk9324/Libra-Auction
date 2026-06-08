@@ -4,14 +4,14 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ServerAPICall } from "@/lib/server_API_call";
 import { JWTResponse } from "@/types/jwt_response";
-import { clearAuthCookies } from "@/libs/clear_auth_cookies";
+import { clearAuthCookies } from "@/lib/clear_auth_cookies";
 
 interface ActionResponse {
     success: boolean;
     message: string;
 }
 
-public async function signInAction(body: any): Promise<ActionResponse> {
+export async function signInAction(body: any): Promise<ActionResponse> {
     try {
         const { username, password } = body;
         
@@ -50,7 +50,7 @@ public async function signInAction(body: any): Promise<ActionResponse> {
     }
 }
 
-public async function signUpAction(body: any): Promise<ActionResponse> {
+export async function signUpAction(body: any): Promise<ActionResponse> {
     try {
         const { fullName, username, email, password } = body;
         
@@ -73,7 +73,7 @@ public async function signUpAction(body: any): Promise<ActionResponse> {
     }
 }
 
-public async function signOutAction(): Promise<void> {
+export async function signOutAction(): Promise<void> {
     await clearAuthCookies();
     redirect('/sign-in');
 }

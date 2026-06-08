@@ -1,8 +1,8 @@
 'use client';
 
-import { signInAction, signUpAction } from "@/libs/auth_actions";
+import { signInAction, signUpAction } from "@/lib/auth_actions";
 
-public async function signInPassword(
+export async function signInPassword(
     username: string, 
     password: string, 
     onSuccess: () => void, 
@@ -17,7 +17,7 @@ public async function signInPassword(
     }
 }
 
-public async function signUp(
+export async function signUp(
     fullName: string, 
     username: string, 
     email: string, 
@@ -40,7 +40,7 @@ public async function signUp(
     }
 }
 
-public async function signInGoogle(onSuccess: () => void, onFailed: () => void) {
+export async function signInGoogle(onSuccess: () => void, onFailed: () => void) {
     const w = 500;
     const h = 600;
     const left = (screen.width / 2) - (w / 2);

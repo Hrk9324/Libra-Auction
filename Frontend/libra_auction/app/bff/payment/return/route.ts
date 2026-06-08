@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
 
         if (auctionId) {
             return NextResponse.redirect(
-                new URL(`/api/payment/handle?auctionId=${auctionId}&status=${status}`, req.url)
+                new URL(`/bff/payment/handle?auctionId=${auctionId}&status=${status}`, req.url)
             );
         }
 
