@@ -316,7 +316,6 @@ export default function LiveAuctionView({
 
   const isEnded = auctionStatus === "ENDED" || auctionStatus === "CANCELLED";
   const isPaused = auctionStatus === "PAUSED";
-  const isLoggedIn = !!currentUserId;
 
   return (
     <div className="min-h-screen bg-gray-50/50 pt-10 px-16 pb-12">

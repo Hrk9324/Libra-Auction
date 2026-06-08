@@ -26,7 +26,9 @@ export const ImageGallery = ({ images }: { images: string[] }) => {
             className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 transition-all overflow-hidden bg-white ${mainImage === img ? "border-[var(--primary-color)]" : "border-transparent"
               }`}
           >
-            <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+            <div className="relative h-full w-full">
+              <Image src={img} alt={`Thumb ${idx}`} fill className="object-cover" />
+            </div>
           </button>
         ))}
       </div>

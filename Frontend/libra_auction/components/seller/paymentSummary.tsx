@@ -41,7 +41,7 @@ export default function PaymentSummary() {
         </div>
         <table className="w-full text-left">
           <thead>
-            <tr className="text-[12px] text-gray-400 uppercase border-b border-[#AFD3E2]">
+            <tr className="text-xs text-gray-400 uppercase border-b border-[#AFD3E2]">
               <th className="p-4">Txn ID</th>
               <th className="p-4">Auction</th>
               <th className="p-4">Amount</th>

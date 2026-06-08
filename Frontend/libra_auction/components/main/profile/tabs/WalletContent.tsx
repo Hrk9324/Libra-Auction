@@ -10,6 +10,10 @@ interface WalletContentProps {
   userId: string;
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Failed to load wallet data";
+}
+
 export function WalletContent({ userId }: WalletContentProps) {
   const [transactions, setTransactions] = useState<UserTransactionResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,9 +31,9 @@ export function WalletContent({ userId }: WalletContentProps) {
         ]);
 
         setTransactions(transactionList);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching wallet data:", err);
-        setError(err.message || "Failed to load wallet data");
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }

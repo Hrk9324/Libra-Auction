@@ -10,6 +10,9 @@ export default async function Header() {
   const userInfo = await fetchUserInfo(user_id);
   const authedUserActionItems = [
     { value: "Profile", href: "/profile" },
+    ...(userInfo.role?.name === "ADMIN"
+      ? [{ value: "Admin Dashboard", href: "/admin-dashboard" }]
+      : []),
     { value: "Auction Lobby", href: "/" },
   ];
   return (

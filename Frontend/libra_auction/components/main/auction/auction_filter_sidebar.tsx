@@ -2,7 +2,7 @@
 
 import type { Category } from "@/types/category";
 import { useRouter } from "next/navigation";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const statusOptions = [
@@ -27,7 +27,6 @@ export const AuctionFilterSidebar = ({
     initialPriceTo?: string;
 }) => {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
     
     // Lưu các lựa chọn vào state tạm thời

@@ -39,7 +39,7 @@ export default async function Header() {
       {/* --- LOGO --- */}
       <Link href="/" className="flex items-center gap-2 flex-1">
         <Image src={logo_img} alt="Libra Auction" className="h-8 w-8" />
-        <span className="text-[1.25rem] font-bold text-(--primary-color)">
+        <span className="text-xl font-bold text-(--primary-color)">
           Libra Auction
         </span>
       </Link>

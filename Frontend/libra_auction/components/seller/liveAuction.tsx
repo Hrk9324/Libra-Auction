@@ -12,7 +12,7 @@ interface Bid {
 export default function LiveAuction({ auctionId }: { auctionId: string }) {
   const [bids, setBids] = useState<Bid[]>([]);
   const [currentPrice, setCurrentPrice] = useState(8500);
-  const [timeLeft, setTimeLeft] = useState("12:45:02");
+  const timeLeft = "12:45:02";
 
   useEffect(() => {
     auctionSocket.connect(auctionId);

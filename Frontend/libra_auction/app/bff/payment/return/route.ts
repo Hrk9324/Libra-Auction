@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
         // Determine endpoint based on order info
         const orderInfo = searchParams.get("vnp_OrderInfo") || "";
-        let endpoint = "/api/payments/vnpay/deposit/successed";
+        const endpoint = "/api/payments/vnpay/deposit/successed";
 
         // Extract auction ID from order info for redirect
         let auctionId = "";

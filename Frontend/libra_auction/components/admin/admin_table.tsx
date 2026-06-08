@@ -3,7 +3,7 @@
 interface Column<T> {
   key: keyof T;
   label: string;
-  render?: (value: any, row: T) => React.ReactNode;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
   width?: string;
 }
 
@@ -19,7 +19,7 @@ interface AdminTableProps<T> {
   emptyMessage?: string;
 }
 
-export default function AdminTable<T extends Record<string, any>>({
+export default function AdminTable<T extends Record<string, React.ReactNode>>({
   columns,
   data,
   actions,

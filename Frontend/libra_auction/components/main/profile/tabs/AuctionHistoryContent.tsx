@@ -18,6 +18,10 @@ interface AuctionHistoryItem {
   error?: string;
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Failed to load auction history";
+}
+
 export function AuctionHistoryContent({ userId }: AuctionHistoryContentProps) {
   const [auctionHistory, setAuctionHistory] = useState<AuctionHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,21 +57,21 @@ export function AuctionHistoryContent({ userId }: AuctionHistoryContentProps) {
               };
               return updated;
             });
-          } catch (err: any) {
+          } catch (err: unknown) {
             setAuctionHistory((prev) => {
               const updated = [...prev];
               updated[i] = {
                 ...updated[i],
                 loading: false,
-                error: err.message,
+                error: getErrorMessage(err),
               };
               return updated;
             });
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching auction history:", err);
-        setError(err.message || "Failed to load auction history");
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }
@@ -134,7 +138,7 @@ export function AuctionHistoryContent({ userId }: AuctionHistoryContentProps) {
         </svg>
         <p className="text-gray-500 text-lg">No auction history found</p>
         <p className="text-gray-400 text-sm mt-1">
-          You haven't registered for any auctions yet
+          You haven&apos;t registered for any auctions yet
         </p>
       </div>
     );

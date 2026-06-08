@@ -6,7 +6,6 @@ import { Auction } from "@/types/auction/auction";
 import { UserInfo } from "@/types/user_info";
 import { CurrencyFormat } from "@/utils/currency_format";
 import { registerForAuction } from "@/services/register_auction";
-import Button from "@/components/ui/Button";
 
 interface RegistrationConfirmDialogProps {
     isOpen: boolean;

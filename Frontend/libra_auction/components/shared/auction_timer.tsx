@@ -25,35 +25,27 @@ export default function AuctionTimer({
       : Math.max(0, endTimeMs - Date.now())
   );
 
-  // Reset timer immediately when endTimeMs, remainingTimeMs, or isPaused changes
-  useEffect(() => {
-    if (isPaused) {
-      if (remainingTimeMs !== undefined && remainingTimeMs !== null) {
-        setTimeLeftMs(Math.max(0, remainingTimeMs));
-        onTick?.(Math.max(0, remainingTimeMs));
-      }
-      return;
-    }
-    const remaining = Math.max(0, endTimeMs - Date.now());
-    setTimeLeftMs(remaining);
-  }, [endTimeMs, remainingTimeMs, isPaused, onTick]);
-
   // Tick every second when not paused
   useEffect(() => {
     if (isPaused) return;
 
-    const interval = setInterval(() => {
+    const updateTimeLeft = () => {
       const remaining = Math.max(0, endTimeMs - Date.now());
       setTimeLeftMs(remaining);
       onTick?.(remaining);
 
       if (remaining <= 0) {
-        clearInterval(interval);
         onEnd?.();
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(interval);
+    const timeout = setTimeout(updateTimeLeft, 0);
+    const interval = setInterval(updateTimeLeft, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [isPaused, endTimeMs, onTick, onEnd]);
 
   const sizeClasses = {
@@ -62,9 +54,13 @@ export default function AuctionTimer({
     lg: "text-5xl font-bold tracking-[0.18em]",
   };
 
-  const hours = Math.floor(timeLeftMs / (1000 * 60 * 60));
-  const minutes = Math.floor((timeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((timeLeftMs % (1000 * 60)) / 1000);
+  const displayTimeLeftMs = isPaused && remainingTimeMs !== undefined && remainingTimeMs !== null
+    ? Math.max(0, remainingTimeMs)
+    : timeLeftMs;
+
+  const hours = Math.floor(displayTimeLeftMs / (1000 * 60 * 60));
+  const minutes = Math.floor((displayTimeLeftMs % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((displayTimeLeftMs % (1000 * 60)) / 1000);
   const pad = (n: number) => n.toString().padStart(2, "0");
   const timeStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
@@ -80,22 +76,22 @@ export default function AuctionTimer({
   }
 
   const getColorClass = () => {
-    if (timeLeftMs <= 60 * 1000) return "text-red-600";
-    if (timeLeftMs <= 5 * 60 * 1000) return "text-yellow-600";
+    if (displayTimeLeftMs <= 60 * 1000) return "text-red-600";
+    if (displayTimeLeftMs <= 5 * 60 * 1000) return "text-yellow-600";
     return "text-emerald-600";
   };
 
   return (
     <div className="px-6 py-5 text-center">
       <div className={`${sizeClasses[size]} ${getColorClass()} font-mono`} suppressHydrationWarning>
-        {timeLeftMs <= 0 ? (
+        {displayTimeLeftMs <= 0 ? (
             <span className="text-rose-600">ENDED</span>
         ) : (
           timeStr
         )}
       </div>
       <p className="mt-2 text-sm text-[#5A7184]">
-        {timeLeftMs <= 0
+        {displayTimeLeftMs <= 0
           ? "The auction has ended"
           : "Real-time countdown"}
       </p>

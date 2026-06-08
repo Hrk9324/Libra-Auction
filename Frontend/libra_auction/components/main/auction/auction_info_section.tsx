@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Auction } from "@/types/auction/auction";
 import { UserInfo } from "@/types/user_info";
 import { CurrencyFormat } from '@/utils/currency_format';
-import { TimeFormat } from '@/utils/time_format';
 import { DurationFormat } from '@/utils/duration_format';
 import { checkRegistration } from '@/services/register_auction';
 import { getIdFromToken } from '@/lib/get_id_from_token';
@@ -93,7 +92,7 @@ export default function AuctionInfoSection({
       }
     };
     checkUserRegistration();
-  }, [autionInfos.auction_id]);
+  }, [autionInfos.auction_id, autionInfos.creator_id]);
 
   const handleRegisterClick = () => {
     if (!isLoggedIn) {

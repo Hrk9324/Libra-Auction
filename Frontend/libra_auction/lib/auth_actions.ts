@@ -11,7 +11,23 @@ interface ActionResponse {
     message: string;
 }
 
-export async function signInAction(body: any): Promise<ActionResponse> {
+interface SignInBody {
+    username: string;
+    password: string;
+}
+
+interface SignUpBody {
+    fullName: string;
+    username: string;
+    email: string;
+    password: string;
+}
+
+interface SignUpResponse {
+    message?: string;
+}
+
+export async function signInAction(body: SignInBody): Promise<ActionResponse> {
     try {
         const { username, password } = body;
         
@@ -50,7 +66,7 @@ export async function signInAction(body: any): Promise<ActionResponse> {
     }
 }
 
-export async function signUpAction(body: any): Promise<ActionResponse> {
+export async function signUpAction(body: SignUpBody): Promise<ActionResponse> {
     try {
         const { fullName, username, email, password } = body;
         
@@ -60,7 +76,7 @@ export async function signUpAction(body: any): Promise<ActionResponse> {
             body: JSON.stringify({ fullName, username, email, password })
         });
 
-        const data = await res.json();
+        const data = await res.json() as SignUpResponse;
         
         if (!res.ok) {
             return { success: false, message: data.message || "Sign up failed" };

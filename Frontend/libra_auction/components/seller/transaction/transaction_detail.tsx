@@ -6,6 +6,14 @@ const statusConfig = {
   FAILED: { label: "Failed", color: "bg-red-100 text-red-700 border-red-200" },
 };
 
+interface DetailItemProps {
+  label: string;
+  value: string;
+  highlight?: boolean;
+  isLink?: boolean;
+  href?: string;
+}
+
 export const TransactionDetail = ({ data }: { data: TransactionDetailData }) => {
   const status = statusConfig[data.status];
 
@@ -57,7 +65,7 @@ export const TransactionDetail = ({ data }: { data: TransactionDetailData }) => 
 };
 
 // Helper component for key-value rows
-const DetailItem = ({ label, value, highlight, isLink, href }: any) => (
+const DetailItem = ({ label, value, highlight, isLink, href }: DetailItemProps) => (
   <div className="flex justify-between items-start py-2 border-b border-gray-50 last:border-0">
     <span className="text-xs font-bold text-gray-400 uppercase tracking-tight">{label}</span>
     {isLink ? (
