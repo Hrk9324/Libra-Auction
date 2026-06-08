@@ -1,34 +1,38 @@
 'use client';
-export async function signUp(fullName: string, username: string, email: string, password: string, confirmPassword: string, onSuccess: () => void, onFailed: (message: string) => void) {
+
+// Import hàm Server Action bạn đã tạo trong libs
+import { signUpAction } from "@/libs/auth_actions";
+
+export async function signUp(
+    fullName: string, 
+    username: string, 
+    email: string, 
+    password: string, 
+    confirmPassword: string, 
+    onSuccess: () => void, 
+    onFailed: (message: string) => void
+) {
     try {
         if (password !== confirmPassword) {
-            onFailed("Password and Cofirm password not match.");
+            onFailed("Password and Confirm password do not match.");
             return;
         }
-        const res = await fetch("/api/sign-up", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                fullName: fullName,
-                username: username,
-                email: email,
-                password: password
-            })
-        })
-        const data = await res.json();
-        if (!res.ok) {
-            onFailed(data.message);
-        }
-        else if (res.status === 200 || res.status === 201) {
-            console.log("Success failed");
+
+        const res = await signUpAction({
+            fullName,
+            username,
+            email,
+            password
+        });
+
+        if (!res.success) {
+            onFailed(res.message);
+        } else {
             onSuccess();
-            console.log("Success failed");
         }
     }
     catch (error) {
-        console.log(error);
+        console.error("Client signup error:", error);
         onFailed("Internal server error");
     }
 }
